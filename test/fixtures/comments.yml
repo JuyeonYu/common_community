@@ -1,0 +1,18 @@
+top_on_welcome:
+  post: welcome
+  user: two
+  body: 첫 댓글입니다.
+  status: 0
+
+reply_on_welcome:
+  post: welcome
+  user: one
+  parent: top_on_welcome
+  body: 답글입니다.
+  status: 0
+
+hidden_comment:
+  post: welcome
+  user: two
+  body: 가려진 댓글
+  status: 1
