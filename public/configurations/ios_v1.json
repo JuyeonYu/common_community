@@ -1,0 +1,35 @@
+{
+  "settings": {
+    "screenshots_enabled": true
+  },
+  "rules": [
+    {
+      "patterns": [
+        "^/posts/new$",
+        "^/posts/\\d+/edit$",
+        "^/comments/\\d+/edit$",
+        "^/reports/new$",
+        "^/profiles/\\d+/edit$"
+      ],
+      "properties": {
+        "context": "modal"
+      }
+    },
+    {
+      "patterns": [
+        "^/auth/.*"
+      ],
+      "properties": {
+        "context": "browser"
+      }
+    },
+    {
+      "patterns": [
+        ".*"
+      ],
+      "properties": {
+        "context": "default"
+      }
+    }
+  ]
+}
