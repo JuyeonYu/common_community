@@ -1,0 +1,12 @@
+unread_comment_notif:
+  recipient: one
+  actor: two
+  action: commented_on_post
+  notifiable: top_on_welcome (Comment)
+
+read_like_notif:
+  recipient: one
+  actor: two
+  action: liked_post
+  notifiable: welcome (Post)
+  read_at: 2026-01-01 00:00:00
