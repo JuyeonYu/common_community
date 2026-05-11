@@ -1,0 +1,35 @@
+<%= turbo_stream_from @conversation, :messages %>
+
+<div class="px-3 py-3 pb-24" data-native="true"
+     data-controller="chat-room"
+     data-chat-room-conversation-id-value="<%= @conversation.id %>">
+  <header class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-200">
+    <%= avatar_image(@other, class: "h-8 w-8 rounded-full") %>
+    <%= link_to @other.name, profile_path(@other),
+          class: "font-medium truncate flex-1" %>
+    <% if Block.exists_between?(Current.user, @other) %>
+      <span class="text-xs text-red-500">차단됨</span>
+    <% end %>
+  </header>
+
+  <div id="messages_list" class="space-y-2 mb-4"
+       data-chat-room-target="messagesList">
+    <% @messages.each do |message| %>
+      <%= render "messages/message", message: message %>
+    <% end %>
+  </div>
+
+  <button type="button"
+          data-chat-room-target="newMessageButton"
+          data-action="click->chat-room#jumpToBottom"
+          class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-10
+                 rounded-full bg-blue-600 text-white text-sm px-4 py-2 shadow-lg cursor-pointer">
+    ↓ 새 메시지
+  </button>
+
+  <% unless Block.exists_between?(Current.user, @other) %>
+    <div id="new_message_form" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3">
+      <%= render "messages/form", conversation: @conversation, message: @new_message %>
+    </div>
+  <% end %>
+</div>

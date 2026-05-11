@@ -34,7 +34,7 @@ class LikeTest < ActiveSupport::TestCase
   end
 
   test "post 삭제 시 likes cascade" do
-    fresh = Post.create!(user: @user, title: "임시", body: "<p>x</p>")
+    fresh = Post.create!(user: @user, board: boards(:free), title: "임시", body: "<p>x</p>")
     Like.create!(user: users(:two), likeable: fresh)
 
     assert_difference "Like.count", -1 do

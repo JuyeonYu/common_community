@@ -1,0 +1,15 @@
+<h1>Black Ticket 초대장</h1>
+
+<p><strong><%= @invitation.inviter.name %></strong>님이 <%= @invitation.invitee_name %>님을 Black Ticket에 초대했습니다.</p>
+
+<p>아래 링크를 클릭하여 가입을 진행해주세요:</p>
+
+<p>
+  <a href="<%= @invite_url %>" style="display: inline-block; background: #111827; color: #fff; padding: 10px 16px; text-decoration: none; border-radius: 6px;">
+    가입하기
+  </a>
+</p>
+
+<p style="color: #6b7280; font-size: 13px; margin-top: 24px;">
+  이 초대 링크는 <%= l @invitation.expires_at, format: :default %>까지 유효합니다.
+</p>

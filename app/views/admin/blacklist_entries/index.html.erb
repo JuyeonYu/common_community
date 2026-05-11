@@ -1,0 +1,58 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">블랙리스트</h1>
+</div>
+
+<%= form_with model: @entry, url: admin_blacklist_entries_path, class: "space-y-3 bg-white border border-gray-200 rounded-md p-4 mb-6 max-w-2xl" do |form| %>
+  <% if @entry.errors.any? %>
+    <div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
+      <ul class="list-disc list-inside">
+        <% @entry.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid sm:grid-cols-3 gap-2">
+    <%= form.text_field :name, placeholder: "이름", required: true,
+          class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <%= form.telephone_field :phone, placeholder: "휴대폰 (숫자만)", required: true,
+          class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    <%= form.text_field :reason, placeholder: "사유 (선택)",
+          class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+  </div>
+
+  <%= form.submit "추가",
+        class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
+<% end %>
+
+<% if @entries.any? %>
+  <table class="w-full bg-white border border-gray-200 rounded-md text-sm">
+    <thead class="bg-gray-50 text-left text-gray-600">
+      <tr>
+        <th class="p-3">이름</th>
+        <th class="p-3">휴대폰</th>
+        <th class="p-3">사유</th>
+        <th class="p-3">등록일</th>
+        <th class="p-3 w-20"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @entries.each do |entry| %>
+        <tr class="border-t border-gray-100">
+          <td class="p-3 font-medium"><%= entry.name %></td>
+          <td class="p-3 font-mono text-xs"><%= entry.phone %></td>
+          <td class="p-3 text-gray-600 text-xs"><%= entry.reason || "—" %></td>
+          <td class="p-3 text-xs text-gray-500"><%= l entry.created_at, format: :default %></td>
+          <td class="p-3">
+            <%= button_to "삭제", admin_blacklist_entry_path(entry), method: :delete,
+                  data: { turbo_confirm: "정말 삭제하시겠습니까?" },
+                  class: "text-xs text-red-600 hover:underline cursor-pointer" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+    등록된 블랙리스트가 없습니다.
+  </div>
+<% end %>

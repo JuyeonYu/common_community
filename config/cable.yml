@@ -1,9 +1,13 @@
-# Async adapter only works within the same process, so for manually triggering cable updates from a console,
-# and seeing results in the browser, you must do so from the web console (running inside the dev process),
-# not a terminal started via bin/rails console! Add "console" to any action or any ERB template view
-# to make the web console appear.
+# 운영(production)과 동일하게 Solid Cable 사용. async adapter는 같은 프로세스 내에선
+# 동작하지만 멀티 워커/콘솔 등에서 broadcasts가 누락되는 경우가 있어 일관성 유지를 위해
+# dev에서도 solid_cable 사용. 프로덕션 cable DB(jiindo_development_cable)를 그대로 활용.
 development:
-  adapter: async
+  adapter: solid_cable
+  connects_to:
+    database:
+      writing: cable
+  polling_interval: 0.1.seconds
+  message_retention: 1.day
 
 test:
   adapter: test

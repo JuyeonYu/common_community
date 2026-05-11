@@ -5,6 +5,14 @@
 
   <article class="rounded-md bg-white border border-gray-200 p-6">
     <header class="mb-6">
+      <div class="flex items-center gap-2 text-xs mb-2">
+        <%= link_to @post.board.name, board_path(@post.board),
+              class: "px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" %>
+        <% if @post.prefix.present? %>
+          <span class="text-gray-500">[<%= @post.prefix %>]</span>
+        <% end %>
+      </div>
+
       <h1 class="text-3xl font-bold mb-3"><%= @post.title %></h1>
 
       <div class="flex items-center gap-2 text-sm text-gray-500">

@@ -1,0 +1,9 @@
+<% one_id = ActiveRecord::FixtureSet.identify(:one) %>
+
+active_invitation:
+  inviter_id: <%= one_id %>
+  token: active-test-token
+  invitee_name: 신규
+  invitee_phone: "01011112222"
+  invitee_email: invitee@example.com
+  expires_at: <%= 1.day.from_now %>

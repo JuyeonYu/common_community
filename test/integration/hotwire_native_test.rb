@@ -29,7 +29,7 @@ class HotwireNativeTest < ActionDispatch::IntegrationTest
 
   test "글쓰기 native variant" do
     sign_in_as(users(:one))
-    get new_post_path, headers: NATIVE_HEADERS
+    get new_post_path(board_slug: "free"), headers: NATIVE_HEADERS
     assert_response :success
     assert_match(/data-native="true"/, response.body)
   end

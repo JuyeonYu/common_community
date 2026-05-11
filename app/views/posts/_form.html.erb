@@ -1,4 +1,12 @@
-<%= form_with model: post, class: "space-y-5" do |form| %>
+<% writable_boards = local_assigns[:writable_boards] || @writable_boards || [ post.board ].compact %>
+<% prefixes_by_board = writable_boards.to_h { |b| [ b.id.to_s, b.allowed_prefixes ] } %>
+<% current_prefixes = post.board&.allowed_prefixes || [] %>
+
+<%= form_with model: post, class: "space-y-5",
+      data: {
+        controller: "board-prefix",
+        "board-prefix-prefixes-value" => prefixes_by_board.to_json
+      } do |form| %>
   <% if post.errors.any? %>
     <div class="rounded-md bg-red-50 p-4 text-sm text-red-700">
       <p class="font-medium mb-1">저장하지 못했습니다:</p>
@@ -9,6 +17,24 @@
       </ul>
     </div>
   <% end %>
+
+  <div>
+    <%= form.label :board_id, "게시판", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.select :board_id,
+          options_from_collection_for_select(writable_boards, :id, :name, post.board_id),
+          {}, required: true,
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600",
+          data: { "board-prefix-target" => "boardSelect", action: "change->board-prefix#update" } %>
+  </div>
+
+  <div class="<%= "hidden" if current_prefixes.empty? %>">
+    <%= form.label :prefix, "말머리", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.select :prefix,
+          [ [ "(선택 안 함)", "" ] ] + current_prefixes.map { |p| [ p, p ] },
+          { selected: post.prefix },
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600",
+          data: { "board-prefix-target" => "prefixSelect" } %>
+  </div>
 
   <div>
     <%= form.label :title, "제목", class: "block text-sm font-medium text-gray-700 mb-1" %>

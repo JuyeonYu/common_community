@@ -4,6 +4,7 @@ class Post < ApplicationRecord
   include PgSearch::Model
 
   belongs_to :user
+  belongs_to :board
   has_many :post_tags, dependent: :destroy
   has_many :tags, through: :post_tags
   has_many :comments, dependent: :destroy
@@ -22,9 +23,10 @@ class Post < ApplicationRecord
 
   validates :title, presence: true, length: { maximum: 200 }
   validates :body, presence: true
+  validate  :prefix_must_be_allowed
 
   scope :recent, -> { order(created_at: :desc) }
-  scope :for_feed, -> { published.includes(:user, :tags).with_rich_text_body }
+  scope :for_feed, -> { published.includes(:user, :board, :tags).with_rich_text_body }
 
   def author?(other_user)
     other_user.present? && user_id == other_user.id
@@ -37,4 +39,11 @@ class Post < ApplicationRecord
   def tag_names=(value)
     self.tags = Tag.from_names(value)
   end
+
+  private
+    def prefix_must_be_allowed
+      return if prefix.blank?
+      return if board && board.allowed_prefixes.include?(prefix)
+      errors.add(:prefix, "는 이 게시판의 말머리 목록에 없습니다")
+    end
 end

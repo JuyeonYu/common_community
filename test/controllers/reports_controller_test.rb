@@ -57,4 +57,23 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :unprocessable_entity
   end
+
+  test "create: Message 신고 후 admin이 hide" do
+    conv = conversations(:welcome_pair)
+    msg = conv.messages.create!(sender: @user, body: "신고 대상")
+
+    sign_in_as(users(:two))
+    assert_difference "Report.count", 1 do
+      post reports_path, params: {
+        reportable_type: "Message", reportable_id: msg.id,
+        report: { reason: "부적절한 메시지" }
+      }
+    end
+    assert_redirected_to conversation_path(conv)
+    report = Report.last
+
+    sign_in_as(users(:admin))
+    patch admin_report_path(report, decision: "hide")
+    assert msg.reload.status_hidden?
+  end
 end

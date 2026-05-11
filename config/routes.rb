@@ -7,6 +7,14 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
 
+  # Black Ticket 가입
+  get  "/signup/:token",         to: "registrations#new",         as: :signup
+  post "/signup/:token",         to: "registrations#create"
+  get  "/signup/:token/verify",  to: "registrations#verify_otp",  as: :verify_signup
+  post "/signup/:token/confirm", to: "registrations#confirm_otp", as: :confirm_signup
+
+  resources :invitations, only: %i[ index create destroy ]
+
   # 콘텐츠
   resources :posts do
     resources :comments, only: %i[ create ]
@@ -16,6 +24,7 @@ Rails.application.routes.draw do
     resource :like, only: %i[ create destroy ], module: :comments
   end
   resources :tags, only: %i[ show ], param: :slug
+  resources :boards, only: %i[ index show ], param: :slug
   resources :profiles, only: %i[ show edit update ] do
     member do
       get :posts
@@ -27,7 +36,18 @@ Rails.application.routes.draw do
     collection { patch :read_all }
   end
 
+  # 1:1 쪽지 (대화방 + 메시지 + 차단)
+  resources :conversations, only: %i[ index show create ] do
+    resources :messages, only: %i[ create destroy ], shallow: true
+    member { patch :read }
+  end
+  resources :blocks, only: %i[ index create destroy ]
+
   namespace :admin do
+    root "dashboards#show"
+    resource  :dashboard, only: %i[ show ]
+    resources :boards
+    resources :blacklist_entries, only: %i[ index create destroy ]
     resources :reports, only: %i[ index update ]
   end
 

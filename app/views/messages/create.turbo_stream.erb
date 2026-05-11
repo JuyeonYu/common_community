@@ -1,0 +1,6 @@
+<%# 메시지 추가는 broadcast_append_to가 처리. 여기선 폼 리셋만. %>
+<%= turbo_stream.replace "new_message_form" do %>
+  <div id="new_message_form" class="sticky bottom-0 bg-gray-50 pt-2">
+    <%= render "messages/form", conversation: @conversation, message: @conversation.messages.build %>
+  </div>
+<% end %>

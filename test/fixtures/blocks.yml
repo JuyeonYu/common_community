@@ -1,0 +1,4 @@
+admin_blocks_two:
+  blocker: admin
+  blocked: two
+  reason: 테스트 차단

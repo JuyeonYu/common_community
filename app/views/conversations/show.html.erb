@@ -1,0 +1,54 @@
+<%= turbo_stream_from @conversation, :messages %>
+
+<div class="mx-auto max-w-2xl"
+     data-controller="chat-room"
+     data-chat-room-conversation-id-value="<%= @conversation.id %>">
+  <header class="flex items-center gap-3 mb-6 pb-3 border-b border-gray-200">
+    <%= link_to conversations_path, class: "text-gray-500 hover:text-gray-700 text-sm shrink-0" do %>
+      ← 목록
+    <% end %>
+    <%= avatar_image(@other, class: "h-8 w-8 rounded-full") %>
+    <%= link_to @other.name, profile_path(@other),
+          class: "font-medium hover:underline truncate flex-1" %>
+
+    <% if Block.exists_between?(Current.user, @other) %>
+      <span class="text-xs text-red-500 shrink-0">차단됨</span>
+    <% else %>
+      <%= button_to "차단", blocks_path,
+            params: { blocked_id: @other.id },
+            method: :post,
+            data: { turbo_confirm: "#{@other.name}님을 차단하시겠습니까? 새 메시지를 주고받을 수 없게 됩니다." },
+            class: "text-xs text-gray-500 hover:text-red-500 shrink-0",
+            form: { class: "inline" } %>
+    <% end %>
+  </header>
+
+  <% if flash[:alert] %>
+    <p class="py-2 px-3 bg-red-50 mb-4 text-red-700 rounded-md text-sm"><%= flash[:alert] %></p>
+  <% end %>
+
+  <div id="messages_list" class="space-y-3 mb-4 min-h-96"
+       data-chat-room-target="messagesList">
+    <% @messages.each do |message| %>
+      <%= render "messages/message", message: message %>
+    <% end %>
+  </div>
+
+  <button type="button"
+          data-chat-room-target="newMessageButton"
+          data-action="click->chat-room#jumpToBottom"
+          class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-10
+                 rounded-full bg-blue-600 text-white text-sm px-4 py-2 shadow-lg cursor-pointer">
+    ↓ 새 메시지
+  </button>
+
+  <% if Block.exists_between?(Current.user, @other) %>
+    <div class="rounded-md bg-gray-50 border border-gray-200 p-4 text-center text-sm text-gray-500">
+      차단 상태에서는 메시지를 주고받을 수 없습니다.
+    </div>
+  <% else %>
+    <div id="new_message_form" class="sticky bottom-0 bg-gray-50 pt-2">
+      <%= render "messages/form", conversation: @conversation, message: @new_message %>
+    </div>
+  <% end %>
+</div>

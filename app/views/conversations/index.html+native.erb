@@ -1,0 +1,17 @@
+<%= turbo_stream_from Current.user, :conversations %>
+
+<div class="px-4 py-3" data-native="true">
+  <h1 class="text-xl font-bold mb-4">쪽지함</h1>
+
+  <div id="conversations_list" class="space-y-2">
+    <%= render @conversations, viewer: Current.user %>
+  </div>
+
+  <% if @conversations.empty? %>
+    <p class="text-center text-gray-500 py-8">받은 쪽지가 없습니다.</p>
+  <% else %>
+    <div class="mt-6 text-center text-sm">
+      <%== pagy_nav(@pagy) %>
+    </div>
+  <% end %>
+</div>

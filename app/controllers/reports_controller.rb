@@ -17,7 +17,7 @@ class ReportsController < ApplicationController
   end
 
   private
-    REPORTABLE_TYPES = %w[ Post Comment ].freeze
+    REPORTABLE_TYPES = %w[ Post Comment Message ].freeze
 
     def set_reportable
       type = params[:reportable_type] || params.dig(:report, :reportable_type)
@@ -30,6 +30,7 @@ class ReportsController < ApplicationController
       case @reportable
       when Post    then post_path(@reportable)
       when Comment then post_path(@reportable.post)
+      when Message then conversation_path(@reportable.conversation)
       end
     end
 end

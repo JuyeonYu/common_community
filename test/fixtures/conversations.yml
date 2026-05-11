@@ -1,0 +1,7 @@
+<% min_id = [ ActiveRecord::FixtureSet.identify(:one), ActiveRecord::FixtureSet.identify(:two) ].min %>
+<% max_id = [ ActiveRecord::FixtureSet.identify(:one), ActiveRecord::FixtureSet.identify(:two) ].max %>
+
+welcome_pair:
+  user_one_id: <%= min_id %>
+  user_two_id: <%= max_id %>
+  last_message_at: 2026-05-01 12:00:00

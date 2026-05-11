@@ -26,6 +26,9 @@
       <% when Comment %>
         <p class="line-clamp-2"><%= @reportable.body %></p>
         <p class="text-xs text-gray-500 mt-1">댓글 · <%= @reportable.user.name %></p>
+      <% when Message %>
+        <p class="line-clamp-2"><%= @reportable.body.presence || "[이미지]" %></p>
+        <p class="text-xs text-gray-500 mt-1">쪽지 · <%= @reportable.sender.name %></p>
       <% end %>
     </div>
 

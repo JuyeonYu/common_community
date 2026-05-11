@@ -1,0 +1,37 @@
+<div class="max-w-2xl">
+  <h1 class="text-2xl font-bold mb-2">게시판 삭제 — <%= @board.name %></h1>
+  <p class="text-sm text-gray-500 mb-6">
+    이 게시판에 글이 <strong><%= @posts_count %>개</strong> 있습니다. 삭제 방법을 선택해주세요.
+  </p>
+
+  <div class="space-y-3">
+    <%# 옵션 1: 다른 게시판으로 이동 %>
+    <% if @other_boards.any? %>
+      <article class="rounded-md bg-white border border-gray-200 p-4">
+        <h2 class="font-semibold mb-2">옵션 1 — 글을 다른 게시판으로 이동 후 삭제</h2>
+        <%= form_with url: admin_board_path(@board), method: :delete, class: "flex items-end gap-2" do |form| %>
+          <div class="flex-1">
+            <%= label_tag :move_to, "이동할 게시판", class: "block text-xs text-gray-500 mb-1" %>
+            <%= select_tag :move_to,
+                  options_from_collection_for_select(@other_boards, :slug, :name),
+                  class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+          </div>
+          <%= submit_tag "이동 후 삭제",
+                data: { turbo_confirm: "정말 진행하시겠습니까?" },
+                class: "rounded-md bg-blue-600 px-3 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
+        <% end %>
+      </article>
+    <% end %>
+
+    <%# 옵션 2: 글까지 삭제 %>
+    <article class="rounded-md bg-white border border-red-200 p-4">
+      <h2 class="font-semibold mb-2 text-red-700">옵션 2 — 글까지 모두 삭제</h2>
+      <p class="text-xs text-gray-500 mb-3">⚠ 복구할 수 없습니다.</p>
+      <%= button_to "글까지 모두 삭제", admin_board_path(@board, delete_posts: true), method: :delete,
+            data: { turbo_confirm: "글 #{@posts_count}개도 함께 삭제됩니다. 정말 진행하시겠습니까?" },
+            class: "rounded-md bg-red-600 px-3 py-2 text-white text-sm font-medium hover:bg-red-500 cursor-pointer" %>
+    </article>
+
+    <%= link_to "← 취소", admin_boards_path, class: "block text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+</div>

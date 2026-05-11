@@ -1,0 +1,14 @@
+<%= form_with model: message, url: conversation_messages_path(conversation),
+      multipart: true, class: "flex items-end gap-2" do |form| %>
+  <div class="flex-1">
+    <%= form.text_area :body, rows: 2, placeholder: "메시지 입력...", maxlength: 2_000,
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-blue-600 resize-none" %>
+    <label class="mt-1 inline-flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+      📎 사진 첨부 (최대 5장, 5MB)
+      <%= form.file_field :images, multiple: true, accept: "image/png,image/jpeg,image/webp,image/gif",
+            class: "ml-1" %>
+    </label>
+  </div>
+  <%= form.submit "전송",
+        class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer shrink-0" %>
+<% end %>

@@ -1,0 +1,56 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">게시판 관리</h1>
+  <%= link_to "+ 새 게시판", new_admin_board_path,
+        class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-500" %>
+</div>
+
+<% if @boards.any? %>
+  <table class="w-full bg-white border border-gray-200 rounded-md text-sm">
+    <thead class="bg-gray-50 text-left text-gray-600">
+      <tr>
+        <th class="p-3">순서</th>
+        <th class="p-3">이름</th>
+        <th class="p-3">slug</th>
+        <th class="p-3">권한</th>
+        <th class="p-3">말머리</th>
+        <th class="p-3 text-right">글 수</th>
+        <th class="p-3 w-32">액션</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @boards.each do |board| %>
+        <tr class="border-t border-gray-100">
+          <td class="p-3"><%= board.position %></td>
+          <td class="p-3 font-medium">
+            <%= link_to board.name, board_path(board), class: "hover:underline" %>
+          </td>
+          <td class="p-3 text-gray-500 font-mono text-xs"><%= board.slug %></td>
+          <td class="p-3">
+            <% if board.write_admin_only? %>
+              <span class="px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded">관리자 전용</span>
+            <% else %>
+              <span class="text-gray-500 text-xs">전체</span>
+            <% end %>
+          </td>
+          <td class="p-3 text-xs text-gray-600">
+            <%= board.allowed_prefixes.any? ? board.allowed_prefixes.join(", ") : "—" %>
+          </td>
+          <td class="p-3 text-right"><%= board.posts_count %></td>
+          <td class="p-3">
+            <div class="flex gap-2 text-xs">
+              <%= link_to "수정", edit_admin_board_path(board), class: "text-blue-600 hover:underline" %>
+              <%= button_to "삭제", admin_board_path(board), method: :delete,
+                    data: { turbo_confirm: "정말 삭제하시겠습니까?" },
+                    class: "text-red-600 hover:underline cursor-pointer",
+                    form: { class: "inline" } %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+    게시판이 없습니다.
+  </div>
+<% end %>

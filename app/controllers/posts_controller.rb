@@ -2,6 +2,7 @@ class PostsController < ApplicationController
   allow_unauthenticated_access only: %i[ index show ]
   before_action :set_post, only: %i[ show edit update destroy ]
   before_action :require_author, only: %i[ edit update destroy ]
+  before_action :load_writable_boards, only: %i[ new create edit update ]
 
   def index
     scope = Post.for_feed
@@ -21,11 +22,20 @@ class PostsController < ApplicationController
   end
 
   def new
-    @post = Current.user.posts.build
+    if @writable_boards.empty?
+      redirect_to posts_path, alert: "글을 쓸 수 있는 게시판이 없습니다." and return
+    end
+
+    @post = Current.user.posts.build(board: pick_initial_board)
   end
 
   def create
-    @post = Current.user.posts.build(post_params)
+    @board = Board.find_by(id: params.dig(:post, :board_id))
+    unless @board && @board.writable_by?(Current.user)
+      redirect_to posts_path, alert: "이 게시판에 글쓰기 권한이 없습니다." and return
+    end
+
+    @post = Current.user.posts.build(post_params.merge(board: @board))
     if @post.save
       redirect_to @post, notice: "글이 등록되었습니다."
     else
@@ -51,14 +61,26 @@ class PostsController < ApplicationController
 
   private
     def set_post
-      @post = Post.includes(:user, :tags).find(params[:id])
+      @post = Post.includes(:user, :board, :tags).find(params[:id])
     end
 
     def require_author
       redirect_to posts_path, alert: "권한이 없습니다." unless @post.author?(Current.user) || Current.user&.admin?
     end
 
+    def load_writable_boards
+      @writable_boards = Board.writable_by(Current.user).ordered
+    end
+
+    def pick_initial_board
+      if params[:board_slug].present?
+        candidate = @writable_boards.find_by(slug: params[:board_slug])
+        return candidate if candidate
+      end
+      @writable_boards.first
+    end
+
     def post_params
-      params.expect(post: [ :title, :body, :tag_names ])
+      params.expect(post: [ :title, :body, :tag_names, :prefix, :board_id ])
     end
 end

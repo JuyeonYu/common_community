@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "관리자 — Black Ticket" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <% if Current.user %>
+      <meta name="current-user-id" content="<%= Current.user.id %>">
+    <% end %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-100 min-h-screen">
+    <%# 일반 헤더 미사용. 관리자 전용 슬림 바. %>
+    <header class="border-b border-gray-300 bg-gray-900 text-gray-100">
+      <div class="container mx-auto px-5 py-2 flex items-center justify-between text-sm">
+        <div class="flex items-center gap-3">
+          <%= link_to "← 사이트로", root_path, class: "text-gray-300 hover:text-white" %>
+          <span class="text-gray-500">|</span>
+          <span class="font-bold">관리자</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <% if Current.user %>
+            <span class="text-gray-300"><%= Current.user.name %></span>
+            <%= button_to "로그아웃", session_path, method: :delete,
+                  class: "text-gray-400 underline hover:text-white" %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# 탭 네비 %>
+      <nav class="container mx-auto px-5 flex gap-1">
+        <% tabs = [
+             { label: "대시보드",   path: admin_dashboard_path,           match: %w[ dashboards ] },
+             { label: "게시판",     path: admin_boards_path,              match: %w[ boards ] },
+             { label: "블랙리스트", path: admin_blacklist_entries_path,   match: %w[ blacklist_entries ] },
+             { label: "신고",       path: admin_reports_path,             match: %w[ reports ] }
+           ] %>
+        <% tabs.each do |tab| %>
+          <% active = tab[:match].include?(controller_name) %>
+          <%= link_to tab[:label], tab[:path],
+                class: "px-4 py-2 text-sm border-b-2 #{active ? 'border-blue-500 text-white' : 'border-transparent text-gray-300 hover:text-white'}" %>
+        <% end %>
+      </nav>
+    </header>
+
+    <main class="container mx-auto py-6 px-5">
+      <% if flash[:notice] %>
+        <p class="py-2 px-3 bg-green-50 mb-4 text-green-700 rounded-md text-sm"><%= flash[:notice] %></p>
+      <% end %>
+      <% if flash[:alert] %>
+        <p class="py-2 px-3 bg-red-50 mb-4 text-red-700 rounded-md text-sm"><%= flash[:alert] %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

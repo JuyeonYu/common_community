@@ -1,0 +1,49 @@
+<%# 서버는 중립 스타일로 렌더링. 본인 메시지 판단은 own_message_controller가 처리. %>
+<article id="<%= dom_id(message) %>"
+         class="flex justify-start"
+         data-controller="own-message"
+         data-own-message-sender-id-value="<%= message.sender_id %>"
+         data-own-message-created-at-value="<%= message.created_at.to_i %>">
+  <div class="max-w-[75%] bg-white text-gray-800 border border-gray-200 rounded-lg px-3 py-2"
+       data-own-message-target="bubble">
+    <% if message.status_hidden? %>
+      <p class="italic text-gray-400">[신고로 가려진 메시지]</p>
+    <% else %>
+      <% if message.images.attached? %>
+        <div class="mb-2 grid <%= message.images.size == 1 ? 'grid-cols-1' : 'grid-cols-2' %> gap-1">
+          <% message.images.each do |image| %>
+            <%= image_tag image,
+                  class: "rounded #{message.images.size == 1 ? 'max-h-80' : 'h-32 w-full object-cover'}" %>
+          <% end %>
+        </div>
+      <% end %>
+      <% if message.body.present? %>
+        <p class="text-sm whitespace-pre-wrap"><%= message.body %></p>
+      <% end %>
+    <% end %>
+
+    <footer class="flex items-center gap-2 mt-1 text-[10px] text-gray-500"
+            data-own-message-target="footer">
+      <time datetime="<%= message.created_at.iso8601 %>">
+        <%= l message.created_at, format: :short %>
+      </time>
+
+      <%# 회수 버튼: 서버는 hidden으로 렌더링, JS가 본인 + 5분 이내면 표시 %>
+      <%= button_to "회수", message_path(message), method: :delete,
+            data: {
+              turbo_confirm: "이 메시지를 회수하시겠습니까?",
+              own_message_target: "recallButton"
+            },
+            class: "underline hover:text-white cursor-pointer hidden",
+            form: { class: "inline" } %>
+
+      <%# 신고 링크: 서버는 표시, JS가 본인 메시지면 제거 %>
+      <% unless message.status_hidden? %>
+        <%= link_to "신고",
+              new_report_path(reportable_type: "Message", reportable_id: message.id),
+              class: "ml-auto hover:text-red-500",
+              data: { own_message_target: "reportLink" } %>
+      <% end %>
+    </footer>
+  </div>
+</article>

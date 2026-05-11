@@ -41,7 +41,7 @@ class NotificationTest < ActiveSupport::TestCase
   end
 
   test "좋아요 콜백: 콘텐츠 작성자에게 알림" do
-    fresh_post = Post.create!(user: @author, title: "임시", body: "<p>x</p>")
+    fresh_post = Post.create!(user: @author, board: boards(:free), title: "임시", body: "<p>x</p>")
     assert_difference "Notification.count", 1 do
       Like.create!(user: @actor, likeable: fresh_post)
     end
@@ -51,7 +51,7 @@ class NotificationTest < ActiveSupport::TestCase
   end
 
   test "자기 콘텐츠에 자기 좋아요는 알림 없음" do
-    fresh_post = Post.create!(user: @author, title: "임시", body: "<p>x</p>")
+    fresh_post = Post.create!(user: @author, board: boards(:free), title: "임시", body: "<p>x</p>")
     assert_no_difference "Notification.count" do
       Like.create!(user: @author, likeable: fresh_post)
     end

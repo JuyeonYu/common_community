@@ -8,6 +8,14 @@
     <time datetime="<%= post.created_at.iso8601 %>"><%= l post.created_at, format: :short %></time>
   </header>
 
+  <div class="flex items-center gap-2 text-xs mb-1">
+    <%= link_to post.board.name, board_path(post.board),
+          class: "px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200" %>
+    <% if post.prefix.present? %>
+      <span class="text-gray-500">[<%= post.prefix %>]</span>
+    <% end %>
+  </div>
+
   <h2 class="text-lg font-semibold mb-1">
     <%= link_to post.title, post, class: "hover:underline" %>
   </h2>

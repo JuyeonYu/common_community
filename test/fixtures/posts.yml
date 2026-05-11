@@ -1,17 +1,22 @@
+<% free_id = ActiveRecord::FixtureSet.identify(:free) %>
+
 welcome:
   user: one
+  board_id: <%= free_id %>
   title: 환영합니다
   status: 0
   views_count: 0
 
 second:
   user: two
+  board_id: <%= free_id %>
   title: 두 번째 글
   status: 0
   views_count: 5
 
 hidden:
   user: one
+  board_id: <%= free_id %>
   title: 가려진 글
   status: 1
   views_count: 0

@@ -23,6 +23,15 @@
       <% if Current.user&.id == @user.id %>
         <%= link_to "프로필 수정", edit_profile_path(@user),
               class: "rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50" %>
+      <% elsif Current.user %>
+        <% if Block.exists_between?(Current.user, @user) %>
+          <span class="text-xs text-red-500">차단됨</span>
+        <% else %>
+          <%= button_to "쪽지 보내기", conversations_path,
+                params: { with_user_id: @user.id }, method: :post,
+                class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer",
+                form: { class: "inline" } %>
+        <% end %>
       <% end %>
     </div>
 

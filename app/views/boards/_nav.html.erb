@@ -1,0 +1,12 @@
+<%# locals: current — nil(=전체) 또는 Board %>
+<% boards = Board.ordered %>
+<% all_active = current.blank? %>
+<nav class="flex flex-wrap gap-1 mb-4">
+  <%= link_to "전체", posts_path,
+        class: "px-3 py-1 rounded-md text-sm border #{all_active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700'}" %>
+  <% boards.each do |board| %>
+    <% active = current.is_a?(Board) && current.id == board.id %>
+    <%= link_to board.name, board_path(board),
+          class: "px-3 py-1 rounded-md text-sm border #{active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700'}" %>
+  <% end %>
+</nav>

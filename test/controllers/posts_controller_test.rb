@@ -47,20 +47,47 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
     assert_difference "Post.count", 1 do
       post posts_path, params: {
-        post: { title: "새 글", body: "<p>내용</p>", tag_names: "rails, 신규태그" }
+        post: { board_id: boards(:free).id, title: "새 글", body: "<p>내용</p>", tag_names: "rails, 신규태그" }
       }
     end
     created = Post.order(:created_at).last
     assert_redirected_to created
     assert_equal [ "rails", "신규태그" ].sort, created.tags.map(&:name).sort
+    assert_equal boards(:free).id, created.board_id
   end
 
   test "create: title 누락 시 422" do
     sign_in_as(@user)
     assert_no_difference "Post.count" do
-      post posts_path, params: { post: { title: "", body: "<p>x</p>" } }
+      post posts_path, params: { post: { board_id: boards(:free).id, title: "", body: "<p>x</p>" } }
     end
     assert_response :unprocessable_entity
+  end
+
+  test "new: board 미지정이면 첫 번째 쓸 수 있는 게시판이 기본 선택됨" do
+    sign_in_as(@user)
+    get new_post_path
+    assert_response :success
+    assert_match(/게시판/, response.body)
+    assert_match(/제목/, response.body)
+  end
+
+  test "new: board_slug로 기본 선택 보드 지정 가능" do
+    sign_in_as(@user)
+    get new_post_path(board_slug: "qa")
+    assert_response :success
+    # qa 게시판이 기본 선택되어 있는지 (selected="selected"와 함께 qa의 id가 있어야 함)
+    qa_id = boards(:qa).id
+    assert_match(/selected="selected"\s+value="#{qa_id}"|value="#{qa_id}"\s+selected/, response.body)
+  end
+
+  test "create: admin_only 게시판에 일반 사용자 차단" do
+    sign_in_as(@user)
+    notice = boards(:notice)
+    assert_no_difference "Post.count" do
+      post posts_path, params: { post: { board_id: notice.id, title: "x", body: "<p>x</p>" } }
+    end
+    assert_redirected_to posts_path
   end
 
   test "edit/update: 본인만 가능" do

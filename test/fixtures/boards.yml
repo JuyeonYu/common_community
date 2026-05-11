@@ -1,0 +1,20 @@
+free:
+  name: 자유
+  slug: free
+  position: 0
+  allowed_prefixes: []
+  write_permission: 0
+
+qa:
+  name: 질문
+  slug: qa
+  position: 1
+  allowed_prefixes: ["초보", "고급"]
+  write_permission: 0
+
+notice:
+  name: 공지
+  slug: notice
+  position: 2
+  allowed_prefixes: []
+  write_permission: 1

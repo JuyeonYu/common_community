@@ -1,0 +1,9 @@
+Black Ticket 초대장
+
+<%= @invitation.inviter.name %>님이 <%= @invitation.invitee_name %>님을 Black Ticket에 초대했습니다.
+
+아래 링크를 클릭하여 가입을 진행해주세요:
+
+<%= @invite_url %>
+
+이 초대 링크는 <%= l @invitation.expires_at, format: :default %>까지 유효합니다.

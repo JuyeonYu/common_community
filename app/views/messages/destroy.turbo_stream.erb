@@ -1,0 +1,3 @@
+<%# 메시지 제거 + 뱃지 갱신은 broadcast_remove_to/broadcast_messages_badge가 처리.
+    sender 본인의 즉시 반영을 위해 명시적으로 한 번 더. %>
+<%= turbo_stream.remove dom_id(@message) %>

@@ -1,0 +1,68 @@
+<div class="mx-auto max-w-2xl">
+  <h1 class="text-2xl font-bold mb-2">초대 (Black Ticket)</h1>
+  <p class="text-sm text-gray-500 mb-6">같이 일해본 사람을 초대해주세요.</p>
+
+  <% if flash[:notice] %>
+    <p class="py-2 px-3 bg-green-50 mb-4 text-green-700 rounded-md text-sm"><%= flash[:notice] %></p>
+  <% end %>
+  <% if flash[:alert] %>
+    <p class="py-2 px-3 bg-red-50 mb-4 text-red-700 rounded-md text-sm"><%= flash[:alert] %></p>
+  <% end %>
+
+  <%= form_with model: @invitation, url: invitations_path, class: "space-y-3 bg-white border border-gray-200 rounded-md p-4 mb-6" do |form| %>
+    <% if @invitation.errors.any? %>
+      <div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
+        <ul class="list-disc list-inside">
+          <% @invitation.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="grid sm:grid-cols-3 gap-2">
+      <%= form.text_field :invitee_name, placeholder: "이름", required: true,
+            class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+      <%= form.telephone_field :invitee_phone, placeholder: "휴대폰", required: true,
+            class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+      <%= form.email_field :invitee_email, placeholder: "이메일", required: true,
+            class: "rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+    </div>
+
+    <%= form.submit "초대 발송",
+          class: "rounded-md bg-gray-900 px-3 py-1.5 text-white text-sm font-medium hover:bg-gray-800 cursor-pointer" %>
+  <% end %>
+
+  <h2 class="font-semibold text-sm text-gray-500 mb-2">최근 보낸 초대</h2>
+  <% if @invitations.any? %>
+    <div class="space-y-2">
+      <% @invitations.each do |inv| %>
+        <article class="rounded-md bg-white border border-gray-200 p-3 text-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-medium"><%= inv.invitee_name %> · <%= inv.invitee_email %></p>
+              <p class="text-xs text-gray-500 mt-0.5">
+                <%= l inv.created_at, format: :short %> ·
+                <% case inv.status %>
+                <% when :active %>
+                  <span class="text-green-600">활성 (만료 <%= l inv.expires_at, format: :short %>)</span>
+                <% when :expired %>
+                  <span class="text-gray-500">만료</span>
+                <% when :accepted %>
+                  <span class="text-blue-600">가입 완료</span>
+                <% when :canceled %>
+                  <span class="text-gray-500">취소됨</span>
+                <% end %>
+              </p>
+            </div>
+            <% if inv.active? %>
+              <%= button_to "취소", invitation_path(inv), method: :delete,
+                    data: { turbo_confirm: "취소하시겠습니까?" },
+                    class: "text-xs text-red-600 hover:underline" %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-gray-400">아직 보낸 초대가 없습니다.</p>
+  <% end %>
+</div>

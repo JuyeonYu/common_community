@@ -29,7 +29,7 @@ class ReportTest < ActiveSupport::TestCase
   end
 
   test "post 삭제 시 reports cascade" do
-    fresh = Post.create!(user: users(:one), title: "임시", body: "<p>x</p>")
+    fresh = Post.create!(user: users(:one), board: boards(:free), title: "임시", body: "<p>x</p>")
     Report.create!(reporter: @user, reportable: fresh, reason: "test")
     assert_difference "Report.count", -1 do
       fresh.destroy
