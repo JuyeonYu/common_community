@@ -1,0 +1,13 @@
+one_chrome:
+  user: one
+  endpoint: https://fcm.googleapis.com/fcm/send/one-chrome-endpoint
+  p256dh_key: BNxJq5Z9k2v7Yw3Lq1Hh0sample-p256dh-key
+  auth_key: aGVsbG93b3JsZA==
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome"
+
+two_safari:
+  user: two
+  endpoint: https://web.push.apple.com/two-safari-endpoint
+  p256dh_key: BNxJq5Z9k2v7Yw3Lq1Hh0sample-p256dh-two
+  auth_key: c2FtcGxlLWF1dGgta2V5
+  user_agent: "Mozilla/5.0 (Macintosh) Safari"

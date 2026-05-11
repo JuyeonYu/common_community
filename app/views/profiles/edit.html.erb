@@ -43,4 +43,26 @@
       <%= link_to "취소", profile_path(@user), class: "text-sm text-gray-500 hover:text-gray-700" %>
     </div>
   <% end %>
+
+  <% if (vapid_pk = Rails.application.credentials.dig(:vapid, :public_key)).present? %>
+    <section class="mt-10 border-t pt-6"
+             data-controller="push-subscription"
+             data-push-subscription-vapid-public-key-value="<%= vapid_pk %>">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">브라우저 알림</h2>
+      <p class="text-sm text-gray-600 mb-3">
+        이 브라우저가 닫혀 있어도 댓글/좋아요 같은 알림을 OS 알림 센터로 받습니다.
+        디바이스마다 별도로 켜야 합니다.
+      </p>
+      <button type="button"
+              data-push-subscription-target="button"
+              data-action="push-subscription#toggle"
+              class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer">
+        브라우저 알림 받기
+      </button>
+      <p data-push-subscription-target="unsupportedMsg" hidden
+         class="text-sm text-gray-500 mt-2">
+        이 브라우저는 Web Push를 지원하지 않습니다. (모바일 Safari는 홈 화면에 추가한 PWA에서만 동작)
+      </p>
+    </section>
+  <% end %>
 </div>

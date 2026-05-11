@@ -12,6 +12,7 @@ class Notification < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   after_create_commit :broadcast_to_recipient
+  after_create_commit :enqueue_web_push
 
   def read?
     read_at.present?
@@ -41,5 +42,9 @@ class Notification < ApplicationRecord
         locals: { notification: self }
 
       recipient.broadcast_notification_badge
+    end
+
+    def enqueue_web_push
+      WebPushJob.perform_later(id)
     end
 end

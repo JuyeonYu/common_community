@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :filed_reports, class_name: "Report", foreign_key: :reporter_id, dependent: :destroy
   has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
   has_many :acted_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :nullify
+  has_many :push_subscriptions, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

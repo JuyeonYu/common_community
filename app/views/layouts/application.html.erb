@@ -12,6 +12,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <% if (vapid_pk = Rails.application.credentials.dig(:vapid, :public_key)).present? %>
+      <meta name="vapid-public-key" content="<%= vapid_pk %>">
+    <% end %>
 
     <%= yield :head %>
 

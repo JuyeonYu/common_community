@@ -27,6 +27,12 @@ Rails.application.routes.draw do
     collection { patch :read_all }
   end
 
+  # 브라우저 Web Push 구독. 클라이언트 Service Worker가 만든 subscription 객체를
+  # 서버에 등록(create) / 해제(destroy by endpoint in body) 한다.
+  resources :push_subscriptions, only: %i[ create ] do
+    collection { delete :unsubscribe }
+  end
+
   namespace :admin do
     resources :reports, only: %i[ index update ]
   end

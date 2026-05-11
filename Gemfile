@@ -54,6 +54,9 @@ gem "omniauth"
 gem "omniauth-google-oauth2"
 gem "omniauth-rails_csrf_protection"
 
+# Web Push (RFC 8030) — VAPID 서명, ECDH/AES-128-GCM 암호화. 직접 구현 비현실적이라 도입.
+gem "web-push"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
