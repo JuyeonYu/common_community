@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@layer base {
+  /* iOS Safari가 가로 회전 시 텍스트를 임의로 키우는 동작 차단 */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* iOS Safari는 폼 입력 폰트가 16px 미만이면 포커스 시 자동 확대(zoom)한다.
+     모든 입력 요소에 최소 16px을 보장해 의도치 않은 확대를 막는다. */
+  input,
+  textarea,
+  select,
+  trix-editor {
+    font-size: 16px;
+  }
+}
