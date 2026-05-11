@@ -1,119 +1,83 @@
-# Name of your application. Used to uniquely configure containers.
+# 서비스 이름 — 컨테이너/네트워크 이름의 prefix가 됨.
 service: jiindo
 
-# Name of the container image (use your-user/app-name on external registries).
-image: jiindo
+# 푸시할 이미지 이름. Docker Hub: <username>/<repo>.
+# TODO: juyeon88을 본인 Docker Hub 아이디로 교체.
+image: juyeon88/jiindo
 
-# Deploy to these servers.
+# 배포 대상 서버. 단일 호스트에 Puma 내장 Solid Queue로 워커까지 같이 돌림.
 servers:
   web:
-    - 192.168.0.1
-  # job:
-  #   hosts:
-  #     - 192.168.0.1
-  #   cmd: bin/jobs
+    - 158.247.217.34
 
-# Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
-# If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
-#
-# Using an SSL proxy like this requires turning on config.assume_ssl and config.force_ssl in production.rb!
-#
-# Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
-#
-# proxy:
-#   ssl: true
-#   host: app.example.com
+# Kamal proxy(Let's Encrypt 자동 갱신). SSL 종단은 proxy가 담당.
+# 주의: 이 옵션을 켰으면 production.rb에서 assume_ssl/force_ssl도 켜야 함.
+proxy:
+  ssl: true
+  host: kamal-test.messageopen.com
 
-# Where you keep your container images.
+# 컨테이너 레지스트리(Docker Hub).
 registry:
-  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  server: localhost:5555
+  server: docker.io
+  # TODO: juyeon88을 본인 Docker Hub 아이디로 교체.
+  username: juyeon88
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
-  # Needed for authenticated registries.
-  # username: your-user
-
-  # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
-
-# Inject ENV variables into containers (secrets come from .kamal/secrets).
+# 컨테이너에 주입할 환경변수. secrets는 .kamal/secrets에서 로드.
 env:
   secret:
     - RAILS_MASTER_KEY
+    - JIINDO_DATABASE_PASSWORD
   clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
+    # Solid Queue 워커를 Puma 프로세스 안에서 같이 실행.
     SOLID_QUEUE_IN_PUMA: true
 
-    # Set number of processes dedicated to Solid Queue (default: 1)
-    # JOB_CONCURRENCY: 3
+    # DB 접속 정보. host는 accessory 이름(jiindo-db) — 같은 도커 네트워크에서 DNS로 해소됨.
+    # database.yml은 DATABASE_HOST / 유저는 'jiindo' / 비밀번호는 JIINDO_DATABASE_PASSWORD 사용.
+    DATABASE_HOST: jiindo-db
 
-    # Set number of cores available to the application on each server (default: 1).
-    # WEB_CONCURRENCY: 2
+# Puma 안에서 Solid Queue를 돌리므로 별도 job 서버 블록은 두지 않음.
+# 트래픽이 늘어 워커를 분리하고 싶을 때 servers.job 추가 + SOLID_QUEUE_IN_PUMA: false로 변경.
 
-    # Match this to any external database server to configure Active Record correctly
-    # Use jiindo-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
-
-    # Log everything from Rails
-    # RAILS_LOG_LEVEL: debug
-
-# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
-# "bin/kamal logs -r job" will tail logs from the first server in the job section.
+# 자주 쓰는 명령 단축어. "bin/kamal console" 등으로 호출.
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   shell: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Use a persistent storage volume for sqlite database files and local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
+# Active Storage(:local) 업로드 파일을 컨테이너 재배포 시에도 보존하기 위한 볼륨.
 volumes:
   - "jiindo_storage:/rails/storage"
 
-# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
-# hitting 404 on in-flight requests. Combines all files from new and old
-# version inside the asset_path.
+# 무중단 배포 시 신·구 컨테이너가 같은 자산을 잠시 공유할 수 있도록 핑거프린트된 자산을 브릿지.
 asset_path: /rails/public/assets
 
-# Configure the image builder.
+# 이미지 빌더. 로컬 Mac은 arm64지만 운영 서버는 amd64이므로 amd64로 빌드.
+# arm64 머신에서의 amd64 빌드는 QEMU 에뮬레이션이라 느림 — 빌드가 너무 길어지면
+# remote 빌더(예: ssh://docker@<arm64나 amd64 서버>)를 추가하는 방안 검토.
 builder:
   arch: amd64
 
-  # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
-  # remote: ssh://docker@docker-builder-server
-  #
-  # # Pass arguments and secrets to the Docker build process
-  # args:
-  #   RUBY_VERSION: 3.3.5
-  # secrets:
-  #   - GITHUB_TOKEN
-  #   - RAILS_MASTER_KEY
-
-# Use a different ssh user than root
-# ssh:
-#   user: app
-
-# Use accessory services (secrets come from .kamal/secrets).
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     # Change to 3306 to expose port to the world instead of just local network.
-#     port: "127.0.0.1:3306:3306"
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+# 부속 서비스. PostgreSQL을 같은 호스트에 컨테이너로 띄움(외부 노출 차단).
+accessories:
+  db:
+    image: postgres:16-alpine
+    host: 158.247.217.34
+    # 호스트 localhost에서만 접근 가능하도록 바인딩. 외부 인터넷에는 노출되지 않음.
+    # 같은 도커 네트워크의 web 컨테이너는 'jiindo-db' DNS로 접근하므로 이 port 매핑이 없어도 동작함.
+    # SSH로 들어가 psql로 점검하고 싶을 때만 유용.
+    port: "127.0.0.1:5432:5432"
+    env:
+      clear:
+        POSTGRES_USER: jiindo
+        POSTGRES_DB: jiindo_production
+      secret:
+        - POSTGRES_PASSWORD
+    files:
+      # 최초 부팅 시 Solid Cache/Queue/Cable용 DB도 함께 생성.
+      - config/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    directories:
+      # 컨테이너 재배포 후에도 데이터 유지.
+      - data:/var/lib/postgresql/data
