@@ -4,7 +4,14 @@
   <div class="container mx-auto px-5 py-3 flex items-center gap-4">
     <%= link_to "블랙티켓", root_path, class: "text-xl font-bold text-gray-900 shrink-0" %>
 
-    <div class="flex-1"></div>
+    <% if Current.user&.active? %>
+      <%= form_with url: posts_path, method: :get, class: "flex-1 max-w-md", data: { turbo_frame: "_top" } do |form| %>
+        <%= form.search_field :q, value: params[:q], placeholder: "글 검색",
+              class: "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-blue-600" %>
+      <% end %>
+    <% else %>
+      <div class="flex-1"></div>
+    <% end %>
 
     <nav class="flex items-center gap-4 text-sm shrink-0">
       <% if Current.user&.active? %>

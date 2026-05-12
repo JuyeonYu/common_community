@@ -5,7 +5,14 @@ class PostsController < ApplicationController
   def index
     scope = Post.for_feed
     scope = scope.joins(:tags).where(tags: { slug: params[:tag] }).distinct if params[:tag].present?
-    @pagy, @posts = pagy(scope.recent, limit: 20)
+
+    if params[:q].present?
+      @query = params[:q].to_s.strip
+      scope = scope.search_by_text(@query)
+      @pagy, @posts = pagy(scope, limit: 20)
+    else
+      @pagy, @posts = pagy(scope.recent, limit: 20)
+    end
   end
 
   def show

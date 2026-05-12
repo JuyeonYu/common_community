@@ -1,6 +1,7 @@
 class Post < ApplicationRecord
   include Likeable
   include Reportable
+  include PgSearch::Model
 
   belongs_to :user
   has_many :post_tags, dependent: :destroy
@@ -8,6 +9,14 @@ class Post < ApplicationRecord
   has_many :comments, dependent: :destroy
 
   has_rich_text :body
+
+  pg_search_scope :search_by_text,
+    against: { title: "A" },
+    associated_against: { rich_text_body: { body: "B" } },
+    using: {
+      tsearch: { prefix: true, dictionary: "simple" },
+      trigram: { threshold: 0.2 }
+    }
 
   enum :status, { published: 0, hidden: 1 }
 

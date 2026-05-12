@@ -110,6 +110,13 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to posts_path
   end
 
+  test "index: q 검색 파라미터로 결과 노출" do
+    sign_in_as(@user)
+    get posts_path, params: { q: "환영" }
+    assert_response :success
+    assert_match(/환영합니다/, response.body)
+  end
+
   test "for_feed: user/tags 미리 로드 (N+1 방지)" do
     posts = Post.for_feed.recent.to_a
     assert_predicate posts.size, :positive?

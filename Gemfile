@@ -43,6 +43,9 @@ gem "image_processing", "~> 1.2"
 # Tailwind CSS for Rails [https://github.com/rails/tailwindcss-rails]
 gem "tailwindcss-rails"
 
+# PostgreSQL full-text search with Korean support [https://github.com/Casecommons/pg_search]
+gem "pg_search"
+
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 9"
 

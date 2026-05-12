@@ -33,4 +33,23 @@ class PostTest < ActiveSupport::TestCase
     assert_not post.author?(users(:two))
     assert_not post.author?(nil)
   end
+
+  test "search_by_text: 제목 매칭" do
+    results = Post.search_by_text("환영")
+    assert_includes results, posts(:welcome)
+  end
+
+  test "search_by_text: 본문 매칭 (Action Text body 조인)" do
+    results = Post.search_by_text("안녕하세요")
+    assert_includes results, posts(:welcome)
+  end
+
+  test "search_by_text + for_feed: hidden 글은 제외" do
+    results = Post.for_feed.search_by_text("가려진")
+    assert_not_includes results, posts(:hidden)
+  end
+
+  test "search_by_text: 빈 문자열은 결과 없음" do
+    assert_empty Post.search_by_text("")
+  end
 end
