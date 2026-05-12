@@ -2,12 +2,9 @@
 
 <header class="border-b border-gray-200 bg-white">
   <div class="container mx-auto px-5 py-3 flex items-center gap-4">
-    <%= link_to "Jiindo", root_path, class: "text-xl font-bold text-gray-900 shrink-0" %>
+    <%= link_to "블랙티켓", root_path, class: "text-xl font-bold text-gray-900 shrink-0" %>
 
-    <%= form_with url: posts_path, method: :get, class: "flex-1 max-w-md", data: { turbo_frame: "_top" } do |form| %>
-      <%= form.search_field :q, value: params[:q], placeholder: "글 검색",
-            class: "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-blue-600" %>
-    <% end %>
+    <div class="flex-1"></div>
 
     <nav class="flex items-center gap-4 text-sm shrink-0">
       <% if Current.user %>
@@ -15,9 +12,6 @@
         <div id="notification_badge">
           <%= render "shared/notification_badge", user: Current.user %>
         </div>
-        <% if Current.user.admin? %>
-          <%= link_to "신고함", admin_reports_path, class: "text-red-600 hover:underline" %>
-        <% end %>
         <%= link_to profile_path(Current.user), class: "flex items-center gap-2 hover:text-gray-900" do %>
           <%= avatar_image(Current.user, class: "h-8 w-8 rounded-full") %>
           <span class="text-gray-700 hidden sm:inline"><%= Current.user.name %></span>

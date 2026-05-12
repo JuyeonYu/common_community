@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="<%= I18n.locale %>">
   <head>
-    <title><%= content_for(:title) || "Jiindo" %></title>
+    <title><%= content_for(:title) || "블랙티켓" %></title>
     <%# viewport-fit=cover: iOS notch/Dynamic Island 영역까지 활용 (Hotwire Native에서도 동일) %>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <%# 게시판 본문의 숫자가 자동으로 전화/이메일 링크로 변하는 걸 방지 %>
     <meta name="format-detection" content="telephone=no, email=no, address=no">
     <meta name="theme-color" content="#f9fafb">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Jiindo">
+    <meta name="application-name" content="BlackTicket">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>

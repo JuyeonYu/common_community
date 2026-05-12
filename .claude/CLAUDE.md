@@ -1,6 +1,8 @@
-# Jiindo 작업 지침
+# 블랙티켓 작업 지침
 
-Jiindo는 Rails 8 기반 웹 커뮤니티 서비스다. 웹 + 모바일(iOS/Android) 동시 배포를 목표로 하며, 모바일은 **Hotwire Native**(37signals 퍼스트파티)로 단일 코드베이스를 유지한다.
+블랙티켓(BlackTicket)은 Rails 8 기반의 **초대제 소개팅·구인구직 플랫폼**이다. 같이 일해본 사람만 초대할 수 있는 리퍼럴 + 추천인 연대책임(스코어 페널티) 구조가 핵심. 웹 + 모바일(iOS/Android) 동시 배포를 목표로 하며, 모바일은 **Hotwire Native**(37signals 퍼스트파티)로 단일 코드베이스를 유지한다.
+
+상위 기획서: `doc/TalkFile_블랙티켓_상위기획서_v1.1.docx`.
 
 작업자(사용자)는 Rails 입문자다. **결정의 근거를 짧게 설명하면서 진행한다.**
 
@@ -34,8 +36,8 @@ Jiindo는 Rails 8 기반 웹 커뮤니티 서비스다. 웹 + 모바일(iOS/Andr
 | 파일 업로드 | Active Storage + image_processing(libvips) | |
 | 리치 텍스트 | Action Text + Trix | **코드블록 비활성** |
 | 이메일 | Action Mailer | |
-| 검색 | `pg_search` gem | 한글 풀텍스트 검색, 랭킹 |
 | 페이지네이션 | `pagy` gem | Rails 퍼스트파티 없음, 가장 가벼움 |
+| 브라우저 푸시 | `web-push` gem | VAPID + Service Worker. RFC 8030 직접 구현 비현실적 |
 | Rate limit | `ActionController::RateLimiting` | Rails 8 내장 |
 | N+1 감지 | `assert_queries_count` | 테스트로 검증, Bullet 미사용 |
 | 테스트 | Minitest + Capybara System Test | RSpec/FactoryBot 미사용 |
@@ -45,7 +47,7 @@ Jiindo는 Rails 8 기반 웹 커뮤니티 서비스다. 웹 + 모바일(iOS/Andr
 | i18n | `:ko` 기본 | `Asia/Seoul` 타임존 |
 | 언어 | 한글 | 커밋/PR/주석/에러 메시지 |
 
-승인된 외부 gem: `pg`, `tailwindcss-rails`, `pg_search`, `pagy`. 그 외는 추가 시 사용자 승인 필요.
+승인된 외부 gem: `pg`, `tailwindcss-rails`, `pagy`, `web-push`. 그 외는 추가 시 사용자 승인 필요.
 
 ---
 
@@ -131,14 +133,19 @@ Jiindo는 Rails 8 기반 웹 커뮤니티 서비스다. 웹 + 모바일(iOS/Andr
 
 ---
 
-## 8. 도메인 (확장 예정)
+## 8. 도메인 (블랙티켓 — 진행 중)
 
-커뮤니티 도메인 모델은 별도 합의 후 추가. 현재 미정 항목:
-- 소셜 로그인 (omniauth gem 필요 시 별도 논의)
-- 검색 대상 모델
-- 신고/모더레이션 정책
-- 알림 채널 (in-app / 이메일 / 모바일 푸시)
-- 좋아요/추천 시스템
+상위 기획서: `doc/TalkFile_블랙티켓_상위기획서_v1.1.docx`.
+
+피벗 후 도메인 핵심:
+- **초대제 가입** (Invitation, 7일 1회 무료, 12시간 토큰, 추천인 코멘트)
+- **휴대폰 본인인증** (외부 SDK 미정 — Phase B에서는 stub)
+- **티켓 스코어** (10점, 0점 정지, 추천인 연대책임)
+- **티켓 크레딧** (서비스 내 유료 화폐 — 결제 PG 미정)
+- **레드티켓** (이성 매칭, 주간 기수)
+- **골든티켓** (구인구직, 전자계약 + 채용 수수료 — 후속 Phase)
+
+도입 시점/외부 의존성이 정해진 항목만 단계적으로 합류. Phase D 이후는 별도 plan.
 
 ---
 

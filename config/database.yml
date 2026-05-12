@@ -1,13 +1,4 @@
 # PostgreSQL. Versions 9.3 and up are supported.
-#
-# Install the pg driver:
-#   gem install pg
-# On macOS with Homebrew:
-#   gem install pg -- --with-pg-config=/usr/local/bin/pg_config
-#
-# Configure Using Gemfile
-# gem "pg"
-#
 default: &default
   adapter: postgresql
   encoding: unicode
@@ -19,48 +10,45 @@ default: &default
 development:
   primary:
     <<: *default
-    database: jiindo_development
+    database: blackticket_development
   cache:
     <<: *default
-    database: jiindo_development_cache
+    database: blackticket_development_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: jiindo_development_queue
+    database: blackticket_development_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *default
-    database: jiindo_development_cable
+    database: blackticket_development_cable
     migrations_paths: db/cable_migrate
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: jiindo_test
+  database: blackticket_test
 
 production:
   primary:
     <<: *default
-    database: jiindo_production
-    username: jiindo
-    password: <%= ENV["JIINDO_DATABASE_PASSWORD"] %>
+    database: blackticket_production
+    username: blackticket
+    password: <%= ENV["BLACKTICKET_DATABASE_PASSWORD"] %>
   cache:
     <<: *default
-    database: jiindo_production_cache
-    username: jiindo
-    password: <%= ENV["JIINDO_DATABASE_PASSWORD"] %>
+    database: blackticket_production_cache
+    username: blackticket
+    password: <%= ENV["BLACKTICKET_DATABASE_PASSWORD"] %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: jiindo_production_queue
-    username: jiindo
-    password: <%= ENV["JIINDO_DATABASE_PASSWORD"] %>
+    database: blackticket_production_queue
+    username: blackticket
+    password: <%= ENV["BLACKTICKET_DATABASE_PASSWORD"] %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *default
-    database: jiindo_production_cable
-    username: jiindo
-    password: <%= ENV["JIINDO_DATABASE_PASSWORD"] %>
+    database: blackticket_production_cable
+    username: blackticket
+    password: <%= ENV["BLACKTICKET_DATABASE_PASSWORD"] %>
     migrations_paths: db/cable_migrate

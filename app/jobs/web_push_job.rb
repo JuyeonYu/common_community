@@ -34,7 +34,7 @@ class WebPushJob < ApplicationJob
 
   private
     def build_payload(notification)
-      title = notification.actor&.name.presence || "Jiindo"
+      title = notification.actor&.name.presence || "블랙티켓"
       {
         title: title,
         body:  notification.message,
