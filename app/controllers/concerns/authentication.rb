@@ -29,11 +29,18 @@ module Authentication
       Current.session.present? || request_authentication
     end
 
-    # 가입 직후 비활성 상태(초대 코드 미적용 + 시드 아님)면 코드 입력 화면으로 강제 이동.
+    # 비활성 사용자는 적절한 곳으로 강제 이동.
+    #   정지(suspended_until 미래) → 정지 안내 페이지(현재는 로그아웃 + alert)
+    #   가입 후 초대 코드 미적용     → 코드 입력 화면
     def require_active_user
       return unless Current.user
-      return if Current.user.active?
-      redirect_to redeem_invitations_path
+      if Current.user.suspended?
+        until_at = I18n.l(Current.user.suspended_until, format: :short)
+        terminate_session
+        redirect_to new_session_path, alert: "정지된 계정입니다. 해제 시점: #{until_at}"
+      elsif !Current.user.active?
+        redirect_to redeem_invitations_path
+      end
     end
 
     def require_admin

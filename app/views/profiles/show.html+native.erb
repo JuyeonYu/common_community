@@ -5,11 +5,16 @@
 
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
-          <h1 class="text-xl font-bold"><%= @user.name %></h1>
-          <% if @user.admin? %>
-            <span class="px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700">관리자</span>
+          <h1 class="text-xl font-bold">
+            <%= @user.nickname.presence || @user.name %>
+          </h1>
+          <% if @user.age %>
+            <span class="text-sm text-gray-500"><%= @user.age %>세</span>
           <% end %>
         </div>
+        <% if @user.job_title.present? %>
+          <p class="text-sm text-gray-700 mt-1"><%= @user.job_title %></p>
+        <% end %>
         <% if @user.bio.present? %>
           <p class="mt-1 text-sm text-gray-700 whitespace-pre-wrap"><%= @user.bio %></p>
         <% end %>

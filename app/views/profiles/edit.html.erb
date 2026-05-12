@@ -1,3 +1,5 @@
+<% content_for :title, "프로필 수정" %>
+
 <div class="mx-auto max-w-2xl">
   <h1 class="text-2xl font-bold mb-6">프로필 수정</h1>
 
@@ -19,23 +21,82 @@
 
     <div>
       <%= form.label :avatar, "아바타 변경", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.file_field :avatar, accept: "image/*",
-            class: "block w-full text-sm text-gray-700" %>
-      <p class="mt-1 text-xs text-gray-500">업로드한 이미지가 우선 표시됩니다. 미업로드 시 Google 아바타.</p>
+      <%= form.file_field :avatar, accept: "image/*", class: "block w-full text-sm text-gray-700" %>
     </div>
 
-    <div>
-      <%= form.label :name, "이름", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.text_field :name, required: true,
-            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= form.label :name, "이름", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_field :name, required: true,
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+      <div>
+        <%= form.label :nickname, "닉네임 (유일)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_field :nickname,
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
     </div>
 
     <div>
       <%= form.label :bio, "자기소개", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.text_area :bio, rows: 4, maxlength: 500,
-            placeholder: "자기소개를 입력하세요 (선택)",
+      <%= form.text_area :bio, rows: 3, maxlength: 500,
             class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
     </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= form.label :birth_date, "생년월일", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.date_field :birth_date,
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+      <div>
+        <%= form.label :gender, "성별", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.select :gender,
+              [["남성","male"],["여성","female"],["기타","other"]], { include_blank: "선택" },
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= form.label :residence_area, "거주지", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.select :residence_area,
+              User::RESIDENCE_AREAS.keys.map { |k| [t("users.residence_area.#{k}"), k] },
+              { include_blank: "선택" },
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+      <div>
+        <%= form.label :smoking, "흡연", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.select :smoking,
+              [["핌","smokes"],["비흡연","non_smoker"],["가끔","sometimes"]],
+              { include_blank: "선택" },
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+    </div>
+
+    <div>
+      <%= form.label :job_title, "직무 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.text_field :job_title,
+            placeholder: "예: 백엔드 개발자",
+            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    </div>
+
+    <div>
+      <%= form.label :hobby, "취미 (해시태그)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.text_field :hobby,
+            placeholder: "러닝, 사진, 컬처 (콤마/공백으로 구분)",
+            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    </div>
+
+    <fieldset class="rounded-md border border-gray-200 p-4">
+      <legend class="text-sm font-medium text-gray-700 px-1">알림 설정</legend>
+      <div class="flex items-center gap-2 mt-2">
+        <%= form.check_box "notification_preferences[web_push]",
+              { checked: @user.notification_preferences["web_push"] != false },
+              "true", "false" %>
+        <span class="text-sm text-gray-700">브라우저 푸시 알림 받기</span>
+      </div>
+    </fieldset>
 
     <div class="flex items-center gap-2">
       <%= form.submit "저장",
@@ -48,10 +109,9 @@
     <section class="mt-10 border-t pt-6"
              data-controller="push-subscription"
              data-push-subscription-vapid-public-key-value="<%= vapid_pk %>">
-      <h2 class="text-lg font-semibold text-gray-900 mb-2">브라우저 알림</h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">브라우저 알림 구독</h2>
       <p class="text-sm text-gray-600 mb-3">
-        이 브라우저가 닫혀 있어도 댓글/좋아요 같은 알림을 OS 알림 센터로 받습니다.
-        디바이스마다 별도로 켜야 합니다.
+        이 브라우저에서 백그라운드 알림을 받으려면 구독을 켜세요. 디바이스마다 별도로 켜야 합니다.
       </p>
       <button type="button"
               data-push-subscription-target="button"
@@ -61,7 +121,7 @@
       </button>
       <p data-push-subscription-target="unsupportedMsg" hidden
          class="text-sm text-gray-500 mt-2">
-        이 브라우저는 Web Push를 지원하지 않습니다. (모바일 Safari는 홈 화면에 추가한 PWA에서만 동작)
+        이 브라우저는 Web Push를 지원하지 않습니다.
       </p>
     </section>
   <% end %>

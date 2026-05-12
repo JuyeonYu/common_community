@@ -37,6 +37,14 @@ Rails.application.routes.draw do
   # 관리자 백오피스.
   namespace :admin do
     resources :seed_emails, only: %i[ index create destroy ]
+    resources :users, only: %i[ index show ] do
+      member do
+        post   :adjust_score
+        post   :grant_credits
+        post   :suspend
+        post   :unsuspend
+      end
+    end
   end
 
   # 헬스체크.

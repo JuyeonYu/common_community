@@ -53,6 +53,56 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.active?
   end
 
+  test "active?: 정지 중이면 false (시드라도)" do
+    u = User.new(seed: true, suspended_until: 1.day.from_now)
+    assert_not u.active?
+  end
+
+  test "active?: 정지 만료 후엔 true" do
+    u = User.new(seed: true, suspended_until: 1.day.ago)
+    assert u.active?
+  end
+
+  test "age 계산" do
+    u = User.new(birth_date: 30.years.ago.to_date - 1.day)
+    assert_equal 30, u.age
+  end
+
+  test "hobby 정규화: 콤마/공백 분리 + # prefix" do
+    u = users(:one)
+    u.update!(hobby: "러닝, 사진 컬처")
+    assert_equal "#러닝 #사진 #컬처", u.reload.hobby
+  end
+
+  test "hobby 중복 제거" do
+    u = users(:one)
+    u.update!(hobby: "러닝 러닝, #사진")
+    assert_equal "#러닝 #사진", u.reload.hobby
+  end
+
+  test "신규 가입자에게 signup_bonus 크레딧" do
+    auth = OmniAuth::AuthHash.new(
+      provider: "google_oauth2", uid: "bonus-uid",
+      info: { email: "bonus@example.com", name: "보너스" }
+    )
+    user = User.from_google_oauth(auth)
+    assert_equal User::SIGNUP_BONUS_CREDITS, user.reload.ticket_credits
+    assert user.credit_transactions.exists?(kind: :signup_bonus)
+  end
+
+  test "닉네임 unique" do
+    User.create!(email_address: "n1@example.com", name: "유저1", nickname: "동일닉")
+    dup = User.new(email_address: "n2@example.com", name: "유저2", nickname: "동일닉")
+    assert_not dup.valid?
+    assert_includes dup.errors.attribute_names, :nickname
+  end
+
+  test "닉네임 format" do
+    u = User.new(email_address: "f@example.com", name: "포맷", nickname: "공백 안돼")
+    assert_not u.valid?
+    assert_includes u.errors.attribute_names, :nickname
+  end
+
   test "from_google_oauth: 동일 uid 재로그인 시 동일 사용자 반환, 상태 불변" do
     auth = OmniAuth::AuthHash.new(
       provider: "google_oauth2", uid: "repeat-uid",

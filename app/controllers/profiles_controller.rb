@@ -27,6 +27,10 @@ class ProfilesController < ApplicationController
     end
 
     def profile_params
-      params.expect(user: [ :name, :bio, :avatar ])
+      params.expect(user: [
+        :name, :nickname, :bio, :avatar,
+        :hobby, :residence_area, :job_title, :smoking, :birth_date, :gender,
+        { notification_preferences: [ :web_push ] }
+      ])
     end
 end

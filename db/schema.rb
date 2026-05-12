@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_072304) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_074905) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -51,6 +51,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_072304) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "credit_transactions", force: :cascade do |t|
+    t.integer "amount", null: false
+    t.datetime "created_at", null: false
+    t.integer "kind", null: false
+    t.text "memo"
+    t.bigint "related_id"
+    t.string "related_type"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["related_type", "related_id"], name: "index_credit_transactions_on_related"
+    t.index ["user_id", "created_at"], name: "index_credit_transactions_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_credit_transactions_on_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -98,6 +112,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_072304) do
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
+  create_table "score_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "delta", null: false
+    t.text "memo"
+    t.integer "reason", null: false
+    t.bigint "related_id"
+    t.string "related_type"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["related_type", "related_id"], name: "index_score_events_on_related"
+    t.index ["user_id", "created_at"], name: "index_score_events_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_score_events_on_user_id"
+  end
+
   create_table "seed_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "created_by_id"
@@ -120,27 +148,41 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_072304) do
     t.boolean "admin", default: false, null: false
     t.string "avatar_url"
     t.text "bio"
+    t.date "birth_date"
     t.datetime "created_at", null: false
     t.string "email_address", null: false
+    t.integer "gender"
     t.string "google_uid"
+    t.text "hobby"
     t.datetime "invitation_accepted_at"
     t.bigint "invited_by_id"
+    t.string "job_title"
     t.string "name"
+    t.string "nickname"
+    t.jsonb "notification_preferences", default: {}, null: false
     t.string "password_digest"
+    t.integer "residence_area"
     t.boolean "seed", default: false, null: false
+    t.integer "smoking"
+    t.datetime "suspended_until"
+    t.integer "ticket_credits", default: 0, null: false
+    t.integer "ticket_score", default: 10, null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true, where: "(nickname IS NOT NULL)"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "credit_transactions", "users"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "score_events", "users"
   add_foreign_key "seed_emails", "users", column: "created_by_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "users", column: "invited_by_id"
