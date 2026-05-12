@@ -1,1 +1,12 @@
-# Phase A: 도메인 폐기 후 알림 트리거가 비어 있음. Phase B/C에서 새 ACTIONS 추가 시 픽스처 복원.
+unread_comment_notif:
+  recipient: one
+  actor: two
+  action: commented_on_post
+  notifiable: top_on_welcome (Comment)
+
+read_like_notif:
+  recipient: one
+  actor: two
+  action: liked_post
+  notifiable: welcome (Post)
+  read_at: 2026-01-01 00:00:00

@@ -26,6 +26,10 @@ class User < ApplicationRecord
   has_secure_password validations: false
   has_one_attached :avatar
   has_many :sessions, dependent: :destroy
+  has_many :posts, dependent: :destroy
+  has_many :comments, dependent: :destroy
+  has_many :likes, dependent: :destroy
+  has_many :filed_reports, class_name: "Report", foreign_key: :reporter_id, dependent: :destroy
   has_many :notifications, foreign_key: :recipient_id, dependent: :destroy
   has_many :acted_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :nullify
   has_many :push_subscriptions, dependent: :destroy

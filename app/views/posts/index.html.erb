@@ -1,0 +1,47 @@
+<div class="mx-auto max-w-3xl">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">
+      <% if @query.present? %>
+        "<%= @query %>" 검색 결과 <span class="text-gray-500 text-base">(<%= @pagy.count %>건)</span>
+      <% elsif params[:tag].present? %>
+        #<%= params[:tag] %>
+      <% else %>
+        피드
+      <% end %>
+    </h1>
+
+    <% if Current.user %>
+      <%= link_to "글쓰기", new_post_path,
+            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500" %>
+    <% end %>
+  </div>
+
+  <% if flash[:notice] %>
+    <p class="py-2 px-3 bg-green-50 mb-4 text-green-700 rounded-md text-sm"><%= flash[:notice] %></p>
+  <% end %>
+  <% if flash[:alert] %>
+    <p class="py-2 px-3 bg-red-50 mb-4 text-red-700 rounded-md text-sm"><%= flash[:alert] %></p>
+  <% end %>
+
+  <% if @posts.any? %>
+    <div class="space-y-4">
+      <%= render @posts %>
+    </div>
+
+    <div class="mt-8 text-center text-sm">
+      <%== pagy_nav(@pagy) %>
+    </div>
+  <% else %>
+    <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+      <% if @query.present? %>
+        검색 결과가 없습니다.
+        <%= link_to "전체 피드 보기", posts_path, class: "text-blue-600 underline" %>
+      <% else %>
+        아직 글이 없습니다.
+        <% if Current.user %>
+          <%= link_to "첫 글 작성하기", new_post_path, class: "text-blue-600 underline" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

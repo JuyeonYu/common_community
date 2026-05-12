@@ -8,8 +8,23 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
 
   resources :profiles, only: %i[ show edit update ] do
-    member { get :history }
+    member do
+      get :history
+      get :posts
+      get :comments
+    end
   end
+
+  # 게시판.
+  resources :posts do
+    resources :comments, only: %i[ create ]
+    resource  :like, only: %i[ create destroy ], module: :posts
+  end
+  resources :comments, only: %i[ edit update destroy ] do
+    resource :like, only: %i[ create destroy ], module: :comments
+  end
+  resources :tags, only: %i[ show ], param: :slug
+  resources :reports, only: %i[ new create ]
 
   resources :notifications, only: %i[ index ] do
     collection { patch :read_all }
@@ -39,6 +54,7 @@ Rails.application.routes.draw do
   # 관리자 백오피스.
   namespace :admin do
     resources :seed_emails, only: %i[ index create destroy ]
+    resources :reports, only: %i[ index update ]
     resources :users, only: %i[ index show ] do
       member do
         post   :adjust_score

@@ -1,13 +1,13 @@
 class Notification < ApplicationRecord
-  # Phase A: 커뮤니티 도메인 알림(comment/like 등)을 모두 폐기.
-  # Phase B/C에서 새 도메인 이벤트(invitation_received 등)를 화이트리스트에 추가한다.
-  ACTIONS = %w[].freeze
+  # Phase D-0: 게시판 부활로 댓글/좋아요 알림 재도입.
+  # Phase D-1~D-3에서 매칭/커넥트/채팅/비추천 등 추가 예정.
+  ACTIONS = %w[ commented_on_post replied_to_comment liked_post liked_comment ].freeze
 
   belongs_to :recipient, class_name: "User"
   belongs_to :actor, class_name: "User", optional: true
   belongs_to :notifiable, polymorphic: true
 
-  validates :action, inclusion: { in: ACTIONS }, if: -> { ACTIONS.any? }
+  validates :action, inclusion: { in: ACTIONS }
   validates :action, presence: true
 
   scope :unread, -> { where(read_at: nil) }
@@ -22,12 +22,19 @@ class Notification < ApplicationRecord
   end
 
   def message
-    "" # Phase B/C에서 action별 한글 문구 매핑 추가
+    case action
+    when "commented_on_post"  then "내 글에 댓글을 남겼습니다"
+    when "replied_to_comment" then "내 댓글에 답글을 남겼습니다"
+    when "liked_post"         then "내 글에 좋아요를 눌렀습니다"
+    when "liked_comment"      then "내 댓글에 좋아요를 눌렀습니다"
+    end
   end
 
   def link_path
-    # Phase B/C에서 notifiable별 경로 매핑 추가
-    nil
+    case notifiable
+    when Post    then notifiable
+    when Comment then notifiable.post
+    end
   end
 
   private

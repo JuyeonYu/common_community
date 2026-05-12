@@ -11,6 +11,14 @@ class ProfilesController < ApplicationController
     @pagy_credit, @credit_txns   = pagy(@user.credit_transactions.recent, limit: 30, page_param: :credit_page)
   end
 
+  def posts
+    @pagy, @posts = pagy(@user.posts.published.includes(:user, :tags).recent, limit: 20)
+  end
+
+  def comments
+    @pagy, @comments = pagy(@user.comments.published.includes(:post, :user).recent, limit: 30)
+  end
+
   def edit
   end
 

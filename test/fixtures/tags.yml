@@ -1,0 +1,11 @@
+rails:
+  name: rails
+  slug: rails
+
+hotwire:
+  name: hotwire
+  slug: hotwire
+
+community:
+  name: 커뮤니티
+  slug: 커뮤니티

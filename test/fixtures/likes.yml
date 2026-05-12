@@ -1,0 +1,7 @@
+user_two_likes_welcome:
+  user: two
+  likeable: welcome (Post)
+
+user_one_likes_top_comment:
+  user: one
+  likeable: top_on_welcome (Comment)
