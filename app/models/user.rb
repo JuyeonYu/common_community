@@ -36,6 +36,9 @@ class User < ApplicationRecord
   belongs_to :invited_by, class_name: "User", optional: true
   has_many :invitees, class_name: "User", foreign_key: :invited_by_id, dependent: :nullify
 
+  has_many :sent_connect_requests,  class_name: "ConnectRequest", foreign_key: :requester_id, dependent: :destroy
+  has_many :recv_connect_requests,  class_name: "ConnectRequest", foreign_key: :target_id,    dependent: :destroy
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }
@@ -115,8 +118,42 @@ class User < ApplicationRecord
   end
 
   def disable_matching!
-    update!(matching_enabled: false)
-    # Phase D-2에서 pending ConnectRequest 자동 취소 + 양측 알림. 현재는 placeholder.
+    transaction do
+      update!(matching_enabled: false)
+      # 본인이 송수신한 pending ConnectRequest 일괄 취소 (휴식 진입 시 정리).
+      ConnectRequest.where(status: :pending)
+        .where("requester_id = :id OR target_id = :id", id: id)
+        .find_each { |req| req.update!(status: :cancelled) }
+    end
+  end
+
+  def gender_opposite
+    return nil if gender.blank?
+    male? ? "female" : "male"
+  end
+
+  # 매칭 풀 후보 — viewer 기준으로 본 추출 가능한 사용자.
+  # 제외 조건: 본인, 비활성/정지, 동성, 이미 RedConnect 성사, 본인이 이번 기수에 이미 요청 송신/타깃
+  def self.matching_pool_for(viewer, gen_week:)
+    return none if viewer.gender.blank?
+
+    pool = where(matching_enabled: true)
+      .where("seed = TRUE OR invitation_accepted_at IS NOT NULL")
+      .where("suspended_until IS NULL OR suspended_until <= ?", Time.current)
+      .where(gender: viewer.gender_opposite)
+      .where.not(id: viewer.id)
+
+    # 이미 RedConnect 성사된 사용자 제외 (양쪽 어떤 슬롯에 있든)
+    connected_ids = RedConnect.for_user(viewer).pluck(:user_a_id, :user_b_id).flatten.uniq
+    pool = pool.where.not(id: connected_ids) if connected_ids.any?
+
+    # 본인이 이번 기수에 송신한 요청의 target / 받은 요청의 requester 제외 (서로 한 번이면 의미 X)
+    sent_target_ids = ConnectRequest.where(requester_id: viewer.id, gen_week: gen_week).pluck(:target_id)
+    recv_req_ids    = ConnectRequest.where(target_id: viewer.id, gen_week: gen_week).pluck(:requester_id)
+    excluded = (sent_target_ids + recv_req_ids).uniq
+    pool = pool.where.not(id: excluded) if excluded.any?
+
+    pool
   end
 
   def unsuspend!

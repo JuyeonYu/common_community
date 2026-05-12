@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_100300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -67,6 +67,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
+  create_table "connect_requests", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "gen_week", null: false
+    t.bigint "requester_id", null: false
+    t.integer "status", default: 0, null: false
+    t.bigint "target_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requester_id", "gen_week"], name: "index_connect_requests_on_requester_id_and_gen_week"
+    t.index ["requester_id"], name: "index_connect_requests_on_requester_id"
+    t.index ["status", "created_at"], name: "index_connect_requests_on_status_and_created_at"
+    t.index ["target_id", "gen_week"], name: "index_connect_requests_on_target_id_and_gen_week"
+    t.index ["target_id"], name: "index_connect_requests_on_target_id"
+  end
+
   create_table "credit_transactions", force: :cascade do |t|
     t.integer "amount", null: false
     t.datetime "created_at", null: false
@@ -108,6 +122,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
     t.index ["likeable_type", "likeable_id"], name: "index_likes_on_likeable"
     t.index ["user_id", "likeable_type", "likeable_id"], name: "index_likes_on_user_and_likeable", unique: true
     t.index ["user_id"], name: "index_likes_on_user_id"
+  end
+
+  create_table "match_exposures", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "target_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "viewer_id", null: false
+    t.index ["target_id"], name: "index_match_exposures_on_target_id"
+    t.index ["viewer_id", "target_id"], name: "index_match_exposures_on_viewer_id_and_target_id", unique: true
+    t.index ["viewer_id"], name: "index_match_exposures_on_viewer_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -157,6 +181,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
     t.bigint "user_id", null: false
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
+  create_table "red_connects", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.string "release_reason"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_a_id", null: false
+    t.bigint "user_b_id", null: false
+    t.index ["user_a_id", "user_b_id"], name: "index_red_connects_on_user_a_id_and_user_b_id", unique: true
+    t.index ["user_a_id"], name: "index_red_connects_on_user_a_id"
+    t.index ["user_b_id", "status"], name: "index_red_connects_on_user_b_id_and_status"
+    t.index ["user_b_id"], name: "index_red_connects_on_user_b_id"
   end
 
   create_table "reports", force: :cascade do |t|
@@ -254,16 +292,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
+  add_foreign_key "connect_requests", "users", column: "requester_id"
+  add_foreign_key "connect_requests", "users", column: "target_id"
   add_foreign_key "credit_transactions", "users"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "likes", "users"
+  add_foreign_key "match_exposures", "users", column: "target_id"
+  add_foreign_key "match_exposures", "users", column: "viewer_id"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "post_tags", "posts"
   add_foreign_key "post_tags", "tags"
   add_foreign_key "posts", "users"
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "red_connects", "users", column: "user_a_id"
+  add_foreign_key "red_connects", "users", column: "user_b_id"
   add_foreign_key "reports", "users", column: "reporter_id"
   add_foreign_key "reports", "users", column: "resolved_by_id"
   add_foreign_key "score_events", "users"

@@ -42,6 +42,12 @@ Rails.application.routes.draw do
   resource :matching, only: %i[ show destroy ], controller: "matching" do
     post :enable
   end
+  resources :connect_requests, only: %i[ create destroy ] do
+    member do
+      post :accept
+      post :reject
+    end
+  end
 
   # 초대장.
   #   GET    /invitations          — 내가 보낸 초대 목록 + 발급 폼

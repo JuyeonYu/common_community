@@ -1,7 +1,10 @@
 class Notification < ApplicationRecord
   # Phase D-0: 게시판 부활로 댓글/좋아요 알림 재도입.
   # Phase D-1~D-3에서 매칭/커넥트/채팅/비추천 등 추가 예정.
-  ACTIONS = %w[ commented_on_post replied_to_comment liked_post liked_comment ].freeze
+  ACTIONS = %w[
+    commented_on_post replied_to_comment liked_post liked_comment
+    connect_requested connect_accepted connect_cancelled
+  ].freeze
 
   belongs_to :recipient, class_name: "User"
   belongs_to :actor, class_name: "User", optional: true
@@ -27,13 +30,18 @@ class Notification < ApplicationRecord
     when "replied_to_comment" then "내 댓글에 답글을 남겼습니다"
     when "liked_post"         then "내 글에 좋아요를 눌렀습니다"
     when "liked_comment"      then "내 댓글에 좋아요를 눌렀습니다"
+    when "connect_requested"  then "커넥트를 요청했습니다"
+    when "connect_accepted"   then "커넥트 요청을 수락했습니다"
+    when "connect_cancelled"  then "커넥트 요청이 취소되었습니다"
     end
   end
 
   def link_path
     case notifiable
-    when Post    then notifiable
-    when Comment then notifiable.post
+    when Post           then notifiable
+    when Comment        then notifiable.post
+    when ConnectRequest then Rails.application.routes.url_helpers.matching_path
+    when RedConnect     then Rails.application.routes.url_helpers.matching_path
     end
   end
 
