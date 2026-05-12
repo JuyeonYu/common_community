@@ -1,0 +1,21 @@
+pending_one:
+  inviter: one
+  code: ABCD2345
+  token: ABCD2345
+  expires_at: <%= 6.hours.from_now.to_fs(:db) %>
+  status: 0
+
+accepted_one:
+  inviter: one
+  code: WXYZ6789
+  token: WXYZ6789
+  accepted_by: two
+  expires_at: <%= 2.days.ago.to_fs(:db) %>
+  status: 1
+
+expired_one:
+  inviter: one
+  code: MNPQ2345
+  token: MNPQ2345
+  expires_at: <%= 1.day.ago.to_fs(:db) %>
+  status: 0

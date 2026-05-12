@@ -4,12 +4,19 @@ module Authentication
   included do
     before_action :resume_session
     before_action :require_authentication
+    before_action :require_active_user
     helper_method :authenticated?
   end
 
   class_methods do
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
+      skip_before_action :require_active_user, **options
+    end
+
+    # 잠금 상태(가입은 했으나 초대 코드 미적용)에서도 허용할 액션. 예: 코드 입력 화면, 로그아웃.
+    def allow_inactive_access(**options)
+      skip_before_action :require_active_user, **options
     end
   end
 
@@ -20,6 +27,13 @@ module Authentication
 
     def require_authentication
       Current.session.present? || request_authentication
+    end
+
+    # 가입 직후 비활성 상태(초대 코드 미적용 + 시드 아님)면 코드 입력 화면으로 강제 이동.
+    def require_active_user
+      return unless Current.user
+      return if Current.user.active?
+      redirect_to redeem_invitations_path
     end
 
     def require_admin

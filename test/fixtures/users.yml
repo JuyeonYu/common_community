@@ -5,15 +5,28 @@ one:
   password_digest: <%= password_digest %>
   name: 사용자1
   admin: false
+  seed: true
+  invitation_accepted_at: 2026-01-01 00:00:00
 
 two:
   email_address: two@example.com
   password_digest: <%= password_digest %>
   name: 사용자2
   admin: false
+  seed: true
+  invitation_accepted_at: 2026-01-01 00:00:00
 
 admin:
   email_address: admin@example.com
   password_digest: <%= password_digest %>
   name: 관리자
   admin: true
+  seed: true
+  invitation_accepted_at: 2026-01-01 00:00:00
+
+inactive:
+  email_address: inactive@example.com
+  password_digest: <%= password_digest %>
+  name: 잠금사용자
+  admin: false
+  seed: false

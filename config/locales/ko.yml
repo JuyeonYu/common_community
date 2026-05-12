@@ -16,3 +16,9 @@ ko:
       long: "%Y년 %-m월 %-d일 %H:%M:%S"
     am: "오전"
     pm: "오후"
+  invitations:
+    status:
+      pending: "대기"
+      accepted: "사용됨"
+      expired: "만료"
+      cancelled: "취소"

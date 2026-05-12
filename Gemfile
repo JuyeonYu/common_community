@@ -46,6 +46,11 @@ gem "tailwindcss-rails"
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 9"
 
+# OmniAuth + Google OAuth 2.0 — 가입은 Google로, 활성화는 초대 코드로.
+gem "omniauth"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
+
 # Web Push (RFC 8030) — VAPID 서명, ECDH/AES-128-GCM 암호화. 직접 구현 비현실적이라 도입.
 gem "web-push"
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_064411) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_072304) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -53,6 +53,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_064411) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "accepted_by_id"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "inviter_id", null: false
+    t.text "recommendation_comment"
+    t.integer "status", default: 0, null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_invitations_on_accepted_by_id"
+    t.index ["code"], name: "index_invitations_on_code", unique: true
+    t.index ["inviter_id", "created_at"], name: "index_invitations_on_inviter_id_and_created_at"
+    t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.string "action", null: false
     t.bigint "actor_id"
@@ -81,6 +98,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_064411) do
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
+  create_table "seed_emails", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "email", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_seed_emails_on_created_by_id"
+    t.index ["email"], name: "index_seed_emails_on_email", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -97,17 +123,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_064411) do
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.string "google_uid"
+    t.datetime "invitation_accepted_at"
+    t.bigint "invited_by_id"
     t.string "name"
     t.string "password_digest"
+    t.boolean "seed", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
+    t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "invitations", "users", column: "accepted_by_id"
+  add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "notifications", "users", column: "actor_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "push_subscriptions", "users"
+  add_foreign_key "seed_emails", "users", column: "created_by_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "users", "users", column: "invited_by_id"
 end

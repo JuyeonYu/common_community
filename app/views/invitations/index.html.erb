@@ -1,0 +1,74 @@
+<% content_for :title, "내 초대장" %>
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="text-2xl font-bold mb-6">초대장</h1>
+
+  <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+    <h2 class="font-semibold mb-2">새 초대 발급</h2>
+    <% if @next_free_at&.future? %>
+      <p class="text-sm text-gray-500 mb-3">
+        무료 발급은 <%= l @next_free_at, format: :short %> 이후 가능합니다.
+      </p>
+    <% else %>
+      <p class="text-sm text-gray-500 mb-3">7일에 1회 무료로 발급할 수 있습니다.</p>
+    <% end %>
+
+    <%= form_with model: @invitation, url: invitations_path, class: "space-y-3" do |form| %>
+      <div>
+        <%= form.label :recommendation_comment, "추천 코멘트 (선택)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_area :recommendation_comment, rows: 3, maxlength: 500,
+              placeholder: "어떤 사람을 초대하는지 짧게",
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      </div>
+      <%= form.submit "초대 코드 발급",
+            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer disabled:opacity-50",
+            disabled: @next_free_at&.future? %>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="font-semibold mb-3">발급 내역</h2>
+    <% if @invitations.any? %>
+      <div class="space-y-2">
+        <% @invitations.each do |inv| %>
+          <article class="rounded-md bg-white border border-gray-200 p-3 flex items-center gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-lg tracking-widest"><%= inv.code %></span>
+                <span class="text-xs px-2 py-0.5 rounded
+                  <%= case inv.status
+                      when 'pending'   then 'bg-yellow-100 text-yellow-800'
+                      when 'accepted'  then 'bg-green-100 text-green-800'
+                      when 'expired'   then 'bg-gray-200 text-gray-600'
+                      when 'cancelled' then 'bg-gray-200 text-gray-600'
+                      end %>">
+                  <%= I18n.t("invitations.status.#{inv.status}", default: inv.status) %>
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                만료 <%= l inv.expires_at, format: :short %>
+                <% if inv.recommendation_comment.present? %>
+                  · "<%= truncate(inv.recommendation_comment, length: 40) %>"
+                <% end %>
+              </p>
+            </div>
+            <% if inv.pending? %>
+              <button type="button"
+                      class="text-xs text-gray-500 hover:text-gray-700"
+                      data-controller="copy-to-clipboard"
+                      data-copy-to-clipboard-text-value="<%= request.base_url %>/i/<%= inv.code %>"
+                      data-action="copy-to-clipboard#copy">
+                URL 복사
+              </button>
+              <%= button_to "취소", invitation_path(inv), method: :delete,
+                    data: { turbo_confirm: "취소하시겠습니까?" },
+                    class: "text-xs text-red-600 hover:text-red-800 underline" %>
+            <% end %>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">아직 발급한 초대장이 없습니다.</p>
+    <% end %>
+  </section>
+</div>
