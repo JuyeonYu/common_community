@@ -58,4 +58,24 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     patch profile_path(@user), params: { user: { name: "" } }
     assert_response :unprocessable_entity
   end
+
+  test "history: 비로그인 차단" do
+    get history_profile_path(@user)
+    assert_redirected_to new_session_path
+  end
+
+  test "history: 본인은 조회" do
+    @user.score_events.create!(delta: 1, reason: :admin_adjust, memo: "보너스")
+    sign_in_as(@user)
+    get history_profile_path(@user)
+    assert_response :success
+    assert_match(/스코어 이력/, response.body)
+    assert_match(/크레딧 이력/, response.body)
+  end
+
+  test "history: 다른 사용자 차단" do
+    sign_in_as(@other)
+    get history_profile_path(@user)
+    assert_redirected_to profile_path(@user)
+  end
 end

@@ -1,8 +1,14 @@
 class ProfilesController < ApplicationController
   before_action :set_user
-  before_action :require_self, only: %i[ edit update ]
+  before_action :require_self, only: %i[ edit update history ]
 
   def show
+  end
+
+  # 본인 스코어/크레딧 이력. 양이 많을 수 있어 각각 페이지네이션 분리(키 score_page/credit_page).
+  def history
+    @pagy_score,  @score_events  = pagy(@user.score_events.recent,        limit: 30, page_param: :score_page)
+    @pagy_credit, @credit_txns   = pagy(@user.credit_transactions.recent, limit: 30, page_param: :credit_page)
   end
 
   def edit

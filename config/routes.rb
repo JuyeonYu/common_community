@@ -7,7 +7,9 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
 
-  resources :profiles, only: %i[ show edit update ]
+  resources :profiles, only: %i[ show edit update ] do
+    member { get :history }
+  end
 
   resources :notifications, only: %i[ index ] do
     collection { patch :read_all }

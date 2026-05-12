@@ -1,0 +1,67 @@
+<% content_for :title, "이력" %>
+
+<div class="mx-auto max-w-3xl">
+  <h1 class="text-2xl font-bold mb-2">이력</h1>
+  <p class="text-sm text-gray-500 mb-6"><%= @user.nickname.presence || @user.name %>님의 스코어·크레딧 변동 내역</p>
+
+  <section class="grid grid-cols-2 gap-4 mb-6 text-sm">
+    <div class="bg-white border border-gray-200 rounded-md p-3">
+      <div class="text-gray-500">현재 티켓 스코어</div>
+      <div class="font-semibold text-xl mt-1"><%= @user.ticket_score %></div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-md p-3">
+      <div class="text-gray-500">현재 티켓 크레딧</div>
+      <div class="font-semibold text-xl mt-1"><%= @user.ticket_credits %></div>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="font-semibold mb-3">스코어 이력</h2>
+    <% if @score_events.any? %>
+      <ul class="divide-y divide-gray-200 bg-white border border-gray-200 rounded-md">
+        <% @score_events.each do |e| %>
+          <li class="p-3 text-sm flex items-center justify-between gap-3">
+            <div>
+              <span class="font-mono <%= e.delta.positive? ? 'text-green-700' : 'text-red-700' %>">
+                <%= e.delta.positive? ? "+#{e.delta}" : e.delta %>
+              </span>
+              <span class="ml-2 text-xs text-gray-500"><%= e.reason %></span>
+              <% if e.memo.present? %><span class="ml-2 text-gray-700">"<%= e.memo %>"</span><% end %>
+            </div>
+            <span class="text-xs text-gray-500 shrink-0"><%= l e.created_at, format: :short %></span>
+          </li>
+        <% end %>
+      </ul>
+      <div class="mt-3 text-center text-sm"><%== pagy_nav(@pagy_score) %></div>
+    <% else %>
+      <p class="text-sm text-gray-500">스코어 변동 이력이 없습니다.</p>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="font-semibold mb-3">크레딧 이력</h2>
+    <% if @credit_txns.any? %>
+      <ul class="divide-y divide-gray-200 bg-white border border-gray-200 rounded-md">
+        <% @credit_txns.each do |t| %>
+          <li class="p-3 text-sm flex items-center justify-between gap-3">
+            <div>
+              <span class="font-mono <%= t.amount.positive? ? 'text-green-700' : 'text-red-700' %>">
+                <%= t.amount.positive? ? "+#{t.amount}" : t.amount %>
+              </span>
+              <span class="ml-2 text-xs text-gray-500"><%= t.kind %></span>
+              <% if t.memo.present? %><span class="ml-2 text-gray-700">"<%= t.memo %>"</span><% end %>
+            </div>
+            <span class="text-xs text-gray-500 shrink-0"><%= l t.created_at, format: :short %></span>
+          </li>
+        <% end %>
+      </ul>
+      <div class="mt-3 text-center text-sm"><%== pagy_nav(@pagy_credit) %></div>
+    <% else %>
+      <p class="text-sm text-gray-500">크레딧 변동 이력이 없습니다.</p>
+    <% end %>
+  </section>
+
+  <div class="mt-8">
+    <%= link_to "← 프로필로", profile_path(@user), class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+</div>
