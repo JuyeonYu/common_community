@@ -1,11 +1,8 @@
 class ProfilesController < ApplicationController
-  allow_unauthenticated_access only: %i[ show posts comments ]
   before_action :set_user
   before_action :require_self, only: %i[ edit update ]
 
   def show
-    @recent_posts    = @user.posts.published.includes(:tags).recent.limit(5)
-    @recent_comments = @user.comments.published.includes(:post).recent.limit(5)
   end
 
   def edit
@@ -17,14 +14,6 @@ class ProfilesController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
-  end
-
-  def posts
-    @pagy, @posts = pagy(@user.posts.published.includes(:user, :tags).recent, limit: 20)
-  end
-
-  def comments
-    @pagy, @comments = pagy(@user.comments.published.includes(:post, :user).recent, limit: 30)
   end
 
   private

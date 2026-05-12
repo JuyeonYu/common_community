@@ -1,7 +1,0 @@
-<% if @comment.reply? %>
-  <%= turbo_stream.append dom_id(@comment.parent, :replies), partial: "comments/comment", locals: { comment: @comment } %>
-  <%= turbo_stream.replace "reply_form_for_#{dom_id(@comment.parent)}", partial: "comments/reply_form_wrapper", locals: { post: @comment.post, parent: @comment.parent } %>
-<% else %>
-  <%= turbo_stream.append "comments", partial: "comments/comment", locals: { comment: @comment } %>
-  <%= turbo_stream.replace "new-comment-form", partial: "comments/form_wrapper", locals: { post: @post } %>
-<% end %>

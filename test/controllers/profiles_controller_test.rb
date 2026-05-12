@@ -6,17 +6,16 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     @other = users(:two)
   end
 
-  test "show: 비로그인도 조회 가능" do
+  test "show: 비로그인 차단" do
+    get profile_path(@user)
+    assert_redirected_to new_session_path
+  end
+
+  test "show: 로그인 사용자는 조회 가능" do
+    sign_in_as(@user)
     get profile_path(@user)
     assert_response :success
     assert_match(/사용자1/, response.body)
-  end
-
-  test "show: 통계 + 최근 글/댓글 노출" do
-    get profile_path(@user)
-    assert_response :success
-    assert_match(/작성한 글/, response.body)
-    assert_match(/작성한 댓글/, response.body)
   end
 
   test "edit: 비로그인 차단" do
@@ -58,23 +57,5 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
     patch profile_path(@user), params: { user: { name: "" } }
     assert_response :unprocessable_entity
-  end
-
-  test "posts: 사용자 글 목록" do
-    get posts_profile_path(@user)
-    assert_response :success
-    assert_match(/사용자1님의 글/, response.body)
-    assert_match(/환영합니다/, response.body)
-  end
-
-  test "posts: hidden 글은 제외" do
-    get posts_profile_path(@user)
-    assert_no_match(/가려진 글/, response.body)
-  end
-
-  test "comments: 사용자 댓글 목록" do
-    get comments_profile_path(@user)
-    assert_response :success
-    assert_match(/사용자1님의 댓글/, response.body)
   end
 end

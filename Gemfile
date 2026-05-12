@@ -43,16 +43,8 @@ gem "image_processing", "~> 1.2"
 # Tailwind CSS for Rails [https://github.com/rails/tailwindcss-rails]
 gem "tailwindcss-rails"
 
-# PostgreSQL full-text search with Korean support [https://github.com/Casecommons/pg_search]
-gem "pg_search"
-
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 9"
-
-# OmniAuth + Google OAuth 2.0 [https://github.com/zquestz/omniauth-google-oauth2]
-gem "omniauth"
-gem "omniauth-google-oauth2"
-gem "omniauth-rails_csrf_protection"
 
 # Web Push (RFC 8030) — VAPID 서명, ECDH/AES-128-GCM 암호화. 직접 구현 비현실적이라 도입.
 gem "web-push"

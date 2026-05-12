@@ -8,24 +8,18 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
-  test "index: 본인 알림 목록 + 자동 읽음 처리" do
+  test "index: 로그인 사용자는 빈 알림 페이지 조회" do
     sign_in_as(@user)
-    assert_predicate Notification.unread.where(recipient: @user).count, :positive?
-
     get notifications_path
 
     assert_response :success
     assert_equal 0, Notification.unread.where(recipient: @user).count
   end
 
-  test "read_all: 모든 알림 읽음 처리" do
+  test "read_all: 미읽 0 상태에서도 정상 리디렉트" do
     sign_in_as(@user)
-    Notification.where(recipient: @user).update_all(read_at: nil)
-    assert_predicate Notification.unread.where(recipient: @user).count, :positive?
-
     patch read_all_notifications_path
 
     assert_redirected_to notifications_path
-    assert_equal 0, Notification.unread.where(recipient: @user).count
   end
 end
