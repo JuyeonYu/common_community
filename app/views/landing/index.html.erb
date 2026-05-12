@@ -7,8 +7,9 @@
     같이 일해본 사람의 추천으로만 합류 가능한 비공개 커뮤니티입니다.
   </p>
 
+  <%# OmniAuth 시작 경로는 /auth/google_oauth2 (콜백 아님). 미들웨어가 가로채 Google로 리디렉트. %>
   <%= button_to "Google 계정으로 시작하기",
-        oauth_callback_path(provider: "google_oauth2"),
+        "/auth/google_oauth2",
         method: :post,
         data: { turbo: false },
         class: "block w-full rounded-md bg-gray-900 text-white py-3 font-medium hover:bg-gray-800 cursor-pointer" %>
