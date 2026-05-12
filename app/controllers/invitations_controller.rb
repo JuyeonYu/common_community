@@ -1,14 +1,21 @@
+require "set"
+
 class InvitationsController < ApplicationController
   # /i/:code 진입은 비로그인도 가능 (세션에 저장 후 OAuth로 이어짐).
   allow_unauthenticated_access only: :show
   # 잠금 사용자가 코드 입력하기 위한 화면들.
   allow_inactive_access only: %i[ redeem apply_redemption ]
 
-  # 활성 사용자의 초대 목록 + 발급 폼.
+  TREE_MAX_DEPTH = 5
+
+  # 활성 사용자의 초대 목록 + 발급 폼 + 초대 트리.
   def index
     @invitations  = Current.user.sent_invitations.order(created_at: :desc).limit(50)
     @invitation   = Invitation.new
     @next_free_at = next_free_invitation_at
+    @inviter      = Current.user.invited_by
+    @tree_root    = build_invitee_tree(Current.user, depth: 0)
+    @tree_stats   = collect_tree_stats(@tree_root)
   end
 
   # 새 초대 발급. 7일 1회 무료, 그 외엔 향후 크레딧 소비 (Phase E).
@@ -75,5 +82,32 @@ class InvitationsController < ApplicationController
       last = Current.user.sent_invitations.order(created_at: :desc).first
       return nil unless last
       last.created_at + 7.days
+    end
+
+    # 본인 → 본인이 초대한 사람들 → 그들이 초대한 사람들 ... 재귀.
+    # 깊이 제한과 visited 셋으로 사이클·과도 노드 방지.
+    def build_invitee_tree(user, depth:, visited: Set.new)
+      return { user: user, children: [], truncated: true } if depth >= TREE_MAX_DEPTH
+      return { user: user, children: [], cycle: true } if visited.include?(user.id)
+
+      visited = visited + [ user.id ]
+      children = user.invitees.order(:created_at).map do |child|
+        build_invitee_tree(child, depth: depth + 1, visited: visited)
+      end
+      { user: user, children: children }
+    end
+
+    def collect_tree_stats(node)
+      total = 0
+      max_depth = 0
+      walker = ->(n, d) {
+        n[:children].each do |child|
+          total += 1
+          max_depth = d + 1 if d + 1 > max_depth
+          walker.call(child, d + 1)
+        end
+      }
+      walker.call(node, 0)
+      { descendants: total, max_depth: max_depth }
     end
 end

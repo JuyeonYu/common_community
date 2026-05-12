@@ -113,4 +113,13 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     delete session_path
     assert_redirected_to new_session_path
   end
+
+  test "index: 초대 트리 렌더 (본인 + invitees 노출)" do
+    @inactive.update!(invited_by: @user, invitation_accepted_at: Time.current, seed: false)
+    sign_in_as(@user)
+    get invitations_path
+    assert_response :success
+    assert_match(/초대 트리/, response.body)
+    assert_match(@inactive.name, response.body)
+  end
 end

@@ -33,6 +33,7 @@ class User < ApplicationRecord
   has_many :score_events, dependent: :destroy
   has_many :credit_transactions, dependent: :destroy
   belongs_to :invited_by, class_name: "User", optional: true
+  has_many :invitees, class_name: "User", foreign_key: :invited_by_id, dependent: :nullify
 
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
