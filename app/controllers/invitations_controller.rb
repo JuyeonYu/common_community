@@ -18,16 +18,34 @@ class InvitationsController < ApplicationController
     @tree_stats   = collect_tree_stats(@tree_root)
   end
 
-  # 새 초대 발급. 7일 1회 무료, 그 외엔 향후 크레딧 소비 (Phase E).
+  # 새 초대 발급. 7일 1회 무료, 그 외엔 향후 크레딧 소비(Phase E).
+  # boosted=true면 즉시 크레딧 차감.
   def create
     if next_free_invitation_at&.future?
       redirect_to invitations_path, alert: "무료 초대는 #{l next_free_invitation_at, format: :short} 이후 가능합니다." and return
     end
 
-    @invitation = Current.user.sent_invitations.create!(
-      recommendation_comment: params.dig(:invitation, :recommendation_comment).to_s.presence
-    )
-    redirect_to invitations_path, notice: "초대 코드 #{@invitation.code} 가 생성되었습니다."
+    boosted = ActiveModel::Type::Boolean.new.cast(params.dig(:invitation, :boosted))
+    cost    = Rails.application.config.x.blackticket.boosted_invitation_cost
+    if boosted && Current.user.ticket_credits < cost
+      redirect_to invitations_path, alert: "강력 추천에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    Invitation.transaction do
+      @invitation = Current.user.sent_invitations.create!(
+        recommendation_comment: params.dig(:invitation, :recommendation_comment).to_s.strip,
+        boosted: !!boosted
+      )
+      if boosted
+        Current.user.credit_transactions.create!(
+          amount: -cost, kind: :spend, related: @invitation, memo: "강력 추천"
+        )
+      end
+    end
+    redirect_to invitations_path,
+      notice: "초대 코드 #{@invitation.code} 가 생성되었습니다." + (boosted ? " (강력 추천 -#{cost} 크레딧)" : "")
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to invitations_path, alert: e.record.errors.full_messages.first
   end
 
   # 본인이 보낸 pending 초대 취소.

@@ -80,7 +80,42 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   test "create: 7일 초과 사용자는 발급 성공" do
     sign_in_as(users(:two)) # 발급 이력 없음
     assert_difference "Invitation.count", 1 do
-      post invitations_path, params: { invitation: { recommendation_comment: "환영" } }
+      post invitations_path, params: { invitation: { recommendation_comment: "오래된 친구이며 신뢰합니다." } }
+    end
+    assert_redirected_to invitations_path
+  end
+
+  test "create: boosted 옵션 시 크레딧 차감 + invitation.boosted=true" do
+    user = users(:two)
+    user.credit_transactions.create!(amount: 100, kind: :admin_grant, memo: "seed")
+    sign_in_as(user)
+
+    cost = Rails.application.config.x.blackticket.boosted_invitation_cost
+    before = user.reload.ticket_credits
+
+    post invitations_path, params: {
+      invitation: { recommendation_comment: "강력 추천하는 동료입니다.", boosted: "1" }
+    }
+    inv = user.sent_invitations.order(:created_at).last
+    assert inv.boosted?
+    assert_equal before - cost, user.reload.ticket_credits
+  end
+
+  test "create: boosted인데 크레딧 부족 시 거절" do
+    user = users(:two) # 보너스 받은 적 없는 fixture라 크레딧 0
+    sign_in_as(user)
+    assert_no_difference "Invitation.count" do
+      post invitations_path, params: {
+        invitation: { recommendation_comment: "강력 추천 시도.", boosted: "1" }
+      }
+    end
+    assert_match(/크레딧/, flash[:alert])
+  end
+
+  test "create: recommendation_comment 누락 시 거절" do
+    sign_in_as(users(:two))
+    assert_no_difference "Invitation.count" do
+      post invitations_path, params: { invitation: { recommendation_comment: "" } }
     end
     assert_redirected_to invitations_path
   end

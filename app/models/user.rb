@@ -1,7 +1,4 @@
 class User < ApplicationRecord
-  SIGNUP_BONUS_CREDITS = 10
-  SUSPENSION_PERIOD = 1.month
-
   # 거주지 — 한국 17개 광역시·도
   RESIDENCE_AREAS = {
     seoul:    0,
@@ -41,7 +38,10 @@ class User < ApplicationRecord
 
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
-  enum :gender,         { male: 0, female: 1, other: 2 }
+  enum :gender,         { male: 0, female: 1 }
+
+  # 매칭 필수 프로필 필드. 누락 시 매칭 활성화 불가.
+  MATCHING_REQUIRED_FIELDS = %i[ nickname birth_date gender residence_area job_title smoking hobby bio ].freeze
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :hobby, with: ->(value) {
@@ -75,9 +75,9 @@ class User < ApplicationRecord
       user.invitation_accepted_at = Time.current
     end
     user.save!
-    if is_new && SIGNUP_BONUS_CREDITS.positive?
-      user.credit_transactions.create!(amount: SIGNUP_BONUS_CREDITS, kind: :signup_bonus,
-                                       memo: "가입 보너스")
+    bonus = Rails.application.config.x.blackticket.signup_bonus_credits
+    if is_new && bonus.positive?
+      user.credit_transactions.create!(amount: bonus, kind: :signup_bonus, memo: "가입 보너스")
     end
     user
   end
@@ -91,8 +91,32 @@ class User < ApplicationRecord
     suspended_until.present? && suspended_until.future?
   end
 
-  def suspend!(period: SUSPENSION_PERIOD, reason: nil)
+  def suspend!(period: Rails.application.config.x.blackticket.suspension_period, reason: nil)
     update!(suspended_until: period.from_now)
+  end
+
+  # 매칭 활성화 조건 — 프로필 필수 필드 + 아바타.
+  def matching_profile_complete?
+    matching_missing_fields.empty?
+  end
+
+  def matching_missing_fields
+    missing = MATCHING_REQUIRED_FIELDS.reject { |f| public_send(f).present? }
+    missing << :avatar unless avatar.attached?
+    missing
+  end
+
+  def matching_active?
+    matching_enabled? && active?
+  end
+
+  def enable_matching!
+    update!(matching_enabled: true, matching_activated_at: (matching_activated_at || Time.current))
+  end
+
+  def disable_matching!
+    update!(matching_enabled: false)
+    # Phase D-2에서 pending ConnectRequest 자동 취소 + 양측 알림. 현재는 placeholder.
   end
 
   def unsuspend!

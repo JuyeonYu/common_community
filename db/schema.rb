@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_094631) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_095738) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -83,6 +83,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_094631) do
 
   create_table "invitations", force: :cascade do |t|
     t.bigint "accepted_by_id"
+    t.boolean "boosted", default: false, null: false
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
@@ -229,6 +230,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_094631) do
     t.datetime "invitation_accepted_at"
     t.bigint "invited_by_id"
     t.string "job_title"
+    t.datetime "matching_activated_at"
+    t.boolean "matching_enabled", default: false, null: false
     t.string "name"
     t.string "nickname"
     t.jsonb "notification_preferences", default: {}, null: false

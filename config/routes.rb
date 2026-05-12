@@ -35,6 +35,14 @@ Rails.application.routes.draw do
     collection { delete :unsubscribe }
   end
 
+  # 이성 매칭 (Phase D-1: 토글만, D-2부터 풀/커넥트).
+  #   GET    /matching        — 진입 화면 (조건 체크리스트 또는 풀)
+  #   POST   /matching/enable — 활성화
+  #   DELETE /matching        — 일시 중지
+  resource :matching, only: %i[ show destroy ], controller: "matching" do
+    post :enable
+  end
+
   # 초대장.
   #   GET    /invitations          — 내가 보낸 초대 목록 + 발급 폼
   #   POST   /invitations          — 새 초대 발급

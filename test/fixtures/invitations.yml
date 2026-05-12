@@ -4,6 +4,7 @@ pending_one:
   token: ABCD2345
   expires_at: <%= 6.hours.from_now.to_fs(:db) %>
   status: 0
+  recommendation_comment: "같이 일했던 백엔드 개발자입니다. 책임감 있는 사람이라 추천해요."
 
 accepted_one:
   inviter: one
@@ -12,6 +13,7 @@ accepted_one:
   accepted_by: two
   expires_at: <%= 2.days.ago.to_fs(:db) %>
   status: 1
+  recommendation_comment: "오래된 친구이며 신뢰합니다."
 
 expired_one:
   inviter: one
@@ -19,3 +21,4 @@ expired_one:
   token: MNPQ2345
   expires_at: <%= 1.day.ago.to_fs(:db) %>
   status: 0
+  recommendation_comment: "성실한 사람입니다."

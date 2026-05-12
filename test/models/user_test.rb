@@ -86,7 +86,8 @@ class UserTest < ActiveSupport::TestCase
       info: { email: "bonus@example.com", name: "보너스" }
     )
     user = User.from_google_oauth(auth)
-    assert_equal User::SIGNUP_BONUS_CREDITS, user.reload.ticket_credits
+    expected = Rails.application.config.x.blackticket.signup_bonus_credits
+    assert_equal expected, user.reload.ticket_credits
     assert user.credit_transactions.exists?(kind: :signup_bonus)
   end
 
