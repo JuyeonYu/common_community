@@ -68,4 +68,58 @@
       <% end %>
     <% end %>
   </header>
+
+  <section class="mt-6 grid grid-cols-2 gap-3 text-sm">
+    <%= link_to posts_profile_path(@user),
+          class: "rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
+      <span class="block text-gray-500 text-xs">작성한 글</span>
+      <span class="block font-semibold mt-1"><%= @post_count %></span>
+    <% end %>
+    <%= link_to comments_profile_path(@user),
+          class: "rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
+      <span class="block text-gray-500 text-xs">작성한 댓글</span>
+      <span class="block font-semibold mt-1"><%= @comment_count %></span>
+    <% end %>
+  </section>
+
+  <section class="mt-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold">최근 글</h2>
+      <%= link_to "더보기 →", posts_profile_path(@user), class: "text-sm text-blue-600 hover:underline" %>
+    </div>
+    <% if @recent_posts.any? %>
+      <div class="space-y-2">
+        <% @recent_posts.each do |post| %>
+          <article class="rounded-md bg-white border border-gray-200 p-3">
+            <%= link_to post.title, post, class: "font-medium hover:underline" %>
+            <p class="text-xs text-gray-500 mt-1"><%= l post.created_at, format: :short %></p>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">아직 작성한 글이 없습니다.</p>
+    <% end %>
+  </section>
+
+  <section class="mt-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold">최근 댓글</h2>
+      <%= link_to "더보기 →", comments_profile_path(@user), class: "text-sm text-blue-600 hover:underline" %>
+    </div>
+    <% if @recent_comments.any? %>
+      <div class="space-y-2">
+        <% @recent_comments.each do |comment| %>
+          <article class="rounded-md bg-white border border-gray-200 p-3 text-sm">
+            <p class="line-clamp-2 text-gray-800"><%= comment.body %></p>
+            <p class="text-xs text-gray-500 mt-1">
+              <%= link_to comment.post.title, comment.post, class: "hover:underline" %>
+              · <%= l comment.created_at, format: :short %>
+            </p>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">아직 작성한 댓글이 없습니다.</p>
+    <% end %>
+  </section>
 </div>

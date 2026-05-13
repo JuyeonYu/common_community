@@ -18,6 +18,15 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_match(/사용자1/, response.body)
   end
 
+  test "show: 통계 + 최근 글/댓글 미리보기 노출" do
+    sign_in_as(@user)
+    get profile_path(@user)
+    assert_match(/작성한 글/, response.body)
+    assert_match(/작성한 댓글/, response.body)
+    assert_match(/최근 글/, response.body)
+    assert_match(/최근 댓글/, response.body)
+  end
+
   test "edit: 비로그인 차단" do
     get edit_profile_path(@user)
     assert_redirected_to new_session_path

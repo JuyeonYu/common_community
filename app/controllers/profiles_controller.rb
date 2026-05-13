@@ -3,6 +3,10 @@ class ProfilesController < ApplicationController
   before_action :require_self, only: %i[ edit update history ]
 
   def show
+    @recent_posts    = @user.posts.published.includes(:tags).order(created_at: :desc).limit(5)
+    @recent_comments = @user.comments.published.includes(:post).order(created_at: :desc).limit(5)
+    @post_count      = @user.posts.published.count
+    @comment_count   = @user.comments.published.count
   end
 
   # 본인 스코어/크레딧 이력. 양이 많을 수 있어 각각 페이지네이션 분리(키 score_page/credit_page).
