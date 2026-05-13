@@ -5,9 +5,11 @@
     블랙티켓은 신뢰할 수 있는 추천 기반의 비공개 커뮤니티입니다.
   </p>
 
-  <blockquote style="border-left: 3px solid #ddd; padding: 8px 12px; color: #444; font-style: italic; margin: 16px 0;">
-    <%= simple_format @invitation.recommendation_comment %>
-  </blockquote>
+  <% if @invitation.recommendation_written? %>
+    <blockquote style="border-left: 3px solid #ddd; padding: 8px 12px; color: #444; font-style: italic; margin: 16px 0;">
+      <%= simple_format @invitation.recommendation_comment %>
+    </blockquote>
+  <% end %>
 
   <p style="margin-top: 24px;">
     <a href="<%= @invite_url %>"

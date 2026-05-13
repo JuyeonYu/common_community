@@ -18,6 +18,13 @@
     <% elsif truncated %>
       <span class="text-xs text-gray-400">…더보기</span>
     <% end %>
+    <% unless is_root %>
+      <% inv = user.accepted_invitation %>
+      <% if inv && inv.inviter_id == Current.user.id && !inv.recommendation_written? %>
+        <%= link_to "추천서 작성", edit_invitation_path(inv),
+              class: "text-xs text-blue-600 hover:text-blue-800 underline" %>
+      <% end %>
+    <% end %>
   </div>
 
   <% if children.any? %>

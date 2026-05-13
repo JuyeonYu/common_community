@@ -5,7 +5,6 @@ class InvitationTest < ActiveSupport::TestCase
 
   def build_invite(**overrides)
     @inviter.sent_invitations.create!({
-      recommendation_comment: "테스트 추천서입니다.",
       invitee_email: "fresh-#{SecureRandom.hex(4)}@example.com"
     }.merge(overrides))
   end
@@ -55,13 +54,28 @@ class InvitationTest < ActiveSupport::TestCase
     assert inv.reload.cancelled?
   end
 
-  test "recommendation_comment 필수" do
-    inv = @inviter.sent_invitations.build(recommendation_comment: nil, invitee_email: "x@y.com")
+  test "recommendation_comment: 발급 시 빈 상태 허용" do
+    inv = build_invite
+    assert inv.valid?
+    assert_not inv.recommendation_written?
+  end
+
+  test "recommendation_comment: 너무 짧으면 거절" do
+    inv = @inviter.sent_invitations.build(
+      recommendation_comment: "짧음",
+      invitee_email: "short@example.com"
+    )
     assert_not inv.valid?
     assert_includes inv.errors.attribute_names, :recommendation_comment
   end
 
-  test "recommendation_comment immutable" do
+  test "recommendation_comment: 첫 작성은 허용 (빈 → 값)" do
+    inv = build_invite
+    inv.recommendation_comment = "처음 작성하는 추천서입니다."
+    assert inv.valid?
+  end
+
+  test "recommendation_comment: 사후 수정 거절 (값 → 다른값)" do
     inv = invitations(:pending_one)
     inv.recommendation_comment = "수정 시도하는 새로운 추천서"
     assert_not inv.valid?
@@ -69,7 +83,7 @@ class InvitationTest < ActiveSupport::TestCase
   end
 
   test "invitee_email 필수 + format + normalize" do
-    inv = @inviter.sent_invitations.build(recommendation_comment: "테스트 추천서입니다.")
+    inv = @inviter.sent_invitations.build
     assert_not inv.valid?
     assert_includes inv.errors.attribute_names, :invitee_email
 
@@ -80,7 +94,6 @@ class InvitationTest < ActiveSupport::TestCase
   test "이미 가입된 이메일로 초대 발급 거절" do
     existing = users(:one) # email_address = "one@example.com"
     inv = @inviter.sent_invitations.build(
-      recommendation_comment: "테스트 추천서입니다.",
       invitee_email: existing.email_address.upcase
     )
     assert_not inv.valid?

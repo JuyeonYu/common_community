@@ -15,9 +15,9 @@ class Invitation < ApplicationRecord
   validates :expires_at, presence: true
   validates :invitee_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate  :invitee_not_already_user, on: :create
-  # 추천서는 발급 시점에 필수. 평생 따라다니며 신중 작성 의무.
-  validates :recommendation_comment, presence: true, length: { in: 5..1000 }
-  validate  :recommendation_comment_immutable
+  # 추천서는 발급 후 별도로 작성. 작성된 길이 제약.
+  validates :recommendation_comment, length: { in: 5..1000 }, allow_blank: true
+  validate  :recommendation_comment_immutable_after_first_write
 
   before_validation :assign_code_and_token, on: :create
   before_validation :assign_expires_at,    on: :create
@@ -47,6 +47,10 @@ class Invitation < ApplicationRecord
     invitee_email.present? && email.to_s.strip.downcase == invitee_email
   end
 
+  def recommendation_written?
+    recommendation_comment.present?
+  end
+
   def cancel!
     update!(status: :cancelled)
   end
@@ -68,11 +72,12 @@ class Invitation < ApplicationRecord
       self.expires_at ||= Rails.application.config.x.blackticket.invitation_ttl.from_now
     end
 
-    # 추천서는 발급 시점에 한 번만 작성. 이후 수정 금지.
-    def recommendation_comment_immutable
+    # 추천서는 발급 후 사후 작성. 첫 작성 후엔 수정 금지(빈→값은 허용, 값→다른값/빈은 금지).
+    def recommendation_comment_immutable_after_first_write
       return if new_record?
       return unless recommendation_comment_changed?
-      errors.add(:recommendation_comment, "는 발급 후 수정할 수 없습니다")
+      return if recommendation_comment_was.blank? && recommendation_comment.present?
+      errors.add(:recommendation_comment, "는 한 번 작성한 후 수정할 수 없습니다")
     end
 
     # 이미 가입한 이메일로는 초대 발급 불가.

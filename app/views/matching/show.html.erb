@@ -136,14 +136,32 @@
           </span>
           <span class="<%= 'text-gray-400 line-through' if avatar_present %>">프로필 사진</span>
         </li>
+        <% unless Current.user.seed? %>
+          <li class="flex items-center gap-2">
+            <span class="<%= @has_recommendation ? 'text-green-600' : 'text-gray-300' %>">
+              <%= @has_recommendation ? "✓" : "○" %>
+            </span>
+            <span class="<%= 'text-gray-400 line-through' if @has_recommendation %>">초대자의 추천서</span>
+          </li>
+        <% end %>
       </ul>
+
+      <% unless @has_recommendation %>
+        <div class="mt-4 rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm">
+          <p class="text-yellow-900">
+            <strong><%= @accepted_invitation&.inviter&.nickname.presence || @accepted_invitation&.inviter&.name || "초대자" %></strong>님의 추천서가 아직 없습니다.
+          </p>
+          <%= button_to "초대자에게 추천서 요청", request_recommendation_invitations_path, method: :post,
+                class: "mt-2 rounded-md bg-yellow-600 px-3 py-1.5 text-white text-xs font-medium hover:bg-yellow-500 cursor-pointer" %>
+        </div>
+      <% end %>
 
       <div class="mt-5 flex items-center gap-3">
         <% if @can_activate %>
           <%= button_to "이성 매칭 시작", enable_matching_path, method: :post,
                 class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
           <span class="text-xs text-gray-500">활성화 후 언제든 잠시 쉬기 가능</span>
-        <% else %>
+        <% elsif !@profile_complete %>
           <%= link_to "프로필 채우러 가기", edit_profile_path(Current.user),
                 class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500" %>
           <span class="text-xs text-gray-500">필수 항목 <%= @missing_fields.size %>개 누락</span>

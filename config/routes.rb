@@ -65,8 +65,9 @@ Rails.application.routes.draw do
   #   DELETE /invitations/:id  — 본인이 보낸 pending 초대 취소
   #   POST   /invitations/:id/resend — 메일 재발송
   #   GET    /i/:code          — URL 직접 진입 (메일 링크에서 호출)
-  resources :invitations, only: %i[ index create destroy ] do
+  resources :invitations, only: %i[ index create edit update destroy ] do
     member { post :resend }
+    collection { post :request_recommendation }
   end
   get "/i/:code", to: "invitations#show", as: :invite_link,
       constraints: { code: /[A-Z2-9]{8}/ }

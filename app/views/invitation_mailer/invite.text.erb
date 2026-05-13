@@ -4,9 +4,11 @@
 
 블랙티켓은 신뢰할 수 있는 추천 기반의 비공개 커뮤니티입니다.
 
+<% if @invitation.recommendation_written? %>
 [초대자의 추천]
 <%= @invitation.recommendation_comment %>
 
+<% end %>
 아래 링크에서 가입을 진행해주세요.
 * 가입은 이 메일을 받은 이메일 주소(<%= @invitation.invitee_email %>)의 Google 계정으로만 가능합니다.
 * 링크는 <%= l @invitation.expires_at, format: :default %>까지 유효합니다.

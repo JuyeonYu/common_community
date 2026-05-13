@@ -5,6 +5,7 @@ class Notification < ApplicationRecord
     commented_on_post replied_to_comment liked_post liked_comment
     connect_requested connect_accepted connect_cancelled connect_released
     chat_message downvoted
+    recommendation_requested recommendation_written
   ].freeze
 
   belongs_to :recipient, class_name: "User"
@@ -37,6 +38,8 @@ class Notification < ApplicationRecord
     when "connect_released"   then "커넥트가 종료되었습니다"
     when "chat_message"       then "새 메시지를 보냈습니다"
     when "downvoted"          then "당신을 비추천했습니다"
+    when "recommendation_requested" then "추천서 작성을 요청했습니다"
+    when "recommendation_written"   then "추천서를 작성해주었습니다"
     end
   end
 
@@ -49,6 +52,13 @@ class Notification < ApplicationRecord
     when RedConnect     then helpers.red_connect_path(notifiable)
     when ChatMessage    then helpers.red_connect_path(notifiable.red_connect)
     when Downvote       then helpers.matching_path
+    when Invitation
+      # 추천서 요청 → 초대자가 작성하러 갈 곳 / 추천서 작성됨 → 피초대자가 매칭으로
+      if action == "recommendation_requested"
+        helpers.edit_invitation_path(notifiable)
+      else
+        helpers.matching_path
+      end
     end
   end
 

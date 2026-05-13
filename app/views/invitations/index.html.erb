@@ -35,26 +35,10 @@
         </p>
       </div>
 
-      <div>
-        <%= form.label :recommendation_comment, "추천서 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= form.text_area :recommendation_comment, rows: 4, minlength: 5, maxlength: 1000, required: true,
-              placeholder: "어떤 사람인지, 왜 초대하는지 적어주세요",
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
-        <p class="mt-1 text-xs text-orange-700">
-          ⚠ 추천서는 발급 후 수정할 수 없으며, 블랙티켓 내에서 평생 따라다닙니다. 신중하게 작성해주세요.
-        </p>
-      </div>
-      <% boost_cost = Rails.application.config.x.blackticket.boosted_invitation_cost %>
-      <label class="flex items-center gap-2">
-        <%= form.check_box :boosted %>
-        <span class="text-sm text-gray-700">
-          강력 추천 (<%= boost_cost %> 크레딧 소비 · 잔액 <%= Current.user.ticket_credits %>)
-        </span>
-      </label>
-      <p class="text-xs text-gray-500 -mt-1">
-        강력 추천 받은 사람은 매칭/구직 화면에서 별도 배지로 표시됩니다.
+      <p class="text-xs text-gray-500">
+        추천서와 강력 추천은 가입 후 별도로 작성합니다.
       </p>
-      <%= form.submit "초대 코드 발급",
+      <%= form.submit "초대 메일 발송",
             class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer disabled:opacity-50",
             disabled: @next_free_at&.future? %>
     <% end %>
@@ -85,11 +69,17 @@
               <p class="text-xs text-gray-700 mt-1 font-mono"><%= inv.invitee_email %></p>
               <p class="text-xs text-gray-500 mt-1">
                 만료 <%= l inv.expires_at, format: :short %>
-                <% if inv.recommendation_comment.present? %>
-                  · "<%= truncate(inv.recommendation_comment, length: 40) %>"
+                <% if inv.recommendation_written? %>
+                  · 추천서 작성됨: "<%= truncate(inv.recommendation_comment, length: 40) %>"
+                <% else %>
+                  · 추천서 미작성
                 <% end %>
               </p>
             </div>
+            <% if inv.accepted? && !inv.recommendation_written? %>
+              <%= link_to "추천서 작성", edit_invitation_path(inv),
+                    class: "text-xs text-blue-600 hover:text-blue-800 underline" %>
+            <% end %>
             <% if inv.usable? %>
               <%= button_to "재발송", resend_invitation_path(inv), method: :post,
                     class: "text-xs text-blue-600 hover:text-blue-800 underline" %>

@@ -37,28 +37,31 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   test "create: 7일 이내 발급 이력 있으면 거절" do
     sign_in_as(@user)
     assert_no_difference "Invitation.count" do
-      post invitations_path, params: { invitation: { invitee_email: "x@example.com", recommendation_comment: "테스트 추천서" } }
+      post invitations_path, params: { invitation: { invitee_email: "x@example.com" } }
     end
     assert_redirected_to invitations_path
     assert_match(/무료 초대/, flash[:alert])
   end
 
-  test "create: 7일 초과 사용자는 발급 성공 + 메일 잡 enqueue" do
+  test "create: 7일 초과 사용자는 발급 성공 + 메일 잡 enqueue (추천서 없음)" do
     sign_in_as(users(:two))
     assert_difference "Invitation.count", 1 do
       assert_enqueued_jobs 1, only: InvitationMailJob do
         post invitations_path, params: {
-          invitation: { invitee_email: "new-friend@example.com", recommendation_comment: "오래된 친구이며 신뢰합니다." }
+          invitation: { invitee_email: "new-friend@example.com" }
         }
       end
     end
+    inv = users(:two).sent_invitations.order(:created_at).last
+    assert_not inv.recommendation_written?
+    assert_not inv.boosted?
     assert_redirected_to invitations_path
   end
 
   test "create: invitee_email 누락 시 거절" do
     sign_in_as(users(:two))
     assert_no_difference "Invitation.count" do
-      post invitations_path, params: { invitation: { recommendation_comment: "테스트 추천서입니다." } }
+      post invitations_path, params: { invitation: {} }
     end
     assert_redirected_to invitations_path
   end
@@ -66,45 +69,108 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   test "create: 이미 가입된 이메일은 거절" do
     sign_in_as(users(:two))
     assert_no_difference "Invitation.count" do
-      post invitations_path, params: {
-        invitation: { invitee_email: @user.email_address, recommendation_comment: "테스트 추천서입니다." }
-      }
+      post invitations_path, params: { invitation: { invitee_email: @user.email_address } }
     end
   end
 
-  test "create: boosted 옵션 시 크레딧 차감 + boosted=true" do
+  # --- edit / update (추천서 사후 작성) ---
+
+  def fresh_invitation_for(inviter, accepted_by: nil)
+    inv = inviter.sent_invitations.create!(invitee_email: "fresh-#{SecureRandom.hex(4)}@example.com")
+    inv.update!(status: :accepted, accepted_by: accepted_by) if accepted_by
+    inv
+  end
+
+  test "edit: 추천서 미작성이면 폼 렌더" do
+    sign_in_as(@user)
+    inv = fresh_invitation_for(@user)
+    get edit_invitation_path(inv)
+    assert_response :success
+  end
+
+  test "edit: 이미 작성된 추천서면 거절" do
+    sign_in_as(@user)
+    get edit_invitation_path(@pending) # fixture에 이미 추천서 있음
+    assert_redirected_to invitations_path
+    assert_match(/이미 작성된 추천서/, flash[:alert])
+  end
+
+  test "update: 추천서 저장 + 가입한 피초대자에게 알림 발송" do
+    sign_in_as(@user)
+    inv = fresh_invitation_for(@user, accepted_by: @inactive)
+
+    assert_difference "Notification.count", 1 do
+      patch invitation_path(inv), params: {
+        invitation: { recommendation_comment: "처음 작성하는 추천서입니다." }
+      }
+    end
+    inv.reload
+    assert_equal "처음 작성하는 추천서입니다.", inv.recommendation_comment
+    notif = Notification.order(:created_at).last
+    assert_equal "recommendation_written", notif.action
+    assert_equal @inactive, notif.recipient
+  end
+
+  test "update: boosted 옵션 시 크레딧 차감 + boosted=true" do
     user = users(:two)
     user.credit_transactions.create!(amount: 100, kind: :admin_grant, memo: "seed")
     sign_in_as(user)
-
+    inv = fresh_invitation_for(user)
     cost = Rails.application.config.x.blackticket.boosted_invitation_cost
     before = user.reload.ticket_credits
 
-    post invitations_path, params: {
-      invitation: { invitee_email: "boost@example.com", recommendation_comment: "강력 추천하는 동료입니다.", boosted: "1" }
+    patch invitation_path(inv), params: {
+      invitation: { recommendation_comment: "강력 추천하는 동료입니다.", boosted: "1" }
     }
-    inv = user.sent_invitations.order(:created_at).last
+    inv.reload
     assert inv.boosted?
     assert_equal before - cost, user.reload.ticket_credits
   end
 
-  test "create: boosted인데 크레딧 부족 시 거절" do
+  test "update: boosted인데 크레딧 부족 시 거절" do
     user = users(:two)
     sign_in_as(user)
-    assert_no_difference "Invitation.count" do
-      post invitations_path, params: {
-        invitation: { invitee_email: "x@example.com", recommendation_comment: "강력 추천 시도하는 동료.", boosted: "1" }
-      }
-    end
+    inv = fresh_invitation_for(user)
+    patch invitation_path(inv), params: {
+      invitation: { recommendation_comment: "강력 추천 시도.", boosted: "1" }
+    }
+    assert_redirected_to edit_invitation_path(inv)
     assert_match(/크레딧/, flash[:alert])
+    assert_not inv.reload.recommendation_written?
   end
 
-  test "create: recommendation_comment 누락 시 거절" do
-    sign_in_as(users(:two))
-    assert_no_difference "Invitation.count" do
-      post invitations_path, params: { invitation: { invitee_email: "x@example.com", recommendation_comment: "" } }
-    end
+  test "update: 이미 작성된 추천서는 거절" do
+    sign_in_as(@user)
+    patch invitation_path(@pending), params: {
+      invitation: { recommendation_comment: "사후 수정 시도하는 추천서" }
+    }
     assert_redirected_to invitations_path
+    assert_match(/이미 작성된 추천서/, flash[:alert])
+  end
+
+  # --- request_recommendation ---
+
+  test "request_recommendation: 추천서 누락 시 초대자에게 알림 발송" do
+    # accepted_one — inviter: one, accepted_by: two
+    invitations(:accepted_one).update_columns(recommendation_comment: nil)
+    sign_in_as(users(:two))
+
+    assert_difference "Notification.count", 1 do
+      post request_recommendation_invitations_path
+    end
+    assert_redirected_to matching_path
+    notif = Notification.order(:created_at).last
+    assert_equal "recommendation_requested", notif.action
+    assert_equal @user, notif.recipient
+    assert_equal users(:two), notif.actor
+  end
+
+  test "request_recommendation: 이미 작성된 추천서면 알림 없이 안내" do
+    sign_in_as(users(:two))
+    assert_no_difference "Notification.count" do
+      post request_recommendation_invitations_path
+    end
+    assert_redirected_to matching_path
   end
 
   test "destroy: 본인 pending 초대 취소" do

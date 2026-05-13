@@ -31,6 +31,7 @@ class User < ApplicationRecord
   has_many :acted_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :nullify
   has_many :push_subscriptions, dependent: :destroy
   has_many :sent_invitations, class_name: "Invitation", foreign_key: :inviter_id, dependent: :destroy
+  has_one  :accepted_invitation, class_name: "Invitation", foreign_key: :accepted_by_id
   has_many :score_events, dependent: :destroy
   has_many :credit_transactions, dependent: :destroy
   belongs_to :invited_by, class_name: "User", optional: true
@@ -112,6 +113,16 @@ class User < ApplicationRecord
     missing = MATCHING_REQUIRED_FIELDS.reject { |f| public_send(f).present? }
     missing << :avatar unless avatar.attached?
     missing
+  end
+
+  # 추천서 조건 — 시드 사용자는 면제, 일반은 초대장에 추천서가 작성돼 있어야 함.
+  def has_recommendation?
+    return true if seed?
+    accepted_invitation&.recommendation_written?
+  end
+
+  def matching_ready?
+    matching_profile_complete? && has_recommendation?
   end
 
   def matching_active?

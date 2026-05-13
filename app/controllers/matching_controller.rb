@@ -2,8 +2,11 @@ class MatchingController < ApplicationController
   POOL_SIZE = 5
 
   def show
-    @missing_fields = Current.user.matching_missing_fields
-    @can_activate   = @missing_fields.empty?
+    @missing_fields    = Current.user.matching_missing_fields
+    @profile_complete  = @missing_fields.empty?
+    @has_recommendation = Current.user.has_recommendation?
+    @can_activate      = @profile_complete && @has_recommendation
+    @accepted_invitation = Current.user.accepted_invitation
     return unless Current.user.matching_active?
 
     @gen_week = ConnectRequest.current_gen_week
@@ -17,8 +20,8 @@ class MatchingController < ApplicationController
   end
 
   def enable
-    unless Current.user.matching_profile_complete?
-      redirect_to matching_path, alert: "프로필 필수 항목을 먼저 채워주세요." and return
+    unless Current.user.matching_ready?
+      redirect_to matching_path, alert: "활성화 조건을 모두 충족해주세요." and return
     end
     Current.user.enable_matching!
     redirect_to matching_path, notice: "이성 매칭이 활성화되었습니다."
