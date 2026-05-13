@@ -67,12 +67,13 @@ Rails.application.routes.draw do
   #   POST   /invitations/redeem   — 코드 적용
   #   GET    /i/:code              — URL 직접 진입 (자동 적용 또는 OAuth로)
   resources :invitations, only: %i[ index create destroy ] do
+    member { post :resend }
     collection do
       get  :redeem
       post :redeem, action: :apply_redemption, as: :apply_redemption
     end
   end
-  get "/i/:code", to: "invitations#show", as: :invitation_url,
+  get "/i/:code", to: "invitations#show", as: :invite_link,
       constraints: { code: /[A-Z2-9]{8}/ }
 
   # 관리자 백오피스.
@@ -98,6 +99,9 @@ Rails.application.routes.draw do
 
   # 헬스체크.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # 개발 환경 이메일 프리뷰.
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 
   root "landing#index"
 end

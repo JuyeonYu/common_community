@@ -3,8 +3,15 @@ require "test_helper"
 class InvitationTest < ActiveSupport::TestCase
   setup { @inviter = users(:one) }
 
+  def build_invite(**overrides)
+    @inviter.sent_invitations.create!({
+      recommendation_comment: "테스트 추천서입니다.",
+      invitee_email: "fresh-#{SecureRandom.hex(4)}@example.com"
+    }.merge(overrides))
+  end
+
   test "create: code/token/expires_at 자동 부여" do
-    inv = @inviter.sent_invitations.create!(recommendation_comment: "테스트 추천서입니다.")
+    inv = build_invite
     assert_match(/\A[A-Z2-9]{8}\z/, inv.code)
     assert_equal inv.code, inv.token
     assert inv.expires_at > 11.hours.from_now
@@ -13,8 +20,7 @@ class InvitationTest < ActiveSupport::TestCase
 
   test "code unique 충돌 시 재시도" do
     existing = invitations(:pending_one).code
-    # before_validation에서 회전하므로 새로 만든 invitation은 다른 code를 가짐
-    inv = @inviter.sent_invitations.create!(recommendation_comment: "테스트 추천서입니다.")
+    inv = build_invite
     assert_not_equal existing, inv.code
   end
 
@@ -24,9 +30,10 @@ class InvitationTest < ActiveSupport::TestCase
     assert_not invitations(:accepted_one).usable?
   end
 
-  test "redeem!: 사용자 활성화 + accepted_by 기록" do
-    target = users(:inactive)
+  test "redeem!: 이메일 일치 시 사용자 활성화 + accepted_by 기록" do
     inv = invitations(:pending_one)
+    target = users(:inactive)
+    target.update!(email_address: inv.invitee_email)
 
     inv.redeem!(target)
 
@@ -36,6 +43,12 @@ class InvitationTest < ActiveSupport::TestCase
     assert_equal @inviter, target.invited_by
   end
 
+  test "redeem!: 이메일 불일치 시 EmailMismatch" do
+    inv = invitations(:pending_one)
+    target = users(:inactive) # 다른 이메일
+    assert_raises(Invitation::EmailMismatch) { inv.redeem!(target) }
+  end
+
   test "cancel!" do
     inv = invitations(:pending_one)
     inv.cancel!
@@ -43,15 +56,40 @@ class InvitationTest < ActiveSupport::TestCase
   end
 
   test "recommendation_comment 필수" do
-    inv = @inviter.sent_invitations.build(recommendation_comment: nil)
+    inv = @inviter.sent_invitations.build(recommendation_comment: nil, invitee_email: "x@y.com")
     assert_not inv.valid?
     assert_includes inv.errors.attribute_names, :recommendation_comment
   end
 
   test "recommendation_comment immutable" do
     inv = invitations(:pending_one)
-    inv.recommendation_comment = "수정 시도"
+    inv.recommendation_comment = "수정 시도하는 새로운 추천서"
     assert_not inv.valid?
     assert_includes inv.errors[:recommendation_comment].first, "수정할 수 없습니다"
+  end
+
+  test "invitee_email 필수 + format + normalize" do
+    inv = @inviter.sent_invitations.build(recommendation_comment: "테스트 추천서입니다.")
+    assert_not inv.valid?
+    assert_includes inv.errors.attribute_names, :invitee_email
+
+    inv.invitee_email = "  TEST@Example.Com  "
+    assert_equal "test@example.com", inv.invitee_email
+  end
+
+  test "이미 가입된 이메일로 초대 발급 거절" do
+    existing = users(:one) # email_address = "one@example.com"
+    inv = @inviter.sent_invitations.build(
+      recommendation_comment: "테스트 추천서입니다.",
+      invitee_email: existing.email_address.upcase
+    )
+    assert_not inv.valid?
+    assert_includes inv.errors.attribute_names, :invitee_email
+  end
+
+  test "matches_email?: 대소문자 무시" do
+    inv = invitations(:pending_one)
+    assert inv.matches_email?(inv.invitee_email.upcase)
+    assert_not inv.matches_email?("other@example.com")
   end
 end

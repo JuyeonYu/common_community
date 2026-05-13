@@ -8,9 +8,13 @@ class Invitation < ApplicationRecord
 
   enum :status, { pending: 0, accepted: 1, expired: 2, cancelled: 3 }
 
+  normalizes :invitee_email, with: ->(v) { v.to_s.strip.downcase }
+
   validates :token, presence: true, uniqueness: true
   validates :code,  presence: true, uniqueness: true
   validates :expires_at, presence: true
+  validates :invitee_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validate  :invitee_not_already_user, on: :create
   # 추천서는 발급 시점에 필수. 평생 따라다니며 신중 작성 의무.
   validates :recommendation_comment, presence: true, length: { in: 5..1000 }
   validate  :recommendation_comment_immutable
@@ -25,11 +29,22 @@ class Invitation < ApplicationRecord
   end
 
   # 신규 가입자가 코드를 적용한 순간 호출. 1회용이라 accepted로 마킹.
+  # 초대 이메일과 가입자 이메일이 정확히 일치해야 한다(소문자 무시).
+  # 일치하지 않으면 EmailMismatch 예외.
   def redeem!(by_user)
+    if invitee_email.present? && by_user.email_address.to_s.downcase != invitee_email
+      raise EmailMismatch, "초대받은 이메일과 일치하지 않습니다"
+    end
     transaction do
       update!(status: :accepted, accepted_by: by_user)
       by_user.update!(invitation_accepted_at: Time.current, invited_by: inviter)
     end
+  end
+
+  class EmailMismatch < StandardError; end
+
+  def matches_email?(email)
+    invitee_email.present? && email.to_s.strip.downcase == invitee_email
   end
 
   def cancel!
@@ -58,5 +73,13 @@ class Invitation < ApplicationRecord
       return if new_record?
       return unless recommendation_comment_changed?
       errors.add(:recommendation_comment, "는 발급 후 수정할 수 없습니다")
+    end
+
+    # 이미 가입한 이메일로는 초대 발급 불가.
+    def invitee_not_already_user
+      return if invitee_email.blank?
+      if User.where("LOWER(email_address) = ?", invitee_email).exists?
+        errors.add(:invitee_email, "은 이미 가입된 사용자입니다")
+      end
     end
 end

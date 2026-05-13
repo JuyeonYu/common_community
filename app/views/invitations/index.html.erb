@@ -26,6 +26,16 @@
 
     <%= form_with model: @invitation, url: invitations_path, class: "space-y-3" do |form| %>
       <div>
+        <%= form.label :invitee_email, "초대받을 사람의 이메일 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.email_field :invitee_email, required: true,
+              placeholder: "friend@example.com",
+              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+        <p class="mt-1 text-xs text-gray-500">
+          이 이메일로 초대장이 발송되며, <strong>같은 이메일의 Google 계정으로만</strong> 가입할 수 있습니다.
+        </p>
+      </div>
+
+      <div>
         <%= form.label :recommendation_comment, "추천서 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= form.text_area :recommendation_comment, rows: 4, minlength: 5, maxlength: 1000, required: true,
               placeholder: "어떤 사람인지, 왜 초대하는지 적어주세요",
@@ -57,8 +67,8 @@
         <% @invitations.each do |inv| %>
           <article class="rounded-md bg-white border border-gray-200 p-3 flex items-center gap-3">
             <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="font-mono font-bold text-lg tracking-widest"><%= inv.code %></span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-mono font-bold text-sm tracking-widest"><%= inv.code %></span>
                 <span class="text-xs px-2 py-0.5 rounded
                   <%= case inv.status
                       when 'pending'   then 'bg-yellow-100 text-yellow-800'
@@ -68,7 +78,11 @@
                       end %>">
                   <%= I18n.t("invitations.status.#{inv.status}", default: inv.status) %>
                 </span>
+                <% if inv.boosted? %>
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력</span>
+                <% end %>
               </div>
+              <p class="text-xs text-gray-700 mt-1 font-mono"><%= inv.invitee_email %></p>
               <p class="text-xs text-gray-500 mt-1">
                 만료 <%= l inv.expires_at, format: :short %>
                 <% if inv.recommendation_comment.present? %>
@@ -76,14 +90,9 @@
                 <% end %>
               </p>
             </div>
-            <% if inv.pending? %>
-              <button type="button"
-                      class="text-xs text-gray-500 hover:text-gray-700"
-                      data-controller="copy-to-clipboard"
-                      data-copy-to-clipboard-text-value="<%= request.base_url %>/i/<%= inv.code %>"
-                      data-action="copy-to-clipboard#copy">
-                URL 복사
-              </button>
+            <% if inv.usable? %>
+              <%= button_to "재발송", resend_invitation_path(inv), method: :post,
+                    class: "text-xs text-blue-600 hover:text-blue-800 underline" %>
               <%= button_to "취소", invitation_path(inv), method: :delete,
                     data: { turbo_confirm: "취소하시겠습니까?" },
                     class: "text-xs text-red-600 hover:text-red-800 underline" %>

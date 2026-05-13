@@ -33,6 +33,7 @@ class InvitationsController < ApplicationController
 
     Invitation.transaction do
       @invitation = Current.user.sent_invitations.create!(
+        invitee_email: params.dig(:invitation, :invitee_email).to_s,
         recommendation_comment: params.dig(:invitation, :recommendation_comment).to_s.strip,
         boosted: !!boosted
       )
@@ -42,10 +43,22 @@ class InvitationsController < ApplicationController
         )
       end
     end
+    InvitationMailJob.perform_later(@invitation.id)
     redirect_to invitations_path,
-      notice: "초대 코드 #{@invitation.code} 가 생성되었습니다." + (boosted ? " (강력 추천 -#{cost} 크레딧)" : "")
+      notice: "초대 메일을 #{@invitation.invitee_email}로 발송했습니다." + (boosted ? " (강력 추천 -#{cost} 크레딧)" : "")
   rescue ActiveRecord::RecordInvalid => e
     redirect_to invitations_path, alert: e.record.errors.full_messages.first
+  end
+
+  # 같은 초대장 메일 재발송 (pending + 미만료).
+  def resend
+    invitation = Current.user.sent_invitations.find(params[:id])
+    if invitation.usable?
+      InvitationMailJob.perform_later(invitation.id)
+      redirect_to invitations_path, notice: "초대 메일을 재발송했습니다."
+    else
+      redirect_to invitations_path, alert: "재발송할 수 없는 초대입니다."
+    end
   end
 
   # 본인이 보낸 pending 초대 취소.
@@ -64,16 +77,20 @@ class InvitationsController < ApplicationController
     end
 
     if Current.user
-      # 로그인 사용자: 활성이면 안내, 비활성이면 즉시 적용.
+      # 로그인 사용자: 활성이면 안내, 비활성이면 이메일 검증 후 적용.
       if Current.user.active?
         redirect_to root_path, notice: "이미 활성 상태입니다."
-      else
+      elsif invitation.matches_email?(Current.user.email_address)
         invitation.redeem!(Current.user)
         redirect_to root_path, notice: "초대 코드가 적용되었습니다."
+      else
+        redirect_to redeem_invitations_path,
+          alert: "초대받은 이메일(#{invitation.invitee_email})과 로그인 이메일이 일치하지 않습니다."
       end
     else
       # 비로그인: 세션에 저장 후 Google OAuth로.
-      session[:pending_invitation_code] = invitation.code
+      session[:pending_invitation_code]  = invitation.code
+      session[:pending_invitee_email]    = invitation.invitee_email
       redirect_to new_session_path, notice: "초대장을 확인했습니다. 구글 계정으로 가입을 진행해주세요."
     end
   end
@@ -86,13 +103,18 @@ class InvitationsController < ApplicationController
     code = params[:code].to_s.strip.upcase
     invitation = Invitation.find_by(code: code)
 
-    if invitation&.usable?
-      invitation.redeem!(Current.user)
-      redirect_to root_path, notice: "초대 코드가 적용되었습니다."
-    else
+    unless invitation&.usable?
       flash.now[:alert] = "유효하지 않거나 만료된 초대 코드입니다."
-      render :redeem, status: :unprocessable_entity
+      render :redeem, status: :unprocessable_entity and return
     end
+
+    unless invitation.matches_email?(Current.user.email_address)
+      flash.now[:alert] = "이 초대 코드는 다른 이메일(#{invitation.invitee_email})에게 발급되었습니다."
+      render :redeem, status: :unprocessable_entity and return
+    end
+
+    invitation.redeem!(Current.user)
+    redirect_to root_path, notice: "초대 코드가 적용되었습니다."
   end
 
   private

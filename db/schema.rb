@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_100906) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_13_025311) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -127,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_100906) do
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
+    t.string "invitee_email"
     t.bigint "inviter_id", null: false
     t.text "recommendation_comment"
     t.integer "status", default: 0, null: false
@@ -134,6 +135,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_100906) do
     t.datetime "updated_at", null: false
     t.index ["accepted_by_id"], name: "index_invitations_on_accepted_by_id"
     t.index ["code"], name: "index_invitations_on_code", unique: true
+    t.index ["invitee_email"], name: "index_invitations_on_invitee_email"
     t.index ["inviter_id", "created_at"], name: "index_invitations_on_inviter_id_and_created_at"
     t.index ["inviter_id"], name: "index_invitations_on_inviter_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true

@@ -74,6 +74,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # 개발 환경에서 발송된 이메일을 브라우저로 프리뷰. /letter_opener 마운트.
+  gem "letter_opener_web"
 end
 
 group :test do
