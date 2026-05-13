@@ -1,13 +1,27 @@
 # Solid Queue 정기 잡. fugit 표현식.
 # production에만 등록 — 개발/테스트는 수동 실행.
+#
+# ─────────────────────────────────────────────────────────────
+# schedule 표기 가이드 (2026-05-13 502 인시던트 회귀 방지)
+# ─────────────────────────────────────────────────────────────
+# 안전한 형식:
+#   - 크론: "0 4 * * *"  /  "5 * * * *"  /  "0 0 * * 1"  ← 권장
+#   - 자연어 (timezone 생략 → Rails.config.time_zone 따름):
+#     "every hour at minute 5"
+#     "every day at 4am"
+#
+# 미지원 — 운영 부팅 시점에 Solid Queue/Puma 함께 종료됨:
+#   - "every day at 04:00 (Asia/Seoul)"   ← 괄호 timezone 금지
+#   - "every Monday at 00:00 in Asia/Seoul" ← in 형식 버전 의존, 불안정
+#
+# 추가/변경 시 test/integration/recurring_yml_test.rb 가 fugit 파싱을 강제.
+# 테스트 실패 = 운영 배포 시 사이트 다운 → 반드시 통과시킬 것.
+# ─────────────────────────────────────────────────────────────
 
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
-
-  # 시간대는 Rails.application.config.time_zone(Asia/Seoul) 기준.
-  # 시간대 명시(`(Asia/Seoul)`)는 fugit이 파싱 못 해 Solid Queue 부팅 실패 → 크론 표현식 사용.
 
   invitation_expire:
     class: InvitationExpireJob
