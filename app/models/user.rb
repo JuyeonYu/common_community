@@ -20,7 +20,6 @@ class User < ApplicationRecord
     jeju:     16
   }.freeze
 
-  has_secure_password validations: false
   has_one_attached :avatar
   has_many :sessions, dependent: :destroy
   has_many :posts, dependent: :destroy
@@ -67,7 +66,6 @@ class User < ApplicationRecord
             format: { with: /\A[\p{L}\p{N}_]+\z/, message: "는 한글/영문/숫자/_만 사용할 수 있습니다" },
             if: -> { nickname.present? }
   validates :google_uid, uniqueness: true, allow_nil: true
-  validates :password, confirmation: true, length: { maximum: 72 }, allow_nil: true
   validates :ticket_score, numericality: { only_integer: true }
   validates :ticket_credits, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 

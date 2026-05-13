@@ -3,9 +3,8 @@ Rails.application.routes.draw do
   get "/auth/:provider/callback", to: "sessions#create_oauth", as: :oauth_callback
   get "/auth/failure", to: "sessions#failure"
 
-  # 관리자용 이메일+비밀번호 (admin 백오피스 진입용으로만 유지).
-  resource :session
-  resources :passwords, param: :token
+  # 세션은 Google OAuth로만 생성. new는 로그인 진입 페이지, destroy는 로그아웃.
+  resource :session, only: %i[ new destroy ]
 
   resources :profiles, only: %i[ show edit update ] do
     member do

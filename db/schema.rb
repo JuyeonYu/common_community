@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_13_025311) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_13_101548) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -301,7 +301,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_13_025311) do
     t.string "name"
     t.string "nickname"
     t.jsonb "notification_preferences", default: {}, null: false
-    t.string "password_digest"
     t.integer "residence_area"
     t.boolean "seed", default: false, null: false
     t.integer "smoking"

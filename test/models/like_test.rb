@@ -43,7 +43,7 @@ class LikeTest < ActiveSupport::TestCase
   end
 
   test "user 삭제 시 likes cascade" do
-    fresh_user = User.create!(email_address: "fresh@example.com", name: "임시", password: "password")
+    fresh_user = User.create!(email_address: "fresh@example.com", name: "임시")
     Like.create!(user: fresh_user, likeable: @post)
 
     assert_difference "Like.count", -1 do

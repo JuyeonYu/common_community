@@ -1,8 +1,5 @@
-<% password_digest = BCrypt::Password.create("password") %>
-
 one:
   email_address: one@example.com
-  password_digest: <%= password_digest %>
   name: 사용자1
   admin: false
   seed: true
@@ -10,7 +7,6 @@ one:
 
 two:
   email_address: two@example.com
-  password_digest: <%= password_digest %>
   name: 사용자2
   admin: false
   seed: true
@@ -18,7 +14,6 @@ two:
 
 admin:
   email_address: admin@example.com
-  password_digest: <%= password_digest %>
   name: 관리자
   admin: true
   seed: true
@@ -26,7 +21,6 @@ admin:
 
 inactive:
   email_address: inactive@example.com
-  password_digest: <%= password_digest %>
   name: 잠금사용자
   admin: false
   seed: false

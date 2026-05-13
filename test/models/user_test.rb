@@ -7,8 +7,8 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "이메일 unique" do
-    User.create!(email_address: "dup@example.com", name: "원본", password: "secret123")
-    dup = User.new(email_address: "dup@example.com", name: "복제", password: "secret123")
+    User.create!(email_address: "dup@example.com", name: "원본")
+    dup = User.new(email_address: "dup@example.com", name: "복제")
     assert_not dup.valid?
     assert_includes dup.errors.attribute_names, :email_address
   end
