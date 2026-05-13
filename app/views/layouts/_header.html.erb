@@ -24,9 +24,7 @@
               class: "#{Current.user.matching_active? ? 'text-rose-600 font-semibold' : 'text-gray-700'} hover:text-gray-900 hidden sm:inline" %>
         <%= link_to "초대장", invitations_path, class: "text-gray-700 hover:text-gray-900 hidden sm:inline" %>
         <% if Current.user.admin? %>
-          <%= link_to "사용자", admin_users_path, class: "text-red-600 hover:underline hidden sm:inline" %>
-          <%= link_to "시드", admin_seed_emails_path, class: "text-red-600 hover:underline hidden sm:inline" %>
-          <%= link_to "신고", admin_reports_path, class: "text-red-600 hover:underline hidden sm:inline" %>
+          <%= link_to "관리", admin_root_path, class: "text-red-600 hover:underline hidden sm:inline" %>
         <% end %>
         <%= link_to profile_path(Current.user), class: "flex items-center gap-2 hover:text-gray-900" do %>
           <%= avatar_image(Current.user, class: "h-8 w-8 rounded-full") %>

@@ -73,8 +73,15 @@ Rails.application.routes.draw do
 
   # 관리자 백오피스.
   namespace :admin do
+    root "dashboard#index"
     resources :seed_emails, only: %i[ index create destroy ]
     resources :reports, only: %i[ index update ]
+    resources :posts, only: %i[ index destroy ] do
+      member do
+        post :hide
+        post :unhide
+      end
+    end
     resources :users, only: %i[ index show ] do
       member do
         post   :adjust_score

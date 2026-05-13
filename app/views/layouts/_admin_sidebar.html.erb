@@ -1,0 +1,23 @@
+<aside class="hidden md:block w-48 shrink-0 border-r border-gray-200 bg-white">
+  <nav class="p-3 text-sm">
+    <h2 class="font-semibold text-gray-500 text-xs uppercase tracking-wide mb-2">관리</h2>
+    <% items = [
+      [ "대시보드",   admin_root_path,         controller.controller_name == "dashboard" && controller.class.module_parent == Admin ],
+      [ "사용자",     admin_users_path,        controller.is_a?(Admin::UsersController) ],
+      [ "게시물",     admin_posts_path,        controller.is_a?(Admin::PostsController) ],
+      [ "시드 이메일", admin_seed_emails_path, controller.is_a?(Admin::SeedEmailsController) ],
+      [ "신고",       admin_reports_path,      controller.is_a?(Admin::ReportsController) ]
+    ] %>
+    <ul class="space-y-1">
+      <% items.each do |label, path, current| %>
+        <li>
+          <%= link_to label, path,
+                class: "block rounded px-2 py-1.5 #{current ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}" %>
+        </li>
+      <% end %>
+    </ul>
+    <p class="mt-4 pt-3 border-t border-gray-100">
+      <%= link_to "← 일반 화면", root_path, class: "text-xs text-gray-500 hover:text-gray-700" %>
+    </p>
+  </nav>
+</aside>
