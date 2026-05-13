@@ -6,18 +6,21 @@ production:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
 
+  # 시간대는 Rails.application.config.time_zone(Asia/Seoul) 기준.
+  # 시간대 명시(`(Asia/Seoul)`)는 fugit이 파싱 못 해 Solid Queue 부팅 실패 → 크론 표현식 사용.
+
   invitation_expire:
     class: InvitationExpireJob
     queue: default
-    schedule: every day at 04:00 (Asia/Seoul)
+    schedule: "0 4 * * *"
 
   red_connect_expire:
     class: RedConnectExpireJob
     queue: default
-    schedule: every hour at minute 5
+    schedule: "5 * * * *"
 
+  # 매주 월요일 00:00 KST 새 기수 시작 시점에 이전 기수 미응답 처리.
   connect_request_expire:
     class: ConnectRequestExpireJob
     queue: default
-    # 매주 월요일 00:00 KST 새 기수 시작 시점에 이전 기수 미응답 처리.
-    schedule: every Monday at 00:00 (Asia/Seoul)
+    schedule: "0 0 * * 1"
