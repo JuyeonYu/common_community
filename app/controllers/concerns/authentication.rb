@@ -13,11 +13,6 @@ module Authentication
       skip_before_action :require_authentication, **options
       skip_before_action :require_active_user, **options
     end
-
-    # 잠금 상태(가입은 했으나 초대 코드 미적용)에서도 허용할 액션. 예: 코드 입력 화면, 로그아웃.
-    def allow_inactive_access(**options)
-      skip_before_action :require_active_user, **options
-    end
   end
 
   private
@@ -29,18 +24,22 @@ module Authentication
       Current.session.present? || request_authentication
     end
 
-    # 비활성 사용자는 적절한 곳으로 강제 이동.
-    #   정지(suspended_until 미래) → 정지 안내 페이지(현재는 로그아웃 + alert)
-    #   가입 후 초대 코드 미적용     → 코드 입력 화면
+    # 비활성 사용자는 즉시 로그아웃 처리.
+    # 신규 가입 흐름이 가입 단계에서 활성화까지 완료시키므로(D-6),
+    # 여기 도달하는 케이스는 옛 데이터 / 정지 / 어떤 edge case 잔재뿐.
+    # 일관성 있게 모두 logout + alert로 처리.
     def require_active_user
       return unless Current.user
-      if Current.user.suspended?
-        until_at = I18n.l(Current.user.suspended_until, format: :short)
-        terminate_session
-        redirect_to new_session_path, alert: "정지된 계정입니다. 해제 시점: #{until_at}"
-      elsif !Current.user.active?
-        redirect_to redeem_invitations_path
-      end
+      return if Current.user.active?
+
+      alert = if Current.user.suspended?
+                until_at = I18n.l(Current.user.suspended_until, format: :short)
+                "정지된 계정입니다. 해제 시점: #{until_at}"
+              else
+                "계정 활성화 상태가 아닙니다. 다시 초대 메일의 링크로 가입을 진행해주세요."
+              end
+      terminate_session
+      redirect_to new_session_path, alert: alert
     end
 
     def require_admin

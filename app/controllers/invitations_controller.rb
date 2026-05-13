@@ -3,8 +3,6 @@ require "set"
 class InvitationsController < ApplicationController
   # /i/:code 진입은 비로그인도 가능 (세션에 저장 후 OAuth로 이어짐).
   allow_unauthenticated_access only: :show
-  # 잠금 사용자가 코드 입력하기 위한 화면들.
-  allow_inactive_access only: %i[ redeem apply_redemption ]
 
   TREE_MAX_DEPTH = 5
 
@@ -77,44 +75,14 @@ class InvitationsController < ApplicationController
     end
 
     if Current.user
-      # 로그인 사용자: 활성이면 안내, 비활성이면 이메일 검증 후 적용.
-      if Current.user.active?
-        redirect_to root_path, notice: "이미 활성 상태입니다."
-      elsif invitation.matches_email?(Current.user.email_address)
-        invitation.redeem!(Current.user)
-        redirect_to root_path, notice: "초대 코드가 적용되었습니다."
-      else
-        redirect_to redeem_invitations_path,
-          alert: "초대받은 이메일(#{invitation.invitee_email})과 로그인 이메일이 일치하지 않습니다."
-      end
+      # 활성 사용자만 로그인 상태로 유지되는 새 흐름. 그래도 fallback으로 active? 확인.
+      redirect_to root_path, notice: "이미 활성 상태입니다."
     else
       # 비로그인: 세션에 저장 후 Google OAuth로.
       session[:pending_invitation_code]  = invitation.code
       session[:pending_invitee_email]    = invitation.invitee_email
       redirect_to new_session_path, notice: "초대장을 확인했습니다. 구글 계정으로 가입을 진행해주세요."
     end
-  end
-
-  # 잠금 사용자가 보는 코드 입력 폼.
-  def redeem
-  end
-
-  def apply_redemption
-    code = params[:code].to_s.strip.upcase
-    invitation = Invitation.find_by(code: code)
-
-    unless invitation&.usable?
-      flash.now[:alert] = "유효하지 않거나 만료된 초대 코드입니다."
-      render :redeem, status: :unprocessable_entity and return
-    end
-
-    unless invitation.matches_email?(Current.user.email_address)
-      flash.now[:alert] = "이 초대 코드는 다른 이메일(#{invitation.invitee_email})에게 발급되었습니다."
-      render :redeem, status: :unprocessable_entity and return
-    end
-
-    invitation.redeem!(Current.user)
-    redirect_to root_path, notice: "초대 코드가 적용되었습니다."
   end
 
   private

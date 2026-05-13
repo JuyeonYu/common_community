@@ -60,18 +60,13 @@ Rails.application.routes.draw do
   end
 
   # 초대장.
-  #   GET    /invitations          — 내가 보낸 초대 목록 + 발급 폼
-  #   POST   /invitations          — 새 초대 발급
-  #   DELETE /invitations/:id      — 본인이 보낸 pending 초대 취소
-  #   GET    /invitations/redeem   — 코드 입력 폼 (잠금 사용자 진입점)
-  #   POST   /invitations/redeem   — 코드 적용
-  #   GET    /i/:code              — URL 직접 진입 (자동 적용 또는 OAuth로)
+  #   GET    /invitations      — 내가 보낸 초대 목록 + 발급 폼
+  #   POST   /invitations      — 새 초대 발급
+  #   DELETE /invitations/:id  — 본인이 보낸 pending 초대 취소
+  #   POST   /invitations/:id/resend — 메일 재발송
+  #   GET    /i/:code          — URL 직접 진입 (메일 링크에서 호출)
   resources :invitations, only: %i[ index create destroy ] do
     member { post :resend }
-    collection do
-      get  :redeem
-      post :redeem, action: :apply_redemption, as: :apply_redemption
-    end
   end
   get "/i/:code", to: "invitations#show", as: :invite_link,
       constraints: { code: /[A-Z2-9]{8}/ }

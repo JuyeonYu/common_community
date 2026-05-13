@@ -25,57 +25,11 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/유효하지 않/, flash[:alert])
   end
 
-  test "show: 로그인 + 비활성 + 이메일 일치 → 코드 자동 적용" do
-    sign_in_as(@inactive)
-    get invite_link_path(code: @pending.code)
-    assert_redirected_to root_path
-    assert @inactive.reload.active?
-    assert @pending.reload.accepted?
-  end
-
-  test "show: 로그인 + 비활성 + 이메일 불일치 → redeem 폼" do
-    @inactive.update!(email_address: "different@example.com")
-    sign_in_as(@inactive)
-    get invite_link_path(code: @pending.code)
-    assert_redirected_to redeem_invitations_path
-    assert_not @inactive.reload.active?
-  end
-
   test "show: 로그인 + 활성 → 안내만" do
     sign_in_as(@user)
     get invite_link_path(code: @pending.code)
     assert_redirected_to root_path
     assert @pending.reload.pending?
-  end
-
-  # --- redeem 폼 + 적용 ---
-
-  test "redeem 폼: 비활성 사용자 접근 가능" do
-    sign_in_as(@inactive)
-    get redeem_invitations_path
-    assert_response :success
-  end
-
-  test "apply_redemption: 유효 코드 + 이메일 일치 → 활성화" do
-    sign_in_as(@inactive)
-    post apply_redemption_invitations_path, params: { code: @pending.code }
-    assert_redirected_to root_path
-    assert @inactive.reload.active?
-  end
-
-  test "apply_redemption: 이메일 불일치 시 거절" do
-    @inactive.update!(email_address: "different@example.com")
-    sign_in_as(@inactive)
-    post apply_redemption_invitations_path, params: { code: @pending.code }
-    assert_response :unprocessable_entity
-    assert_not @inactive.reload.active?
-  end
-
-  test "apply_redemption: 만료 코드 → 422" do
-    sign_in_as(@inactive)
-    post apply_redemption_invitations_path, params: { code: @expired.code }
-    assert_response :unprocessable_entity
-    assert_not @inactive.reload.active?
   end
 
   # --- create / destroy ---
@@ -183,18 +137,20 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/재발송할 수 없/, flash[:alert])
   end
 
-  # --- 잠금 사용자가 다른 페이지 접근 시 redeem으로 강제 이동 ---
+  # --- 비활성 사용자: 어떤 페이지든 접근 시 자동 로그아웃 ---
 
-  test "잠금 사용자: 프로필 접근 시 redeem으로 redirect" do
+  test "비활성 사용자: 프로필 접근 시 자동 로그아웃 + 로그인 페이지로" do
     sign_in_as(@inactive)
     get profile_path(@inactive)
-    assert_redirected_to redeem_invitations_path
+    assert_redirected_to new_session_path
+    assert_empty cookies[:session_id]
   end
 
-  test "잠금 사용자: 로그아웃은 가능" do
+  test "비활성 사용자: 명시적 로그아웃도 동일하게 정리" do
     sign_in_as(@inactive)
     delete session_path
     assert_redirected_to new_session_path
+    assert_empty cookies[:session_id]
   end
 
   test "index: 초대 트리 렌더 (본인 + invitees 노출)" do
