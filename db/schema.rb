@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_12_100300) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_12_100906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -53,6 +53,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_100300) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "chat_messages", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.bigint "red_connect_id", null: false
+    t.bigint "sender_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["red_connect_id", "created_at"], name: "index_chat_messages_on_red_connect_id_and_created_at"
+    t.index ["red_connect_id"], name: "index_chat_messages_on_red_connect_id"
+    t.index ["sender_id"], name: "index_chat_messages_on_sender_id"
+  end
+
   create_table "comments", force: :cascade do |t|
     t.text "body", null: false
     t.datetime "created_at", null: false
@@ -93,6 +104,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_100300) do
     t.index ["related_type", "related_id"], name: "index_credit_transactions_on_related"
     t.index ["user_id", "created_at"], name: "index_credit_transactions_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_credit_transactions_on_user_id"
+  end
+
+  create_table "downvotes", force: :cascade do |t|
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.bigint "from_user_id", null: false
+    t.integer "kind", null: false
+    t.bigint "red_connect_id", null: false
+    t.bigint "to_user_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["from_user_id"], name: "index_downvotes_on_from_user_id"
+    t.index ["red_connect_id", "from_user_id"], name: "index_downvotes_on_red_connect_id_and_from_user_id", unique: true
+    t.index ["red_connect_id"], name: "index_downvotes_on_red_connect_id"
+    t.index ["to_user_id", "kind"], name: "index_downvotes_on_to_user_id_and_kind"
+    t.index ["to_user_id"], name: "index_downvotes_on_to_user_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -289,12 +315,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_12_100300) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "chat_messages", "red_connects"
+  add_foreign_key "chat_messages", "users", column: "sender_id"
   add_foreign_key "comments", "comments", column: "parent_id"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "connect_requests", "users", column: "requester_id"
   add_foreign_key "connect_requests", "users", column: "target_id"
   add_foreign_key "credit_transactions", "users"
+  add_foreign_key "downvotes", "red_connects"
+  add_foreign_key "downvotes", "users", column: "from_user_id"
+  add_foreign_key "downvotes", "users", column: "to_user_id"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "inviter_id"
   add_foreign_key "likes", "users"

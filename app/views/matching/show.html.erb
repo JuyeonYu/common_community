@@ -19,6 +19,29 @@
             class: "rounded-md border border-green-300 bg-white px-3 py-1.5 text-sm hover:bg-green-100 cursor-pointer" %>
     </section>
 
+    <% active_connects = Current.user.active_red_connects.includes(:user_a, :user_b) %>
+    <% if active_connects.any? %>
+      <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+        <h2 class="font-semibold mb-3">진행 중 커넥트 (<%= active_connects.size %>)</h2>
+        <ul class="space-y-2">
+          <% active_connects.each do |rc| %>
+            <% other = rc.other_user(Current.user) %>
+            <li>
+              <%= link_to red_connect_path(rc),
+                    class: "flex items-center gap-3 rounded-md border border-gray-200 p-2 hover:bg-gray-50" do %>
+                <%= avatar_image(other, class: "h-9 w-9 rounded-full") %>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium"><%= other.nickname.presence || other.name %></p>
+                  <p class="text-xs text-gray-500">만료 <%= l rc.expires_at, format: :short %></p>
+                </div>
+                <span class="text-xs text-blue-600">채팅 →</span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
     <% if @received_requests.any? %>
       <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
         <h2 class="font-semibold mb-3">받은 커넥트 요청</h2>

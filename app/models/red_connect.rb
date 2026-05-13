@@ -1,6 +1,8 @@
 class RedConnect < ApplicationRecord
   belongs_to :user_a, class_name: "User"
   belongs_to :user_b, class_name: "User"
+  has_many :chat_messages, dependent: :destroy
+  has_many :downvotes, dependent: :destroy
 
   enum :status, { active: 0, released: 1, expired: 2 }
 
@@ -20,8 +22,17 @@ class RedConnect < ApplicationRecord
     user.id == user_a_id ? user_b : user_a
   end
 
-  def release!(reason: nil)
-    update!(status: :released, release_reason: reason)
+  def release!(reason: nil, by: nil)
+    transaction do
+      update!(status: :released, release_reason: reason)
+      [ user_a, user_b ].each do |participant|
+        next if by && participant.id == by.id
+        Notification.create!(
+          recipient: participant, actor: by,
+          action: "connect_released", notifiable: self
+        )
+      end
+    end
   end
 
   def expire!

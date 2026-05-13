@@ -49,6 +49,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # 성사된 커넥트(채팅방) + 비추천.
+  resources :red_connects, only: %i[ show destroy ] do
+    resources :chat_messages, only: %i[ create ]
+    resource  :downvote,     only: %i[ create ]
+  end
+
   # 초대장.
   #   GET    /invitations          — 내가 보낸 초대 목록 + 발급 폼
   #   POST   /invitations          — 새 초대 발급

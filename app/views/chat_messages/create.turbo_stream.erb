@@ -1,0 +1,2 @@
+<%# Solid Cable broadcast가 채팅방에 prepend하지만, 본인 브라우저는 turbo_stream으로 즉시 입력 폼 초기화. %>
+<%= turbo_stream.replace "chat_form", partial: "red_connects/form", locals: { red_connect: @red_connect, chat_message: ChatMessage.new } %>

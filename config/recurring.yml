@@ -1,15 +1,23 @@
-# examples:
-#   periodic_cleanup:
-#     class: CleanSoftDeletedRecordsJob
-#     queue: background
-#     args: [ 1000, { batch_size: 500 } ]
-#     schedule: every hour
-#   periodic_cleanup_with_command:
-#     command: "SoftDeletedRecord.due.delete_all"
-#     priority: 2
-#     schedule: at 5am every day
+# Solid Queue 정기 잡. fugit 표현식.
+# production에만 등록 — 개발/테스트는 수동 실행.
 
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+
+  invitation_expire:
+    class: InvitationExpireJob
+    queue: default
+    schedule: every day at 04:00 (Asia/Seoul)
+
+  red_connect_expire:
+    class: RedConnectExpireJob
+    queue: default
+    schedule: every hour at minute 5
+
+  connect_request_expire:
+    class: ConnectRequestExpireJob
+    queue: default
+    # 매주 월요일 00:00 KST 새 기수 시작 시점에 이전 기수 미응답 처리.
+    schedule: every Monday at 00:00 (Asia/Seoul)

@@ -3,7 +3,8 @@ class Notification < ApplicationRecord
   # Phase D-1~D-3에서 매칭/커넥트/채팅/비추천 등 추가 예정.
   ACTIONS = %w[
     commented_on_post replied_to_comment liked_post liked_comment
-    connect_requested connect_accepted connect_cancelled
+    connect_requested connect_accepted connect_cancelled connect_released
+    chat_message downvoted
   ].freeze
 
   belongs_to :recipient, class_name: "User"
@@ -33,15 +34,21 @@ class Notification < ApplicationRecord
     when "connect_requested"  then "커넥트를 요청했습니다"
     when "connect_accepted"   then "커넥트 요청을 수락했습니다"
     when "connect_cancelled"  then "커넥트 요청이 취소되었습니다"
+    when "connect_released"   then "커넥트가 종료되었습니다"
+    when "chat_message"       then "새 메시지를 보냈습니다"
+    when "downvoted"          then "당신을 비추천했습니다"
     end
   end
 
   def link_path
+    helpers = Rails.application.routes.url_helpers
     case notifiable
     when Post           then notifiable
     when Comment        then notifiable.post
-    when ConnectRequest then Rails.application.routes.url_helpers.matching_path
-    when RedConnect     then Rails.application.routes.url_helpers.matching_path
+    when ConnectRequest then helpers.matching_path
+    when RedConnect     then helpers.red_connect_path(notifiable)
+    when ChatMessage    then helpers.red_connect_path(notifiable.red_connect)
+    when Downvote       then helpers.matching_path
     end
   end
 

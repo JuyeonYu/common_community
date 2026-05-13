@@ -38,6 +38,11 @@ class User < ApplicationRecord
 
   has_many :sent_connect_requests,  class_name: "ConnectRequest", foreign_key: :requester_id, dependent: :destroy
   has_many :recv_connect_requests,  class_name: "ConnectRequest", foreign_key: :target_id,    dependent: :destroy
+  has_many :chat_messages, foreign_key: :sender_id, dependent: :destroy
+
+  def active_red_connects
+    RedConnect.for_user(self).where(status: :active)
+  end
 
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
