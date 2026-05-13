@@ -86,11 +86,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <% @candidates.each do |cand| %>
             <article class="rounded-md bg-white border border-gray-200 p-4">
-              <div class="flex items-start gap-3">
+              <%= link_to matching_candidate_path(cand), class: "flex items-start gap-3 hover:opacity-90" do %>
                 <%= avatar_image(cand, class: "h-14 w-14 rounded-full") %>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <p class="font-medium"><%= cand.nickname.presence || cand.name %></p>
+                    <p class="font-medium"><%= cand.nickname.presence || "이름 비공개" %></p>
                     <% inv = cand.invited_by&.sent_invitations&.find_by(accepted_by_id: cand.id) %>
                     <% if inv&.boosted? %>
                       <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력 추천</span>
@@ -99,8 +99,9 @@
                   <% if inv && inv.recommendation_comment.present? %>
                     <p class="text-xs text-gray-600 italic mt-1 line-clamp-3">"<%= inv.recommendation_comment %>"</p>
                   <% end %>
+                  <p class="text-[11px] text-blue-600 mt-1">프로필 보기 →</p>
                 </div>
-              </div>
+              <% end %>
               <% unless @my_pending_request %>
                 <%= button_to "커넥트 요청", connect_requests_path(target_id: cand.id), method: :post,
                       data: { turbo_confirm: "이 사람에게 커넥트를 요청할까요? 1기수에 1명만 가능합니다." },

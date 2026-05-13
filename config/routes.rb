@@ -42,6 +42,10 @@ Rails.application.routes.draw do
   resource :matching, only: %i[ show destroy ], controller: "matching" do
     post :enable
   end
+  # 매칭 후보 풀 프로필 (제한된 노출).
+  get "/matching/candidates/:id", to: "matching/candidates#show",
+      as: :matching_candidate, constraints: { id: /\d+/ }
+
   resources :connect_requests, only: %i[ create destroy ] do
     member do
       post :accept
@@ -50,7 +54,7 @@ Rails.application.routes.draw do
   end
 
   # 성사된 커넥트(채팅방) + 비추천.
-  resources :red_connects, only: %i[ show destroy ] do
+  resources :red_connects, only: %i[ index show destroy ] do
     resources :chat_messages, only: %i[ create ]
     resource  :downvote,     only: %i[ create ]
   end

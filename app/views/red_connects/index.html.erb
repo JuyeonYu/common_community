@@ -1,0 +1,37 @@
+<% content_for :title, "메시지" %>
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="text-2xl font-bold mb-6">메시지</h1>
+
+  <% if @active_red_connects.any? %>
+    <ul class="space-y-2">
+      <% @active_red_connects.each do |rc| %>
+        <% other = rc.other_user(Current.user) %>
+        <% last  = rc.chat_messages.order(created_at: :desc).first %>
+        <li>
+          <%= link_to red_connect_path(rc),
+                class: "flex items-center gap-3 rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
+            <%= avatar_image(other, class: "h-12 w-12 rounded-full") %>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="font-medium truncate"><%= other.nickname.presence || other.name %></p>
+                <% if last %>
+                  <span class="text-[10px] text-gray-400 shrink-0"><%= l last.created_at, format: :short %></span>
+                <% end %>
+              </div>
+              <% if last %>
+                <p class="text-xs text-gray-500 truncate"><%= last.body %></p>
+              <% else %>
+                <p class="text-xs text-gray-400">아직 메시지가 없습니다.</p>
+              <% end %>
+              <p class="text-[10px] text-gray-400 mt-1">만료 <%= l rc.expires_at, format: :short %></p>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-sm text-gray-500">진행 중인 커넥트가 없습니다.</p>
+    <%= link_to "이성 매칭 가기 →", matching_path, class: "mt-3 inline-block text-sm text-blue-600 hover:underline" %>
+  <% end %>
+</div>

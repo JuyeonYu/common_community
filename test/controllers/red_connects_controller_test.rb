@@ -25,6 +25,6 @@ class RedConnectsControllerTest < ActionDispatch::IntegrationTest
       delete red_connect_path(@rc)
     end
     assert @rc.reload.released?
-    assert_redirected_to matching_path
+    assert_redirected_to red_connects_path
   end
 end
