@@ -31,7 +31,7 @@
                     class: "flex items-center gap-3 rounded-md border border-gray-200 p-2 hover:bg-gray-50" do %>
                 <%= avatar_image(other, class: "h-9 w-9 rounded-full") %>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium"><%= other.nickname.presence || other.name %></p>
+                  <p class="text-sm font-medium"><%= other.nickname %></p>
                   <p class="text-xs text-gray-500">만료 <%= l rc.expires_at, format: :short %></p>
                 </div>
                 <span class="text-xs text-blue-600">채팅 →</span>
@@ -50,7 +50,7 @@
             <li class="flex items-center gap-3 border-b last:border-b-0 pb-3 last:pb-0">
               <%= avatar_image(req.requester, class: "h-10 w-10 rounded-full") %>
               <div class="flex-1 text-sm">
-                <p class="font-medium"><%= req.requester.nickname.presence || req.requester.name %></p>
+                <p class="font-medium"><%= req.requester.nickname %></p>
                 <% if (inv = req.requester.invited_by&.sent_invitations&.find_by(accepted_by_id: req.requester.id)) %>
                   <p class="text-xs text-gray-500 italic">"<%= truncate(inv.recommendation_comment, length: 60) %>"</p>
                 <% end %>
@@ -69,7 +69,7 @@
       <section class="rounded-md bg-yellow-50 border border-yellow-200 p-5 mb-6">
         <p class="text-sm">
           이번 기수 요청 송신 완료 — 상대 응답 대기 중
-          (<%= @my_pending_request.target.nickname.presence || @my_pending_request.target.name %>)
+          (<%= @my_pending_request.target.nickname %>)
         </p>
         <%= button_to "요청 취소", connect_request_path(@my_pending_request), method: :delete,
               data: { turbo_confirm: "요청을 취소할까요?" },
@@ -90,7 +90,7 @@
                 <%= avatar_image(cand, class: "h-14 w-14 rounded-full") %>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <p class="font-medium"><%= cand.nickname.presence || "이름 비공개" %></p>
+                    <p class="font-medium"><%= cand.nickname %></p>
                     <% inv = cand.invited_by&.sent_invitations&.find_by(accepted_by_id: cand.id) %>
                     <% if inv&.boosted? %>
                       <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력 추천</span>
@@ -149,7 +149,7 @@
       <% unless @has_recommendation %>
         <div class="mt-4 rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm">
           <p class="text-yellow-900">
-            <strong><%= @accepted_invitation&.inviter&.nickname.presence || @accepted_invitation&.inviter&.name || "초대자" %></strong>님의 추천서가 아직 없습니다.
+            <strong><%= @accepted_invitation&.inviter&.nickname || "초대자" %></strong>님의 추천서가 아직 없습니다.
           </p>
           <%= button_to "초대자에게 추천서 요청", request_recommendation_invitations_path, method: :post,
                 class: "mt-2 rounded-md bg-yellow-600 px-3 py-1.5 text-white text-xs font-medium hover:bg-yellow-500 cursor-pointer" %>

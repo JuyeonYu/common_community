@@ -4,7 +4,7 @@
 
     <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
       <%= avatar_image(@post.user, class: "h-5 w-5 rounded-full") %>
-      <span class="font-medium text-gray-700"><%= @post.user.name %></span>
+      <span class="font-medium text-gray-700"><%= @post.user.nickname %></span>
       <span>·</span>
       <time><%= l @post.created_at, format: :short %></time>
       <span>·</span>

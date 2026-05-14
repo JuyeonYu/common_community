@@ -225,6 +225,6 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     get invitations_path
     assert_response :success
     assert_match(/초대 트리/, response.body)
-    assert_match(@inactive.name, response.body)
+    assert_match(@inactive.nickname, response.body)
   end
 end

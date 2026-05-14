@@ -10,7 +10,7 @@
   <div class="inline-flex items-center gap-2 rounded-md
               <%= is_root ? 'bg-blue-50 border border-blue-200 px-3 py-2' : 'bg-white px-2 py-1' %>">
     <%= avatar_image(user, class: "h-6 w-6 rounded-full") %>
-    <%= link_to (user.nickname.presence || user.name), profile_path(user),
+    <%= link_to (user.nickname), profile_path(user),
           class: "text-sm hover:underline #{ 'font-semibold' if is_root }" %>
     <span class="text-xs text-gray-400">초대 <%= user.invitees.size %></span>
     <% if cycle %>

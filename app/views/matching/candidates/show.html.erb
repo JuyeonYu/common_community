@@ -1,4 +1,4 @@
-<% content_for :title, @candidate.nickname.presence || "후보 프로필" %>
+<% content_for :title, @candidate.nickname %>
 
 <div class="mx-auto max-w-2xl">
   <%= link_to "← 매칭 후보 목록", matching_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
@@ -8,7 +8,7 @@
       <%= avatar_image(@candidate, class: "h-24 w-24 rounded-full") %>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
-          <h1 class="text-2xl font-bold"><%= @candidate.nickname.presence || "이름 비공개" %></h1>
+          <h1 class="text-2xl font-bold"><%= @candidate.nickname %></h1>
           <% if @invitation&.boosted? %>
             <span class="text-xs px-2 py-0.5 rounded bg-rose-100 text-rose-700">강력 추천</span>
           <% end %>

@@ -1,4 +1,4 @@
-<% content_for :title, (@user.nickname.presence || @user.name) %>
+<% content_for :title, @user.nickname %>
 
 <div class="mx-auto max-w-3xl">
   <header class="rounded-md bg-white border border-gray-200 p-6">
@@ -8,7 +8,7 @@
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
           <h1 class="text-2xl font-bold">
-            <%= @user.nickname.presence || @user.name %>
+            <%= @user.nickname %>
           </h1>
           <% if @user.admin? %>
             <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">관리자</span>
@@ -39,6 +39,9 @@
 
         <% if Current.user&.id == @user.id %>
           <p class="mt-3 text-xs text-gray-500">
+            실명 <span class="font-medium text-gray-700"><%= @user.name %></span>
+          </p>
+          <p class="mt-1 text-xs text-gray-500">
             로그인 이메일 <span class="font-mono"><%= @user.email_address %></span>
           </p>
         <% end %>

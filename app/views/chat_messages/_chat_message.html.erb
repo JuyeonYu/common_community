@@ -6,7 +6,7 @@
      class="flex justify-start">
   <div class="message-bubble max-w-[75%] rounded-2xl px-3 py-2 text-sm bg-white border border-gray-200 text-gray-900">
     <p class="text-[11px] font-medium text-gray-500 mb-0.5">
-      <%= chat_message.sender.nickname.presence || chat_message.sender.name %>
+      <%= chat_message.sender.nickname %>
     </p>
     <p class="whitespace-pre-wrap break-words"><%= chat_message.body %></p>
     <p class="text-[10px] mt-1 text-gray-400">

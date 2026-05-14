@@ -25,7 +25,7 @@
         <% @users.each do |u| %>
           <tr>
             <td class="px-3 py-2">
-              <div class="font-medium"><%= u.nickname.presence || u.name %></div>
+              <div class="font-medium"><%= u.nickname %></div>
               <div class="text-xs text-gray-500"><%= u.email_address %></div>
             </td>
             <td class="px-3 py-2"><%= u.ticket_score %></td>

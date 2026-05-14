@@ -2,7 +2,7 @@
   <header class="flex items-center gap-2 text-xs text-gray-500 mb-2">
     <%= link_to profile_path(post.user), class: "flex items-center gap-2 hover:text-gray-700" do %>
       <%= avatar_image(post.user, class: "h-5 w-5 rounded-full") %>
-      <span class="font-medium text-gray-700"><%= post.user.name %></span>
+      <span class="font-medium text-gray-700"><%= post.user.nickname %></span>
     <% end %>
     <span>·</span>
     <time datetime="<%= post.created_at.iso8601 %>"><%= l post.created_at, format: :short %></time>

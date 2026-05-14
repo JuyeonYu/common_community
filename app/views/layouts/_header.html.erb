@@ -34,7 +34,7 @@
         <% end %>
         <%= link_to profile_path(Current.user), class: "flex items-center gap-2 hover:text-gray-900" do %>
           <%= avatar_image(Current.user, class: "h-8 w-8 rounded-full") %>
-          <span class="text-gray-700 hidden sm:inline"><%= Current.user.name %></span>
+          <span class="text-gray-700 hidden sm:inline"><%= Current.user.nickname %></span>
         <% end %>
         <%= button_to "로그아웃", session_path, method: :delete,
               class: "text-gray-500 underline hover:text-gray-700" %>

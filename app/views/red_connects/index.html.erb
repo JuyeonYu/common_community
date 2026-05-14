@@ -14,7 +14,7 @@
             <%= avatar_image(other, class: "h-12 w-12 rounded-full") %>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2">
-                <p class="font-medium truncate"><%= other.nickname.presence || other.name %></p>
+                <p class="font-medium truncate"><%= other.nickname %></p>
                 <% if last %>
                   <span class="text-[10px] text-gray-400 shrink-0"><%= l last.created_at, format: :short %></span>
                 <% end %>

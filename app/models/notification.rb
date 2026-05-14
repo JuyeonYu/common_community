@@ -37,7 +37,7 @@ class Notification < ApplicationRecord
     when "connect_cancelled"  then "커넥트 요청이 취소되었습니다"
     when "connect_released"   then "커넥트가 종료되었습니다"
     when "chat_message"       then "새 메시지를 보냈습니다"
-    when "downvoted"          then "당신을 비추천했습니다"
+    when "downvoted"          then "당신을 별로에요로 표시했습니다"
     when "recommendation_requested" then "추천서 작성을 요청했습니다"
     when "recommendation_written"   then "추천서를 작성해주었습니다"
     end

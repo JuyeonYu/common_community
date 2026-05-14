@@ -6,7 +6,7 @@
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
           <h1 class="text-xl font-bold">
-            <%= @user.nickname.presence || @user.name %>
+            <%= @user.nickname %>
           </h1>
           <% if @user.age %>
             <span class="text-sm text-gray-500"><%= @user.age %>세</span>

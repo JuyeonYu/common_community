@@ -1,6 +1,7 @@
 one:
   email_address: one@example.com
   name: 사용자1
+  nickname: 일번이
   admin: false
   seed: true
   invitation_accepted_at: 2026-01-01 00:00:00
@@ -8,6 +9,7 @@ one:
 two:
   email_address: two@example.com
   name: 사용자2
+  nickname: 이번이
   admin: false
   seed: true
   invitation_accepted_at: 2026-01-01 00:00:00
@@ -15,6 +17,7 @@ two:
 admin:
   email_address: admin@example.com
   name: 관리자
+  nickname: 관리자닉
   admin: true
   seed: true
   invitation_accepted_at: 2026-01-01 00:00:00
@@ -22,5 +25,6 @@ admin:
 inactive:
   email_address: inactive@example.com
   name: 잠금사용자
+  nickname: 잠금이
   admin: false
   seed: false

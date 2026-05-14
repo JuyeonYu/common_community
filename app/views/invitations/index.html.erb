@@ -7,7 +7,7 @@
     <h2 class="font-semibold mb-3">초대 트리</h2>
     <p class="text-xs text-gray-500 mb-3">
       나로부터 시작된 초대 사슬. 깊이 <%= @tree_stats[:max_depth] %>단계 ·
-      누적 <%= @tree_stats[:descendants] %>명. <% if @inviter %>(나를 초대: <%= @inviter.nickname.presence || @inviter.name %>)<% end %>
+      누적 <%= @tree_stats[:descendants] %>명. <% if @inviter %>(나를 초대: <%= @inviter.nickname %>)<% end %>
     </p>
     <div class="overflow-x-auto">
       <%= render "tree_node", node: @tree_root, root: true %>

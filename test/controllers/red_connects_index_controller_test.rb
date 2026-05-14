@@ -23,7 +23,7 @@ class RedConnectsIndexControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@u1)
     get red_connects_path
     assert_response :success
-    assert_match(/#{@u2.name}/, response.body)
+    assert_match(/#{@u2.nickname}/, response.body)
   end
 
   test "index: released 커넥트는 노출 X" do

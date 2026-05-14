@@ -2,7 +2,7 @@
 
 <div class="mx-auto max-w-3xl">
   <h1 class="text-2xl font-bold mb-2">
-    <%= @user.nickname.presence || @user.name %>
+    <%= @user.nickname %> <span class="text-sm font-normal text-gray-500">(<%= @user.name %>)</span>
   </h1>
   <p class="text-sm text-gray-500 mb-6"><%= @user.email_address %></p>
 

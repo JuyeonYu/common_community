@@ -61,8 +61,8 @@ class User < ApplicationRecord
 
   validates :email_address, presence: true, uniqueness: true
   validates :name, presence: true
-  validates :nickname, uniqueness: true, allow_nil: true,
-            length: { in: 2..20 },
+  # nickname은 controller before_action(ensure_nickname)이 강제. 모델 검증은 입력 값이 있을 때만 unique/length/format.
+  validates :nickname, uniqueness: true, length: { in: 2..20 },
             format: { with: /\A[\p{L}\p{N}_]+\z/, message: "는 한글/영문/숫자/_만 사용할 수 있습니다" },
             if: -> { nickname.present? }
   validates :google_uid, uniqueness: true, allow_nil: true
