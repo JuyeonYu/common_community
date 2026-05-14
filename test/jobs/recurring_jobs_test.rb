@@ -4,7 +4,7 @@ class RecurringJobsTest < ActiveJob::TestCase
   test "InvitationExpireJob: 만료 시각 지난 pending → expired" do
     inv = users(:one).sent_invitations.create!(
       recommendation_comment: "테스트 추천서",
-      invitee_email: "expire-test@example.com",
+      invitee_email: "expire-test@gmail.com",
       expires_at: 1.hour.ago
     )
     assert inv.pending?

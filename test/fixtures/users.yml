@@ -1,5 +1,5 @@
 one:
-  email_address: one@example.com
+  email_address: one@gmail.com
   name: 사용자1
   nickname: 일번이
   admin: false
@@ -7,7 +7,7 @@ one:
   invitation_accepted_at: 2026-01-01 00:00:00
 
 two:
-  email_address: two@example.com
+  email_address: two@gmail.com
   name: 사용자2
   nickname: 이번이
   admin: false
@@ -15,7 +15,7 @@ two:
   invitation_accepted_at: 2026-01-01 00:00:00
 
 admin:
-  email_address: admin@example.com
+  email_address: admin@gmail.com
   name: 관리자
   nickname: 관리자닉
   admin: true
@@ -23,7 +23,7 @@ admin:
   invitation_accepted_at: 2026-01-01 00:00:00
 
 inactive:
-  email_address: inactive@example.com
+  email_address: inactive@gmail.com
   name: 잠금사용자
   nickname: 잠금이
   admin: false

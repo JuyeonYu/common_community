@@ -5,7 +5,7 @@ class InvitationTest < ActiveSupport::TestCase
 
   def build_invite(**overrides)
     @inviter.sent_invitations.create!({
-      invitee_email: "fresh-#{SecureRandom.hex(4)}@example.com"
+      invitee_email: "fresh-#{SecureRandom.hex(4)}@gmail.com"
     }.merge(overrides))
   end
 
@@ -63,7 +63,7 @@ class InvitationTest < ActiveSupport::TestCase
   test "recommendation_comment: 너무 짧으면 거절" do
     inv = @inviter.sent_invitations.build(
       recommendation_comment: "짧음",
-      invitee_email: "short@example.com"
+      invitee_email: "short@gmail.com"
     )
     assert_not inv.valid?
     assert_includes inv.errors.attribute_names, :recommendation_comment
@@ -87,8 +87,14 @@ class InvitationTest < ActiveSupport::TestCase
     assert_not inv.valid?
     assert_includes inv.errors.attribute_names, :invitee_email
 
-    inv.invitee_email = "  TEST@Example.Com  "
-    assert_equal "test@example.com", inv.invitee_email
+    inv.invitee_email = "  TEST@Gmail.Com  "
+    assert_equal "test@gmail.com", inv.invitee_email
+  end
+
+  test "invitee_email: @gmail.com이 아니면 거절" do
+    inv = @inviter.sent_invitations.build(invitee_email: "x@example.com")
+    assert_not inv.valid?
+    assert_includes inv.errors[:invitee_email].first, "@gmail.com"
   end
 
   test "이미 가입된 이메일로 초대 발급 거절" do

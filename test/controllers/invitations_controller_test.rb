@@ -37,7 +37,7 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
   test "create: 7일 이내 발급 이력 있으면 거절" do
     sign_in_as(@user)
     assert_no_difference "Invitation.count" do
-      post invitations_path, params: { invitation: { invitee_email: "x@example.com" } }
+      post invitations_path, params: { invitation: { invitee_local_part: "x" } }
     end
     assert_redirected_to invitations_path
     assert_match(/무료 초대/, flash[:alert])
@@ -48,17 +48,18 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_difference "Invitation.count", 1 do
       assert_enqueued_jobs 1, only: InvitationMailJob do
         post invitations_path, params: {
-          invitation: { invitee_email: "new-friend@example.com" }
+          invitation: { invitee_local_part: "new-friend" }
         }
       end
     end
     inv = users(:two).sent_invitations.order(:created_at).last
+    assert_equal "new-friend@gmail.com", inv.invitee_email
     assert_not inv.recommendation_written?
     assert_not inv.boosted?
     assert_redirected_to invitations_path
   end
 
-  test "create: invitee_email 누락 시 거절" do
+  test "create: invitee_local_part 누락 시 거절" do
     sign_in_as(users(:two))
     assert_no_difference "Invitation.count" do
       post invitations_path, params: { invitation: {} }
@@ -68,15 +69,16 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
 
   test "create: 이미 가입된 이메일은 거절" do
     sign_in_as(users(:two))
+    local = @user.email_address.split("@").first # @user는 one@gmail.com
     assert_no_difference "Invitation.count" do
-      post invitations_path, params: { invitation: { invitee_email: @user.email_address } }
+      post invitations_path, params: { invitation: { invitee_local_part: local } }
     end
   end
 
   # --- edit / update (추천서 사후 작성) ---
 
   def fresh_invitation_for(inviter, accepted_by: nil)
-    inv = inviter.sent_invitations.create!(invitee_email: "fresh-#{SecureRandom.hex(4)}@example.com")
+    inv = inviter.sent_invitations.create!(invitee_email: "fresh-#{SecureRandom.hex(4)}@gmail.com")
     inv.update!(status: :accepted, accepted_by: accepted_by) if accepted_by
     inv
   end

@@ -26,12 +26,18 @@
 
     <%= form_with model: @invitation, url: invitations_path, class: "space-y-3" do |form| %>
       <div>
-        <%= form.label :invitee_email, "초대받을 사람의 이메일 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= form.email_field :invitee_email, required: true,
-              placeholder: "friend@example.com",
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+        <%= form.label :invitee_local_part, "초대받을 Gmail 아이디 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <div class="flex rounded-md border border-gray-300 focus-within:border-blue-600 overflow-hidden">
+          <%= form.text_field :invitee_local_part, required: true,
+                placeholder: "friend",
+                pattern: "[^@\\s]+",
+                title: "이메일 아이디만 입력하세요 (@gmail.com 제외)",
+                autocomplete: "off",
+                class: "flex-1 min-w-0 px-3 py-2 focus:outline-none" %>
+          <span class="px-3 py-2 bg-gray-100 text-gray-600 text-sm border-l border-gray-300">@gmail.com</span>
+        </div>
         <p class="mt-1 text-xs text-gray-500">
-          이 이메일로 초대장이 발송되며, <strong>같은 이메일의 Google 계정으로만</strong> 가입할 수 있습니다.
+          Gmail 계정으로만 가입 가능합니다. <strong>이 메일로 받은 사람의 Google 계정으로만</strong> 가입할 수 있습니다.
         </p>
       </div>
 

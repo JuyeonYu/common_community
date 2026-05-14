@@ -15,7 +15,7 @@ class InvitationMailerTest < ActionMailer::TestCase
   end
 
   test "invite: 추천서 미작성이면 추천서 섹션 생략" do
-    inv = users(:one).sent_invitations.create!(invitee_email: "no-rec@example.com")
+    inv = users(:one).sent_invitations.create!(invitee_email: "no-rec@gmail.com")
     mail = InvitationMailer.invite(inv)
     text = mail.text_part.body.to_s
     html = mail.html_part.body.to_s

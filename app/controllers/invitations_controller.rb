@@ -22,8 +22,9 @@ class InvitationsController < ApplicationController
       redirect_to invitations_path, alert: "무료 초대는 #{l next_free_invitation_at, format: :short} 이후 가능합니다." and return
     end
 
+    local_part = params.dig(:invitation, :invitee_local_part).to_s.strip
     @invitation = Current.user.sent_invitations.create!(
-      invitee_email: params.dig(:invitation, :invitee_email).to_s
+      invitee_email: local_part.present? ? "#{local_part}@gmail.com" : ""
     )
     InvitationMailJob.perform_later(@invitation.id)
     redirect_to invitations_path, notice: "초대 메일을 #{@invitation.invitee_email}로 발송했습니다."

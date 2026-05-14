@@ -13,7 +13,9 @@ class Invitation < ApplicationRecord
   validates :token, presence: true, uniqueness: true
   validates :code,  presence: true, uniqueness: true
   validates :expires_at, presence: true
-  validates :invitee_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  # 가입은 Gmail 계정만 허용 — 초대 이메일도 동일 도메인 강제.
+  validates :invitee_email, presence: true,
+            format: { with: /\A[^@\s]+@gmail\.com\z/i, message: "는 @gmail.com 주소여야 합니다" }
   validate  :invitee_not_already_user, on: :create
   # 추천서는 발급 후 별도로 작성. 작성된 길이 제약.
   validates :recommendation_comment, length: { in: 5..1000 }, allow_blank: true
