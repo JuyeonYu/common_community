@@ -22,10 +22,10 @@
       <% case @reportable %>
       <% when Post %>
         <p class="font-medium"><%= @reportable.title %></p>
-        <p class="text-xs text-gray-500">글 · <%= @reportable.user.name %></p>
+        <p class="text-xs text-gray-500">글 · <%= @reportable.user.nickname %></p>
       <% when Comment %>
         <p class="line-clamp-2"><%= @reportable.body %></p>
-        <p class="text-xs text-gray-500 mt-1">댓글 · <%= @reportable.user.name %></p>
+        <p class="text-xs text-gray-500 mt-1">댓글 · <%= @reportable.user.nickname %></p>
       <% end %>
     </div>
 
