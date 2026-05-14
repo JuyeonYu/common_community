@@ -52,4 +52,26 @@ class PostTest < ActiveSupport::TestCase
   test "search_by_text: 빈 문자열은 결과 없음" do
     assert_empty Post.search_by_text("")
   end
+
+  # --- 멘션 (Phase E-3) ---
+
+  test "본문 @닉네임이 매칭되면 해당 사용자에게 mentioned 알림" do
+    target = users(:two)
+    assert_difference -> { Notification.where(action: "mentioned").count }, 1 do
+      Post.create!(user: @user, title: "멘션", body: "<p>안녕 @#{target.nickname}</p>")
+    end
+    assert_equal target, Notification.where(action: "mentioned").last.recipient
+  end
+
+  test "자기 자신 멘션은 알림 없음" do
+    assert_no_difference -> { Notification.where(action: "mentioned").count } do
+      Post.create!(user: @user, title: "셀프", body: "<p>나 @#{@user.nickname}</p>")
+    end
+  end
+
+  test "존재하지 않는 닉네임은 무시" do
+    assert_no_difference -> { Notification.where(action: "mentioned").count } do
+      Post.create!(user: @user, title: "없는닉", body: "<p>@없는닉네임_123</p>")
+    end
+  end
 end

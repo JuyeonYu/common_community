@@ -1,6 +1,7 @@
 class Comment < ApplicationRecord
   include Likeable
   include Reportable
+  include Mentionable
 
   belongs_to :post
   belongs_to :user
@@ -26,6 +27,15 @@ class Comment < ApplicationRecord
 
   def author?(other_user)
     other_user.present? && user_id == other_user.id
+  end
+
+  # Mentionable concern 인터페이스 — 멘션 파싱 대상 텍스트와 그룹키(부모 글 단위).
+  def mention_source_text
+    body
+  end
+
+  def mention_group_key
+    "post:#{post_id}:mention"
   end
 
   private

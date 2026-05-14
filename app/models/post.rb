@@ -1,6 +1,7 @@
 class Post < ApplicationRecord
   include Likeable
   include Reportable
+  include Mentionable
   include PgSearch::Model
 
   belongs_to :user
@@ -36,5 +37,14 @@ class Post < ApplicationRecord
 
   def tag_names=(value)
     self.tags = Tag.from_names(value)
+  end
+
+  # Mentionable concern 인터페이스 — 멘션 파싱 대상 텍스트와 그룹키.
+  def mention_source_text
+    body.to_plain_text
+  end
+
+  def mention_group_key
+    "post:#{id}:mention"
   end
 end
