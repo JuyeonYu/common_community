@@ -56,23 +56,7 @@ class Notification < ApplicationRecord
 
   def message
     suffix = count > 1 ? " (#{count})" : ""
-    body = case action
-    when "commented_on_post"  then "내 글에 댓글을 남겼습니다"
-    when "replied_to_comment" then "내 댓글에 답글을 남겼습니다"
-    when "liked_post"         then "내 글에 좋아요를 눌렀습니다"
-    when "liked_comment"      then "내 댓글에 좋아요를 눌렀습니다"
-    when "connect_requested"  then "커넥트를 요청했습니다"
-    when "connect_accepted"   then "커넥트 요청을 수락했습니다"
-    when "connect_cancelled"  then "커넥트 요청이 취소되었습니다"
-    when "connect_released"   then "커넥트가 종료되었습니다"
-    when "connect_rejected"   then "커넥트 요청을 거절했습니다"
-    when "new_match_exposed"  then "새 매칭 상대로 노출되었습니다"
-    when "chat_message"       then "새 메시지를 보냈습니다"
-    when "downvoted"          then "당신을 별로에요로 표시했습니다"
-    when "mentioned"          then "회원님을 언급했습니다"
-    when "recommendation_requested" then "추천서 작성을 요청했습니다"
-    when "recommendation_written"   then "추천서를 작성해주었습니다"
-    end
+    body = I18n.t("notifications.actions.#{action}", default: "")
     "#{body}#{suffix}"
   end
 

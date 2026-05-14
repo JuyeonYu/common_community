@@ -22,6 +22,34 @@ ko:
       accepted: "사용됨"
       expired: "만료"
       cancelled: "취소"
+  notifications:
+    actions:
+      commented_on_post:        "내 글에 댓글을 남겼습니다"
+      replied_to_comment:       "내 댓글에 답글을 남겼습니다"
+      liked_post:               "내 글에 좋아요를 눌렀습니다"
+      liked_comment:            "내 댓글에 좋아요를 눌렀습니다"
+      connect_requested:        "커넥트를 요청했습니다"
+      connect_accepted:         "커넥트 요청을 수락했습니다"
+      connect_cancelled:        "커넥트 요청이 취소되었습니다"
+      connect_released:         "커넥트가 종료되었습니다"
+      connect_rejected:         "커넥트 요청을 거절했습니다"
+      new_match_exposed:        "새 매칭 상대로 노출되었습니다"
+      chat_message:             "새 메시지를 보냈습니다"
+      downvoted:                "당신을 별로에요로 표시했습니다"
+      mentioned:                "회원님을 언급했습니다"
+      recommendation_requested: "추천서 작성을 요청했습니다"
+      recommendation_written:   "추천서를 작성해주었습니다"
+  red_connects:
+    show:
+      downvote:
+        summary: "별로에요"
+        kinds:
+          false_info:   "허위 정보 (스코어 페널티)"
+          abusive:      "부적절한 언어/행동 (스코어 페널티)"
+          incompatible: "단순 맞지 않음 (페널티 없음)"
+        comment_placeholder: "추가 코멘트 (선택)"
+        submit:  "제출"
+        confirm: "별로에요로 표시하면 커넥트가 즉시 종료됩니다. 진행할까요?"
   activerecord:
     attributes:
       user:
