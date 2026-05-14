@@ -27,7 +27,7 @@ class RedConnect < ApplicationRecord
       update!(status: :released, release_reason: reason)
       [ user_a, user_b ].each do |participant|
         next if by && participant.id == by.id
-        Notification.create!(
+        Notification.deliver(
           recipient: participant, actor: by,
           action: "connect_released", notifiable: self
         )

@@ -68,4 +68,53 @@ class NotificationTest < ActiveSupport::TestCase
     assert_match(/댓글/, n.message)
     assert_equal n.notifiable.post, n.link_path
   end
+
+  # --- 그룹화 (Phase E-2) ---
+
+  test "deliver: 같은 group_key + 미확인이면 새 row 없이 count 증가" do
+    n1 = Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                              notifiable: @post, group_key: "post:#{@post.id}:comment")
+    assert_difference "Notification.count", 0 do
+      n2 = Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                                notifiable: @post, group_key: "post:#{@post.id}:comment")
+      assert_equal n1.id, n2.id
+    end
+    assert_equal 2, n1.reload.count
+  end
+
+  test "deliver: 같은 group_key라도 읽음 처리된 후엔 새 row" do
+    n1 = Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                              notifiable: @post, group_key: "post:#{@post.id}:comment")
+    n1.update!(read_at: Time.current)
+    assert_difference "Notification.count", 1 do
+      Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                           notifiable: @post, group_key: "post:#{@post.id}:comment")
+    end
+  end
+
+  test "deliver: group_key 없으면 매번 새 row" do
+    assert_difference "Notification.count", 2 do
+      2.times do
+        Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                             notifiable: @post)
+      end
+    end
+  end
+
+  test "message: count > 1이면 접미사 표기" do
+    n = Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                             notifiable: @post, group_key: "post:#{@post.id}:comment")
+    Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                         notifiable: @post, group_key: "post:#{@post.id}:comment")
+    Notification.deliver(recipient: @author, actor: @actor, action: "commented_on_post",
+                         notifiable: @post, group_key: "post:#{@post.id}:comment")
+    assert_match(/\(3\)/, n.reload.message)
+  end
+
+  test "deliver: 본인 자신에게는 알림 발송 X" do
+    assert_no_difference "Notification.count" do
+      Notification.deliver(recipient: @actor, actor: @actor, action: "commented_on_post",
+                           notifiable: @post, group_key: "post:#{@post.id}:comment")
+    end
+  end
 end

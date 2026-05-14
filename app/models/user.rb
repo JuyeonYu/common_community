@@ -44,6 +44,11 @@ class User < ApplicationRecord
     RedConnect.for_user(self).where(status: :active)
   end
 
+  # chat_message 알림은 group_key("chat:<rcid>:<sender>")로 묶이므로 미확인 row 수 = 미확인 대화방 수.
+  def unread_message_room_count
+    notifications.unread.where(action: "chat_message").count
+  end
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }

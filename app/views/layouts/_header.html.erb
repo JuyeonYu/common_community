@@ -22,10 +22,12 @@
         <%= link_to "게시판", posts_path, class: "text-gray-700 hover:text-gray-900 hidden sm:inline" %>
         <%= link_to "이성 매칭", matching_path,
               class: "#{Current.user.matching_active? ? 'text-rose-600 font-semibold' : 'text-gray-700'} hover:text-gray-900 hidden sm:inline" %>
-        <% if (active_connects_count = Current.user.active_red_connects.count).positive? %>
+        <% if Current.user.active_red_connects.exists? %>
           <%= link_to red_connects_path, class: "text-gray-700 hover:text-gray-900 hidden sm:inline" do %>
             메시지
-            <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700"><%= active_connects_count %></span>
+            <% if (unread_rooms = Current.user.unread_message_room_count).positive? %>
+              <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700"><%= unread_rooms %></span>
+            <% end %>
           <% end %>
         <% end %>
         <%= link_to "초대장", invitations_path, class: "text-gray-700 hover:text-gray-900 hidden sm:inline" %>

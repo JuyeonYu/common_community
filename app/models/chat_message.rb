@@ -44,9 +44,10 @@ class ChatMessage < ApplicationRecord
     end
 
     def enqueue_web_push
-      Notification.create!(
+      Notification.deliver(
         recipient: recipient, actor: sender,
-        action: "chat_message", notifiable: self
+        action: "chat_message", notifiable: self,
+        group_key: "chat:#{red_connect_id}:#{sender_id}"
       )
     end
 

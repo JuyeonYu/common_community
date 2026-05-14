@@ -2,11 +2,14 @@
       class: "block rounded-md p-3 border #{notification.read? ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-100'} hover:bg-gray-50" do %>
   <div class="flex items-start gap-3">
     <% if notification.actor&.avatar_url.present? %>
-      <%= image_tag notification.actor.avatar_url, class: "h-8 w-8 rounded-full mt-0.5", alt: notification.actor.name %>
+      <%= image_tag notification.actor.avatar_url, class: "h-8 w-8 rounded-full mt-0.5", alt: notification.actor.nickname %>
     <% end %>
     <div class="flex-1">
       <p class="text-sm">
-        <span class="font-medium"><%= notification.actor&.name || "사용자" %></span>님이 <%= notification.message %>
+        <% if notification.actor %>
+          <span class="font-medium"><%= notification.actor.nickname %></span>님이
+        <% end %>
+        <%= notification.message %>
       </p>
       <p class="text-xs text-gray-500 mt-1">
         <time datetime="<%= notification.created_at.iso8601 %>"><%= l notification.created_at, format: :short %></time>

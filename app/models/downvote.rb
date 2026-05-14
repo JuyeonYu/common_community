@@ -43,7 +43,7 @@ class Downvote < ApplicationRecord
       delta = Rails.application.config.x.blackticket.downvote_penalty
       to_user.score_events.create!(delta: delta, reason: :downvoted_self,
                                    related: self, memo: "비추천: #{kind}")
-      Notification.create!(recipient: to_user, actor: from_user,
+      Notification.deliver(recipient: to_user, actor: from_user,
                            action: "downvoted", notifiable: self)
     end
 end

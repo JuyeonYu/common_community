@@ -26,12 +26,15 @@ class ConnectRequest < ApplicationRecord
       )
       cancel_other_pending!(target)
       cancel_other_pending!(requester)
-      Notification.create!(recipient: requester, actor: target, action: "connect_accepted", notifiable: self)
+      Notification.deliver(recipient: requester, actor: target,
+                           action: "connect_accepted", notifiable: self)
     end
   end
 
   def reject!
     update!(status: :rejected)
+    Notification.deliver(recipient: requester, actor: target,
+                         action: "connect_rejected", notifiable: self)
   end
 
   def cancel!
@@ -65,7 +68,7 @@ class ConnectRequest < ApplicationRecord
     end
 
     def notify_target
-      Notification.create!(
+      Notification.deliver(
         recipient: target, actor: requester,
         action: "connect_requested", notifiable: self
       )

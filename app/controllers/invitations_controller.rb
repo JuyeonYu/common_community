@@ -77,7 +77,7 @@ class InvitationsController < ApplicationController
       end
       # 피초대자가 가입한 상태면 알림 발송.
       if @invitation.accepted_by
-        Notification.create!(
+        Notification.deliver(
           recipient: @invitation.accepted_by, actor: Current.user,
           action: "recommendation_written", notifiable: @invitation
         )
@@ -98,7 +98,7 @@ class InvitationsController < ApplicationController
     if @invitation.recommendation_written?
       redirect_to matching_path, notice: "이미 추천서가 작성되어 있습니다." and return
     end
-    Notification.create!(
+    Notification.deliver(
       recipient: @invitation.inviter, actor: Current.user,
       action: "recommendation_requested", notifiable: @invitation
     )

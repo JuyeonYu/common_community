@@ -10,12 +10,13 @@ class Like < ApplicationRecord
     def create_notification
       return if likeable.user_id == user_id
 
-      action = case likeable
-      when Post    then "liked_post"
-      when Comment then "liked_comment"
+      action, group_key = case likeable
+      when Post    then [ "liked_post",    "post:#{likeable.id}:like" ]
+      when Comment then [ "liked_comment", "comment:#{likeable.id}:like" ]
       end
       return unless action
 
-      Notification.create!(recipient: likeable.user, actor: user, action: action, notifiable: likeable)
+      Notification.deliver(recipient: likeable.user, actor: user, action: action,
+                           notifiable: likeable, group_key: group_key)
     end
 end

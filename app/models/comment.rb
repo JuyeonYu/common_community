@@ -42,10 +42,12 @@ class Comment < ApplicationRecord
     def create_notification
       if reply?
         return if parent.user_id == user_id
-        Notification.create!(recipient: parent.user, actor: user, action: "replied_to_comment", notifiable: self)
+        Notification.deliver(recipient: parent.user, actor: user, action: "replied_to_comment",
+                             notifiable: self, group_key: "comment:#{parent_id}:reply")
       else
         return if post.user_id == user_id
-        Notification.create!(recipient: post.user, actor: user, action: "commented_on_post", notifiable: self)
+        Notification.deliver(recipient: post.user, actor: user, action: "commented_on_post",
+                             notifiable: self, group_key: "post:#{post_id}:comment")
       end
     end
 end
