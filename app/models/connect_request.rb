@@ -45,6 +45,12 @@ class ConnectRequest < ApplicationRecord
     Date.current.strftime("%GW%V")
   end
 
+  # "2026W20" → 해당 ISO 주의 월요일 00:00 ~ 일요일 23:59 범위.
+  def self.gen_week_range(gen_week)
+    year, week = gen_week.split("W").map(&:to_i)
+    Date.commercial(year, week, 1).beginning_of_day..Date.commercial(year, week, 7).end_of_day
+  end
+
   private
     def assign_gen_week
       self.gen_week ||= self.class.current_gen_week

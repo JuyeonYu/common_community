@@ -49,6 +49,19 @@ class User < ApplicationRecord
     notifications.unread.where(action: "chat_message").count
   end
 
+  # 본 기수에 RedConnect를 한 번이라도 성사시킨 적이 있는지 (취소/해제와 무관).
+  def had_red_connect_this_week?(gen_week)
+    ConnectRequest.where(gen_week: gen_week, status: :accepted)
+                  .where("requester_id = :id OR target_id = :id", id: id)
+                  .exists?
+  end
+
+  # 본 기수에 사용한 재요청 크레딧 횟수 (memo: "connect_retry").
+  def connect_retries_used_this_week(gen_week)
+    range = ConnectRequest.gen_week_range(gen_week)
+    credit_transactions.where(kind: :spend, memo: "connect_retry", created_at: range).count
+  end
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }
@@ -171,6 +184,11 @@ class User < ApplicationRecord
     recv_req_ids    = ConnectRequest.where(target_id: viewer.id, gen_week: gen_week).pluck(:requester_id)
     excluded = (sent_target_ids + recv_req_ids).uniq
     pool = pool.where.not(id: excluded) if excluded.any?
+
+    # 본 기수에 한 번이라도 RedConnect를 성사시킨 사용자(본인 포함 양방향) 제외 (Phase E-5)
+    accepted_this_week = ConnectRequest.where(gen_week: gen_week, status: :accepted)
+                                       .pluck(:requester_id, :target_id).flatten.uniq
+    pool = pool.where.not(id: accepted_this_week) if accepted_this_week.any?
 
     pool
   end

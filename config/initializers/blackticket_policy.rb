@@ -14,4 +14,7 @@ Rails.application.config.x.blackticket = ActiveSupport::OrderedOptions.new.tap d
 
   # 매칭/커넥트 (Phase D-2/3에서 사용)
   c.red_connect_default_ttl   = 1.month
+
+  # 거절된 후 같은 기수 내 다른 후보에게 1회 추가 요청 가능 — 1 크레딧 소비.
+  c.connect_retry_cost        = 1
 end
