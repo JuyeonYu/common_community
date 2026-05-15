@@ -47,7 +47,7 @@ gem "tailwindcss-rails"
 gem "pg_search"
 
 # Pagination [https://github.com/ddnexus/pagy]
-gem "pagy", "~> 9"
+gem "pagy", "~> 43"
 
 # OmniAuth + Google OAuth 2.0 — 가입은 Google로, 활성화는 초대 코드로.
 gem "omniauth"
