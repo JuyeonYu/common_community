@@ -43,6 +43,54 @@ class InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/무료 초대/, flash[:alert])
   end
 
+  # --- 추가 발급권 (Phase F-2-b) ---
+
+  test "create: 7일 이내 + pay_extra + 잔액 충분 → 즉시 발급 + 크레딧 차감" do
+    cost = Rails.application.config.x.blackticket.invitation_extra_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    assert_difference "Invitation.count", 1 do
+      post invitations_path, params: { invitation: { invitee_local_part: "extra", pay_extra: "1" } }
+    end
+    inv = @user.sent_invitations.order(:created_at).last
+    assert inv.paid_extra?
+    assert_equal before - cost, @user.reload.ticket_credits
+  end
+
+  test "create: 7일 이내 + pay_extra + 잔액 부족 → 거절" do
+    sign_in_as(@user)
+    assert_no_difference "Invitation.count" do
+      post invitations_path, params: { invitation: { invitee_local_part: "extra", pay_extra: "1" } }
+    end
+    assert_match(/크레딧이 부족/, flash[:alert])
+  end
+
+  test "InvitationExpireJob: paid_extra가 expired 시 50% 환급" do
+    cost = Rails.application.config.x.blackticket.invitation_extra_cost
+    refund = (cost * 0.5).to_i
+    inv = @user.sent_invitations.create!(
+      invitee_email: "expire-paid@gmail.com", paid_extra: true, expires_at: 1.hour.ago
+    )
+    inv.update_columns(status: Invitation.statuses[:pending])
+    assert_difference -> { @user.reload.ticket_credits }, refund do
+      InvitationExpireJob.new.perform
+    end
+    assert inv.reload.expired?
+    assert @user.credit_transactions.exists?(kind: :refund, memo: "invitation_extra_refund")
+  end
+
+  test "InvitationExpireJob: 무료 발급은 환급 없음" do
+    inv = @user.sent_invitations.create!(
+      invitee_email: "expire-free@gmail.com", paid_extra: false, expires_at: 1.hour.ago
+    )
+    inv.update_columns(status: Invitation.statuses[:pending])
+    assert_no_difference -> { @user.reload.ticket_credits } do
+      InvitationExpireJob.new.perform
+    end
+  end
+
   test "create: 7일 초과 사용자는 발급 성공 + 메일 잡 enqueue (추천서 없음)" do
     sign_in_as(users(:two))
     assert_difference "Invitation.count", 1 do

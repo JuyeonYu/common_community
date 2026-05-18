@@ -17,17 +17,40 @@ class InvitationsController < ApplicationController
   end
 
   # 새 초대 발급. 이메일만 입력 — 추천서/강력 추천은 가입 후 별도 작성.
+  # 7일 무료 사용 후엔 invitation_extra_cost 크레딧으로 추가 발급 가능.
   def create
+    pay_extra = ActiveModel::Type::Boolean.new.cast(params.dig(:invitation, :pay_extra))
+    cost      = Rails.application.config.x.blackticket.invitation_extra_cost
+
     if next_free_invitation_at&.future?
-      redirect_to invitations_path, alert: "무료 초대는 #{l next_free_invitation_at, format: :short} 이후 가능합니다." and return
+      unless pay_extra
+        redirect_to invitations_path,
+          alert: "무료 초대는 #{l next_free_invitation_at, format: :short} 이후 가능합니다. 즉시 발급하려면 추가 발급권을 사용하세요." and return
+      end
+      if Current.user.ticket_credits < cost
+        redirect_to invitations_path,
+          alert: "추가 발급에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+      end
     end
 
     local_part = params.dig(:invitation, :invitee_local_part).to_s.strip
-    @invitation = Current.user.sent_invitations.create!(
-      invitee_email: local_part.present? ? "#{local_part}@gmail.com" : ""
-    )
+    invitee_email = local_part.present? ? "#{local_part}@gmail.com" : ""
+
+    Invitation.transaction do
+      paid = !!(pay_extra && next_free_invitation_at&.future?)
+      @invitation = Current.user.sent_invitations.create!(
+        invitee_email: invitee_email, paid_extra: paid
+      )
+      if paid
+        Current.user.credit_transactions.create!(
+          amount: -cost, kind: :spend, related: @invitation, memo: "invitation_extra"
+        )
+      end
+    end
     InvitationMailJob.perform_later(@invitation.id)
-    redirect_to invitations_path, notice: "초대 메일을 #{@invitation.invitee_email}로 발송했습니다."
+    flash[:notice] = "초대 메일을 #{@invitation.invitee_email}로 발송했습니다."
+    flash[:notice] += " (-#{cost} 크레딧)" if @invitation.paid_extra?
+    redirect_to invitations_path
   rescue ActiveRecord::RecordInvalid => e
     redirect_to invitations_path, alert: e.record.errors.full_messages.first
   end
@@ -133,10 +156,11 @@ class InvitationsController < ApplicationController
   end
 
   private
+    # paid_extra(크레딧 발급)는 카운터에서 제외 — 무료 발급 이력만 7일 제한 대상.
     def next_free_invitation_at
-      last = Current.user.sent_invitations.order(created_at: :desc).first
+      last = Current.user.sent_invitations.where(paid_extra: false).order(created_at: :desc).first
       return nil unless last
-      last.created_at + 7.days
+      last.created_at + Rails.application.config.x.blackticket.invitation_free_interval
     end
 
     # 본인 → 본인이 초대한 사람들 → 그들이 초대한 사람들 ... 재귀.

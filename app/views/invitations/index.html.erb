@@ -44,9 +44,19 @@
       <p class="text-xs text-gray-500">
         추천서와 강력 추천은 가입 후 별도로 작성합니다.
       </p>
-      <%= form.submit "초대 메일 발송",
-            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer disabled:opacity-50",
-            disabled: @next_free_at&.future? %>
+
+      <% extra_cost = Rails.application.config.x.blackticket.invitation_extra_cost %>
+      <% if @next_free_at&.future? %>
+        <label class="flex items-center gap-2 text-sm">
+          <%= form.check_box :pay_extra %>
+          <span>지금 추가 발급 (-<%= extra_cost %> 크레딧 · 잔액 <%= Current.user.ticket_credits %>) — 미가입 만료 시 50% 환급</span>
+        </label>
+        <%= form.submit "초대 메일 발송",
+              class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
+      <% else %>
+        <%= form.submit "초대 메일 발송",
+              class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
+      <% end %>
     <% end %>
   </section>
 

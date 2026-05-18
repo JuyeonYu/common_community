@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_052435) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_062646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -130,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_052435) do
     t.datetime "expires_at", null: false
     t.string "invitee_email"
     t.bigint "inviter_id", null: false
+    t.boolean "paid_extra", default: false, null: false
     t.text "recommendation_comment"
     t.integer "status", default: 0, null: false
     t.string "token", null: false
