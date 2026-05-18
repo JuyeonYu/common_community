@@ -42,6 +42,37 @@ class MatchingControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil @user.matching_activated_at # 이력 보존
   end
 
+  # --- 추가 매칭권 (Phase F-2-a) ---
+
+  test "extend_pool: 활성 + 잔액 충분 → 풀 +5 카운트 + 크레딧 차감" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    cost = Rails.application.config.x.blackticket.extra_matching_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post extend_pool_matching_path
+    assert_redirected_to matching_path
+    assert_equal before - cost, @user.reload.ticket_credits
+    gw = ConnectRequest.current_gen_week
+    assert_equal 1, @user.extra_matchings_this_week_count(gw)
+  end
+
+  test "extend_pool: 잔액 부족 거절" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    sign_in_as(@user)
+    post extend_pool_matching_path
+    assert_match(/크레딧이 부족/, flash[:alert])
+  end
+
+  test "extend_pool: 비활성 사용자 거절" do
+    sign_in_as(@user)
+    post extend_pool_matching_path
+    assert_match(/활성화되지 않/, flash[:alert])
+  end
+
   private
     def fill_required_profile(user)
       user.update!(

@@ -108,7 +108,7 @@
             <% end %>
           </article>
         <% end %>
-        <% (MatchingController::POOL_SIZE - @candidates.size).times do %>
+        <% (@pool_size - @candidates.size).times do %>
           <article class="rounded-md bg-gray-50 border border-dashed border-gray-300 p-4 flex items-center justify-center min-h-[112px]">
             <div class="text-center">
               <div class="h-14 w-14 rounded-full bg-gray-200 mx-auto mb-2"></div>
@@ -116,6 +116,12 @@
             </div>
           </article>
         <% end %>
+      </div>
+      <% extra_cost = Rails.application.config.x.blackticket.extra_matching_cost %>
+      <div class="mt-3 text-center">
+        <%= button_to "추가 5명 더 보기 (-#{extra_cost} 크레딧)", extend_pool_matching_path, method: :post,
+              data: { turbo_confirm: "추가 매칭권을 사용합니다. #{extra_cost} 크레딧이 차감됩니다." },
+              class: "rounded-md border border-blue-300 bg-white px-4 py-1.5 text-xs text-blue-600 hover:bg-blue-50 cursor-pointer" %>
       </div>
     </section>
   <% else %>

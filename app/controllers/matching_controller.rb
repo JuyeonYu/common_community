@@ -1,5 +1,6 @@
 class MatchingController < ApplicationController
-  POOL_SIZE = 5
+  BASE_POOL_SIZE = 5
+  EXTRA_PER_PURCHASE = 5
 
   def show
     @missing_fields    = Current.user.matching_missing_fields
@@ -10,7 +11,8 @@ class MatchingController < ApplicationController
     return unless Current.user.matching_active?
 
     @gen_week = ConnectRequest.current_gen_week
-    @candidates = build_candidates(Current.user, @gen_week)
+    @pool_size = pool_size_for(Current.user, @gen_week)
+    @candidates = build_candidates(Current.user, @gen_week, @pool_size)
     record_exposures(@candidates)
     @my_pending_request = Current.user.sent_connect_requests
                                 .where(gen_week: @gen_week, status: :pending).first
@@ -32,10 +34,33 @@ class MatchingController < ApplicationController
     redirect_to matching_path, notice: "이성 매칭을 일시 중지했습니다. 미수락 요청은 취소되었습니다."
   end
 
+  # 추가 매칭권 — 12 크레딧 차감, 본 기수 풀 +5명 확장.
+  def extend_pool
+    unless Current.user.matching_active?
+      redirect_to matching_path, alert: "매칭이 활성화되지 않았습니다." and return
+    end
+    cost = Rails.application.config.x.blackticket.extra_matching_cost
+    if Current.user.ticket_credits < cost
+      redirect_to matching_path,
+        alert: "추가 매칭권에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    Current.user.credit_transactions.create!(
+      amount: -cost, kind: :spend, memo: "extra_matching"
+    )
+    redirect_to matching_path,
+      notice: "후보 #{EXTRA_PER_PURCHASE}명을 추가했습니다 (-#{cost} 크레딧)."
+  end
+
   private
+    # 본 기수 기본 풀 + 추가 매칭권 구매당 +5명.
+    def pool_size_for(user, gen_week)
+      BASE_POOL_SIZE + user.extra_matchings_this_week_count(gen_week) * EXTRA_PER_PURCHASE
+    end
+
     # 우선순위 정렬: ① 노출 없음 ② 동일 시·도. 그 외 무작위.
     # 작은 풀이라 Ruby 정렬로 충분.
-    def build_candidates(viewer, gen_week)
+    def build_candidates(viewer, gen_week, pool_size)
       scope = User.matching_pool_for(viewer, gen_week: gen_week).with_attached_avatar
       exposed_ids = MatchExposure.where(viewer_id: viewer.id).pluck(:target_id).to_set
 
@@ -47,7 +72,7 @@ class MatchingController < ApplicationController
             SecureRandom.random_number
           ]
         }
-        .first(POOL_SIZE)
+        .first(pool_size)
     end
 
     def record_exposures(candidates)

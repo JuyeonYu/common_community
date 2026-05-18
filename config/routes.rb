@@ -40,6 +40,7 @@ Rails.application.routes.draw do
   #   DELETE /matching        — 일시 중지
   resource :matching, only: %i[ show destroy ], controller: "matching" do
     post :enable
+    post :extend_pool
   end
   # 매칭 후보 풀 프로필 (제한된 노출).
   get "/matching/candidates/:id", to: "matching/candidates#show",

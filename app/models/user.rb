@@ -62,6 +62,12 @@ class User < ApplicationRecord
     credit_transactions.where(kind: :spend, memo: "connect_retry", created_at: range).count
   end
 
+  # 본 기수에 구매한 추가 매칭권 횟수 (memo: "extra_matching").
+  def extra_matchings_this_week_count(gen_week)
+    range = ConnectRequest.gen_week_range(gen_week)
+    credit_transactions.where(kind: :spend, memo: "extra_matching", created_at: range).count
+  end
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }
