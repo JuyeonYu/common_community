@@ -151,6 +151,27 @@ class ConnectRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/크레딧이 부족/, flash[:alert])
   end
 
+  test "reject: 재요청(retried)이 거절되면 요청자에게 50% 환급" do
+    cost = Rails.application.config.x.blackticket.connect_retry_cost
+    refund = (cost * 0.5).to_i
+    retried_req = ConnectRequest.create!(requester: @male, target: @female, retried: true)
+    sign_in_as(@female)
+
+    assert_difference -> { @male.reload.ticket_credits }, refund do
+      post reject_connect_request_path(retried_req)
+    end
+    assert retried_req.reload.rejected?
+    assert @male.credit_transactions.exists?(kind: :refund, memo: "connect_retry_refund")
+  end
+
+  test "reject: 일반 요청(retried=false)은 환급 없음" do
+    normal_req = ConnectRequest.create!(requester: @male, target: @female) # retried 기본 false
+    sign_in_as(@female)
+    assert_no_difference -> { @male.reload.ticket_credits } do
+      post reject_connect_request_path(normal_req)
+    end
+  end
+
   test "accept: 본 기수 RedConnect 있으면 다른 요청 수락 불가" do
     ConnectRequest.create!(requester: @male, target: @female).accept!
     other_male = User.create!(

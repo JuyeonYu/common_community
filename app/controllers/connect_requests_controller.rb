@@ -31,7 +31,7 @@ class ConnectRequestsController < ApplicationController
         Current.user.credit_transactions.create!(
           amount: -retry_cost, kind: :spend, memo: "connect_retry"
         )
-        ConnectRequest.create!(requester: Current.user, target: target)
+        ConnectRequest.create!(requester: Current.user, target: target, retried: true)
       end
       redirect_to matching_path,
         notice: "재요청을 보냈습니다 (-#{retry_cost} 크레딧)." and return

@@ -32,7 +32,10 @@ class ConnectRequest < ApplicationRecord
   end
 
   def reject!
-    update!(status: :rejected)
+    transaction do
+      update!(status: :rejected)
+      refund_retry_if_applicable
+    end
     Notification.deliver(recipient: requester, actor: target,
                          action: "connect_rejected", notifiable: self)
   end
@@ -77,6 +80,17 @@ class ConnectRequest < ApplicationRecord
       Notification.deliver(
         recipient: target, actor: requester,
         action: "connect_requested", notifiable: self
+      )
+    end
+
+    # 재요청이 거절된 경우 요청자에게 50% 환급 (v1.2 7-4).
+    def refund_retry_if_applicable
+      return unless retried?
+      cost   = Rails.application.config.x.blackticket.connect_retry_cost
+      refund = (cost * 0.5).to_i
+      return if refund <= 0
+      requester.credit_transactions.create!(
+        amount: refund, kind: :refund, related: self, memo: "connect_retry_refund"
       )
     end
 end
