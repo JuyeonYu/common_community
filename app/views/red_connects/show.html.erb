@@ -31,6 +31,12 @@
         <% else %>
           <span class="mt-1 inline-block text-xs text-gray-500"><%= @red_connect.status %></span>
         <% end %>
+        <% if @red_connect.extendable? %>
+          <% cost = Rails.application.config.x.blackticket.red_connect_extension_cost %>
+          <%= button_to "+1개월 연장 (-#{cost})", extend_duration_red_connect_path(@red_connect), method: :post,
+                data: { turbo_confirm: "커넥트를 1개월 연장합니다. #{cost} 크레딧이 차감됩니다." },
+                class: "mt-1 text-xs text-blue-600 underline" %>
+        <% end %>
       </div>
     </div>
   </header>

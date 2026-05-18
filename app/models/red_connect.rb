@@ -39,6 +39,20 @@ class RedConnect < ApplicationRecord
     update!(status: :expired)
   end
 
+  # 연장 가능 — active(만료 임박 포함) 또는 expired. released는 영구 차단.
+  def extendable?
+    active? || expired?
+  end
+
+  # 연장 — 1개월 추가. expired였으면 active로 복귀.
+  def extend_duration!(by:)
+    return false unless extendable?
+    base = [ expires_at, Time.current ].max
+    update!(expires_at: base + Rails.application.config.x.blackticket.red_connect_default_ttl,
+            status: :active)
+    true
+  end
+
   private
     # 항상 id 작은 쪽이 user_a 가 되도록 정렬 (unique pair).
     def normalize_user_pair
