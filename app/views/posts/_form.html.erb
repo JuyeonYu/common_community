@@ -1,6 +1,7 @@
 <%= form_with model: post, class: "space-y-5" do |form| %>
   <% if post.errors.any? %>
-    <div class="rounded-md bg-red-50 p-4 text-sm text-red-700">
+    <div class="rounded-xl p-4 text-sm"
+         style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
       <p class="font-medium mb-1">저장하지 못했습니다:</p>
       <ul class="list-disc list-inside">
         <% post.errors.full_messages.each do |msg| %>
@@ -11,27 +12,31 @@
   <% end %>
 
   <div>
-    <%= form.label :title, "제목", class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.text_field :title, required: true, maxlength: 200,
-          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    <%= form.label :title, "제목", class: "label" %>
+    <%= form.text_field :title, required: true, maxlength: 200, class: "input" %>
+  </div>
+
+  <div data-controller="mention-autocomplete" class="relative">
+    <%= form.label :body, "본문", class: "label" %>
+    <%= form.rich_text_area :body, class: "block w-full",
+          data: {
+            mention_autocomplete_target: "input",
+            action: "trix-change->mention-autocomplete#onInput keydown->mention-autocomplete#onKeydown"
+          } %>
+    <div data-mention-autocomplete-target="popup" hidden
+         class="absolute z-10 mt-1 w-64 rounded-xl shadow-md"
+         style="background-color: var(--color-surface); border: 1px solid var(--color-border);"></div>
+    <p class="field-hint">@닉네임을 입력하면 자동완성됩니다.</p>
   </div>
 
   <div>
-    <%= form.label :body, "본문", class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.rich_text_area :body, class: "block w-full" %>
-  </div>
-
-  <div>
-    <%= form.label :tag_names, "태그", class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <%= form.text_field :tag_names, value: post.tag_names, placeholder: "콤마(,)로 구분",
-          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
-    <p class="mt-1 text-xs text-gray-500">예: rails, hotwire, 한글태그</p>
+    <%= form.label :tag_names, "태그", class: "label" %>
+    <%= form.text_field :tag_names, value: post.tag_names, placeholder: "콤마(,)로 구분", class: "input" %>
+    <p class="field-hint">예: rails, hotwire, 한글태그</p>
   </div>
 
   <div class="flex items-center gap-2">
-    <%= form.submit (post.persisted? ? "수정" : "등록"),
-          class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500" %>
-    <%= link_to "취소", (post.persisted? ? post : posts_path),
-          class: "text-sm text-gray-500 hover:text-gray-700" %>
+    <%= form.submit (post.persisted? ? "수정" : "등록"), class: "btn btn-primary" %>
+    <%= link_to "취소", (post.persisted? ? post : posts_path), class: "btn btn-ghost btn-sm" %>
   </div>
 <% end %>

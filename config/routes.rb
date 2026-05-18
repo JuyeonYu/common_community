@@ -29,6 +29,9 @@ Rails.application.routes.draw do
     collection { patch :read_all }
   end
 
+  # @멘션 자동완성용 닉네임 검색.
+  get "/users/search", to: "users#search", as: :search_users
+
   # 브라우저 Web Push 구독.
   resources :push_subscriptions, only: %i[ create ] do
     collection { delete :unsubscribe }

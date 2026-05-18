@@ -61,20 +61,20 @@
     <%= render "form", red_connect: @red_connect, chat_message: @chat_message %>
 
     <details class="mt-6">
-      <summary class="text-xs cursor-pointer hover:opacity-80" style="color: var(--color-text-muted);">별로에요</summary>
+      <summary class="text-xs cursor-pointer hover:opacity-80" style="color: var(--color-text-muted);"><%= t(".downvote.summary") %></summary>
       <%= form_with url: red_connect_downvote_path(@red_connect), method: :post, class: "mt-3 space-y-2" do %>
         <div class="space-y-1 text-sm">
-          <% [["false_info", "허위 정보 (스코어 페널티)"], ["abusive", "부적절한 언어/행동 (스코어 페널티)"], ["incompatible", "단순 맞지 않음 (페널티 없음)"]].each do |val, label| %>
+          <% %w[false_info abusive incompatible].each do |val| %>
             <label class="flex items-center gap-2">
               <%= radio_button_tag :kind, val, false, required: true %>
-              <span><%= label %></span>
+              <span><%= t(".downvote.kinds.#{val}") %></span>
             </label>
           <% end %>
         </div>
         <%= text_area_tag :comment, nil, rows: 2, maxlength: 500,
-              placeholder: "추가 코멘트 (선택)", class: "input" %>
-        <%= submit_tag "제출",
-              data: { turbo_confirm: "별로에요로 표시하면 커넥트가 즉시 종료됩니다. 진행할까요?" },
+              placeholder: t(".downvote.comment_placeholder"), class: "input" %>
+        <%= submit_tag t(".downvote.submit"),
+              data: { turbo_confirm: t(".downvote.confirm") },
               class: "btn btn-primary btn-sm" %>
       <% end %>
     </details>
