@@ -1,16 +1,19 @@
-<div class="mx-auto md:w-2/3 w-full">
+<div class="mx-auto max-w-sm pt-8">
   <% if alert = flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" id="alert"><%= alert %></p>
+    <p class="rounded-lg py-2 px-3 mb-5 text-sm" id="alert"
+       style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);"><%= alert %></p>
   <% end %>
 
   <% if notice = flash[:notice] %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
+    <p class="rounded-lg py-2 px-3 mb-5 text-sm" id="notice"
+       style="background-color: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0;"><%= notice %></p>
   <% end %>
 
-  <h1 class="font-bold text-4xl mb-6">로그인</h1>
+  <h1 class="font-wordmark text-3xl mb-2">BlackTicket</h1>
+  <p class="text-sm mb-8" style="color: var(--color-text-muted);">초대받은 사람만 가입할 수 있습니다.</p>
 
   <%= button_to "/auth/google_oauth2", method: :post, data: { turbo: false },
-        class: "w-full flex items-center justify-center gap-3 rounded-md border border-gray-300 bg-white py-2.5 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50" do %>
+        class: "btn btn-secondary w-full" do %>
     <svg viewBox="0 0 24 24" class="h-5 w-5" aria-hidden="true">
       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -19,5 +22,4 @@
     </svg>
     Google로 로그인
   <% end %>
-
 </div>

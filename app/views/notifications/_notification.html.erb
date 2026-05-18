@@ -1,5 +1,7 @@
 <%= link_to (notification.link_path || notifications_path),
-      class: "block rounded-md p-3 border #{notification.read? ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-100'} hover:bg-gray-50" do %>
+      class: "block rounded-xl p-3.5 transition-colors hover:opacity-90",
+      style: ("border: 1px solid var(--color-border); background-color: var(--color-surface);" if notification.read?) ||
+             "border: 1px solid var(--color-accent); background-color: var(--color-accent-soft);" do %>
   <div class="flex items-start gap-3">
     <% if notification.actor&.avatar_url.present? %>
       <%= image_tag notification.actor.avatar_url, class: "h-8 w-8 rounded-full mt-0.5", alt: notification.actor.nickname %>
@@ -7,16 +9,16 @@
     <div class="flex-1">
       <p class="text-sm">
         <% if notification.actor %>
-          <span class="font-medium"><%= notification.actor.nickname %></span>님이
+          <span class="font-semibold"><%= notification.actor.nickname %></span>님이
         <% end %>
         <%= notification.message %>
       </p>
-      <p class="text-xs text-gray-500 mt-1">
+      <p class="text-xs mt-1" style="color: var(--color-text-muted);">
         <time datetime="<%= notification.created_at.iso8601 %>"><%= l notification.created_at, format: :short %></time>
       </p>
     </div>
     <% unless notification.read? %>
-      <span class="h-2 w-2 rounded-full bg-blue-500 mt-2"></span>
+      <span class="h-2 w-2 rounded-full mt-2" style="background-color: var(--color-accent);"></span>
     <% end %>
   </div>
 <% end %>
