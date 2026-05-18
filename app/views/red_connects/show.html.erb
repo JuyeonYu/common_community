@@ -1,41 +1,45 @@
 <% content_for :title, "커넥트: #{@other_user.nickname}" %>
 
 <div class="mx-auto max-w-2xl">
-  <header class="rounded-md bg-white border border-gray-200 p-4 mb-4">
+  <header class="card mb-4">
     <div class="flex items-start gap-3">
       <%= avatar_image(@other_user, class: "h-12 w-12 rounded-full") %>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
           <p class="font-semibold"><%= @other_user.nickname %></p>
-          <% if @other_user.age %><span class="text-xs text-gray-500"><%= @other_user.age %>세</span><% end %>
-          <span class="text-xs text-gray-500"><%= t("users.residence_area.#{@other_user.residence_area}", default: "") %></span>
+          <% if @other_user.age %><span class="text-xs" style="color: var(--color-text-muted);"><%= @other_user.age %>세</span><% end %>
+          <span class="text-xs" style="color: var(--color-text-muted);"><%= t("users.residence_area.#{@other_user.residence_area}", default: "") %></span>
         </div>
-        <p class="text-xs text-gray-600 mt-1">
+        <p class="text-xs mt-1" style="color: var(--color-text-muted);">
           <%= @other_user.job_title %>
           <% if @other_user.smoking.present? %>
             · 흡연 <%= t("users.smoking.#{@other_user.smoking}") %>
           <% end %>
         </p>
         <% if @other_user.hobby.present? %>
-          <p class="text-xs text-blue-600 mt-0.5"><%= @other_user.hobby %></p>
+          <p class="text-xs mt-0.5" style="color: var(--color-accent);"><%= @other_user.hobby %></p>
         <% end %>
       </div>
-      <div class="text-right">
-        <p class="text-xs text-gray-500">
+      <div class="text-right shrink-0">
+        <p class="text-xs" style="color: var(--color-text-muted);">
           만료 <%= l @red_connect.expires_at, format: :short %>
         </p>
         <% if @red_connect.active? %>
           <%= button_to "커넥트 종료", red_connect_path(@red_connect), method: :delete,
                 data: { turbo_confirm: "정말 종료할까요? 종료된 커넥트는 연장 불가합니다." },
-                class: "mt-1 text-xs text-red-600 underline" %>
+                class: "mt-2 text-xs hover:underline cursor-pointer bg-transparent border-0 p-0",
+                style: "color: var(--color-danger);" %>
         <% else %>
-          <span class="mt-1 inline-block text-xs text-gray-500"><%= @red_connect.status %></span>
+          <span class="mt-2 inline-block text-xs" style="color: var(--color-text-subtle);"><%= @red_connect.status %></span>
         <% end %>
         <% if @red_connect.extendable? %>
           <% cost = Rails.application.config.x.blackticket.red_connect_extension_cost %>
-          <%= button_to "+1개월 연장 (-#{cost})", extend_duration_red_connect_path(@red_connect), method: :post,
+          <%= button_to extend_duration_red_connect_path(@red_connect), method: :post,
                 data: { turbo_confirm: "커넥트를 1개월 연장합니다. #{cost} 크레딧이 차감됩니다." },
-                class: "mt-1 text-xs text-blue-600 underline" %>
+                class: "block mt-1 text-xs hover:underline cursor-pointer bg-transparent border-0 p-0",
+                style: "color: var(--color-accent);" do %>
+            +1개월 −<%= cost %>
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -44,11 +48,12 @@
   <%= turbo_stream_from @red_connect %>
 
   <section id="<%= dom_id @red_connect, :messages %>"
-           class="space-y-2 mb-4 max-h-[60vh] overflow-y-auto p-2 bg-gray-50 rounded-md">
+           class="space-y-2 mb-4 max-h-[60vh] overflow-y-auto p-3 rounded-xl"
+           style="background-color: var(--color-surface-muted);">
     <% if @chat_messages.any? %>
       <%= render @chat_messages %>
     <% else %>
-      <p class="text-sm text-gray-400 text-center py-4">아직 메시지가 없습니다.</p>
+      <p class="text-sm text-center py-4" style="color: var(--color-text-subtle);">아직 메시지가 없습니다.</p>
     <% end %>
   </section>
 
@@ -56,7 +61,7 @@
     <%= render "form", red_connect: @red_connect, chat_message: @chat_message %>
 
     <details class="mt-6">
-      <summary class="text-xs text-gray-500 cursor-pointer hover:text-gray-700">별로에요</summary>
+      <summary class="text-xs cursor-pointer hover:opacity-80" style="color: var(--color-text-muted);">별로에요</summary>
       <%= form_with url: red_connect_downvote_path(@red_connect), method: :post, class: "mt-3 space-y-2" do %>
         <div class="space-y-1 text-sm">
           <% [["false_info", "허위 정보 (스코어 페널티)"], ["abusive", "부적절한 언어/행동 (스코어 페널티)"], ["incompatible", "단순 맞지 않음 (페널티 없음)"]].each do |val, label| %>
@@ -67,14 +72,13 @@
           <% end %>
         </div>
         <%= text_area_tag :comment, nil, rows: 2, maxlength: 500,
-              placeholder: "추가 코멘트 (선택)",
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" %>
+              placeholder: "추가 코멘트 (선택)", class: "input" %>
         <%= submit_tag "제출",
               data: { turbo_confirm: "별로에요로 표시하면 커넥트가 즉시 종료됩니다. 진행할까요?" },
-              class: "rounded-md bg-red-600 px-3 py-1.5 text-white text-sm cursor-pointer" %>
+              class: "btn btn-primary btn-sm" %>
       <% end %>
     </details>
   <% else %>
-    <p class="text-sm text-center text-gray-500">종료된 커넥트입니다.</p>
+    <p class="text-sm text-center" style="color: var(--color-text-muted);">종료된 커넥트입니다.</p>
   <% end %>
 </div>

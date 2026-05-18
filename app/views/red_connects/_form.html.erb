@@ -3,8 +3,7 @@
         class: "flex items-end gap-2" do |form| %>
     <%= form.text_area :body, rows: 2, maxlength: 1000, required: true,
           placeholder: "메시지 (이미지·이미지 URL 불가)",
-          class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-blue-600 resize-none" %>
-    <%= form.submit "보내기",
-          class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm cursor-pointer" %>
+          class: "input flex-1 resize-none" %>
+    <%= form.submit "보내기", class: "btn btn-primary" %>
   <% end %>
 </div>
