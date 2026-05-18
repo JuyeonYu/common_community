@@ -41,6 +41,7 @@ Rails.application.routes.draw do
   resource :matching, only: %i[ show destroy ], controller: "matching" do
     post :enable
     post :extend_pool
+    post :refresh
   end
   # 매칭 후보 풀 프로필 (제한된 노출).
   get "/matching/candidates/:id", to: "matching/candidates#show",

@@ -34,6 +34,30 @@ class MatchingController < ApplicationController
     redirect_to matching_path, notice: "이성 매칭을 일시 중지했습니다. 미수락 요청은 취소되었습니다."
   end
 
+  # 새로고침 — 10 크레딧 차감, 본인의 모든 MatchExposure 삭제 후 풀 재추출.
+  def refresh
+    unless Current.user.matching_active?
+      redirect_to matching_path, alert: "매칭이 활성화되지 않았습니다." and return
+    end
+    cost = Rails.application.config.x.blackticket.refresh_matching_cost
+    if Current.user.ticket_credits < cost
+      redirect_to matching_path,
+        alert: "새로고침에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    MatchingController.transaction_for_refresh(Current.user, cost)
+    redirect_to matching_path, notice: "매칭 리스트를 새로고침했습니다 (-#{cost} 크레딧)."
+  end
+
+  def self.transaction_for_refresh(user, cost)
+    ActiveRecord::Base.transaction do
+      user.credit_transactions.create!(
+        amount: -cost, kind: :spend, memo: "refresh_matching"
+      )
+      MatchExposure.where(viewer_id: user.id).delete_all
+    end
+  end
+
   # 추가 매칭권 — 12 크레딧 차감, 본 기수 풀 +5명 확장.
   def extend_pool
     unless Current.user.matching_active?

@@ -73,6 +73,38 @@ class MatchingControllerTest < ActionDispatch::IntegrationTest
     assert_match(/활성화되지 않/, flash[:alert])
   end
 
+  # --- 새로고침 (Phase F-2-b) ---
+
+  test "refresh: 활성 + 잔액 충분 → MatchExposure 삭제 + 크레딧 차감" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    other = users(:two)
+    MatchExposure.create!(viewer: @user, target: other)
+    cost = Rails.application.config.x.blackticket.refresh_matching_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post refresh_matching_path
+    assert_redirected_to matching_path
+    assert_equal 0, MatchExposure.where(viewer_id: @user.id).count
+    assert_equal before - cost, @user.reload.ticket_credits
+  end
+
+  test "refresh: 잔액 부족 거절" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    sign_in_as(@user)
+    post refresh_matching_path
+    assert_match(/크레딧이 부족/, flash[:alert])
+  end
+
+  test "refresh: 비활성 사용자 거절" do
+    sign_in_as(@user)
+    post refresh_matching_path
+    assert_match(/활성화되지 않/, flash[:alert])
+  end
+
   private
     def fill_required_profile(user)
       user.update!(

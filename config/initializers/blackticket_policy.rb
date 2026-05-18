@@ -17,6 +17,7 @@ Rails.application.config.x.blackticket = ActiveSupport::OrderedOptions.new.tap d
   # 매칭/커넥트
   c.red_connect_default_ttl   = 1.month
   c.connect_retry_cost        = 30     # 거절 후 다른 후보 재요청 — v1.2 7-4
-  c.extra_matching_cost       = 12     # 추가 매칭권(+5명) — v1.2 7-4. 사용처 Phase F-2
-  c.red_connect_extension_cost = 60    # 커넥트 연장권(+1개월) — v1.2 7-4. 사용처 Phase F-2
+  c.extra_matching_cost       = 12     # 추가 매칭권(+5명) — v1.2 7-4
+  c.red_connect_extension_cost = 60    # 커넥트 연장권(+1개월) — v1.2 7-4
+  c.refresh_matching_cost     = 10     # 매칭 리스트 새로고침 — v1.2 7-5
 end
