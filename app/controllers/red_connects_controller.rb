@@ -13,6 +13,9 @@ class RedConnectsController < ApplicationController
     @other_user    = @red_connect.other_user(Current.user)
     @chat_messages = @red_connect.chat_messages.recent.includes(:sender)
     @chat_message  = ChatMessage.new
+    # 본인에게 온 미확인 메시지 자동 read 마킹 (발신자가 결제 시 읽음 노출 위한 신호).
+    @red_connect.chat_messages.where(read_at: nil).where.not(sender_id: Current.user.id)
+                .update_all(read_at: Time.current)
   end
 
   def destroy

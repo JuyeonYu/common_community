@@ -12,5 +12,17 @@
     <p class="text-[10px] mt-1 text-gray-400">
       <%= l chat_message.created_at, format: :short %>
     </p>
+    <div class="own-only mt-1 text-[10px] text-blue-100">
+      <% if chat_message.read_check_paid? %>
+        <%= chat_message.read_at.present? ? "✓ 읽음 #{l chat_message.read_at, format: :short}" : "안 읽음" %>
+      <% else %>
+        <% rcost = Rails.application.config.x.blackticket.chat_read_receipt_cost %>
+        <%= button_to "읽음 확인 (-#{rcost})",
+              mark_read_red_connect_chat_message_path(chat_message.red_connect_id, chat_message),
+              method: :post,
+              data: { turbo_confirm: "이 메시지의 읽음 여부를 확인합니다. #{rcost} 크레딧이 차감됩니다." },
+              class: "underline cursor-pointer bg-transparent border-0 p-0 text-blue-100 hover:text-white" %>
+      <% end %>
+    </div>
   </div>
 </div>

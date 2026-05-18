@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_064016) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_064314) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -56,6 +56,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_064016) do
   create_table "chat_messages", force: :cascade do |t|
     t.text "body", null: false
     t.datetime "created_at", null: false
+    t.datetime "read_at"
+    t.boolean "read_check_paid", default: false, null: false
     t.bigint "red_connect_id", null: false
     t.bigint "sender_id", null: false
     t.datetime "updated_at", null: false

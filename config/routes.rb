@@ -60,7 +60,9 @@ Rails.application.routes.draw do
   # 성사된 커넥트(채팅방) + 비추천.
   resources :red_connects, only: %i[ index show destroy ] do
     member { post :extend_duration }
-    resources :chat_messages, only: %i[ create ]
+    resources :chat_messages, only: %i[ create ] do
+      member { post :mark_read }
+    end
     resource  :downvote,     only: %i[ create ]
   end
 
