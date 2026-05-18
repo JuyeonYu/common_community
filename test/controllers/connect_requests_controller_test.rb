@@ -114,8 +114,9 @@ class ConnectRequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create: 거절 후 다른 후보에 1크레딧 차감 + 1회 재요청 성공" do
+    cost = Rails.application.config.x.blackticket.connect_retry_cost
     ConnectRequest.create!(requester: @male, target: @female).reject!
-    @male.credit_transactions.create!(amount: 10, kind: :admin_grant, memo: "seed")
+    @male.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
     other_female = fresh_female("ofemale", "여자3")
     sign_in_as(@male)
     before = @male.reload.ticket_credits
@@ -123,13 +124,13 @@ class ConnectRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_difference "ConnectRequest.count", 1 do
       post connect_requests_path, params: { target_id: other_female.id }
     end
-    cost = Rails.application.config.x.blackticket.connect_retry_cost
     assert_equal before - cost, @male.reload.ticket_credits
   end
 
   test "create: 재요청 두 번째는 차단(원샷 소진)" do
+    cost = Rails.application.config.x.blackticket.connect_retry_cost
     ConnectRequest.create!(requester: @male, target: @female).reject!
-    @male.credit_transactions.create!(amount: 10, kind: :admin_grant, memo: "seed")
+    @male.credit_transactions.create!(amount: cost * 3, kind: :admin_grant, memo: "seed")
     other_female = fresh_female("ofemale", "여자3")
     third = fresh_female("third", "여자4")
     sign_in_as(@male)
