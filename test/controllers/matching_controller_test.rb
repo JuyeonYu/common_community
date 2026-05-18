@@ -146,6 +146,41 @@ class MatchingControllerTest < ActionDispatch::IntegrationTest
     assert_match(/강조할 추천서/, flash[:alert])
   end
 
+  # --- 필터 해제 (Phase F-2-c) ---
+
+  test "unlock_filter: 활성 + 잔액 충분 → 본 기수 적용 + 크레딧 차감" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    cost = Rails.application.config.x.blackticket.filter_unlock_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post unlock_filter_matching_path
+    assert_equal before - cost, @user.reload.ticket_credits
+    assert @user.filter_unlocked_this_week?(ConnectRequest.current_gen_week)
+  end
+
+  test "unlock_filter: 본 기수 중복 구매 거절" do
+    fill_required_profile(@user)
+    @user.enable_matching!
+    cost = Rails.application.config.x.blackticket.filter_unlock_cost
+    @user.credit_transactions.create!(amount: cost * 3, kind: :admin_grant, memo: "seed")
+    @user.credit_transactions.create!(amount: -cost, kind: :spend, memo: "filter_unlock")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post unlock_filter_matching_path
+    assert_equal before, @user.reload.ticket_credits
+    assert_match(/이미 필터 해제/, flash[:notice])
+  end
+
+  test "unlock_filter: 비활성 사용자 거절" do
+    sign_in_as(@user)
+    post unlock_filter_matching_path
+    assert_match(/활성화되지 않/, flash[:alert])
+  end
+
   private
     def fill_required_profile(user)
       user.update!(

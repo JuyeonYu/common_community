@@ -35,6 +35,28 @@ class MatchingController < ApplicationController
     redirect_to matching_path, notice: "이성 매칭을 일시 중지했습니다. 미수락 요청은 취소되었습니다."
   end
 
+  # 거주지/직무 필터 해제 — 20 크레딧, 본 기수 동안 동일 지역 우선 정렬 무시.
+  def unlock_filter
+    unless Current.user.matching_active?
+      redirect_to matching_path, alert: "매칭이 활성화되지 않았습니다." and return
+    end
+    gen_week = ConnectRequest.current_gen_week
+    if Current.user.filter_unlocked_this_week?(gen_week)
+      redirect_to matching_path, notice: "이번 기수에 이미 필터 해제가 적용되어 있습니다." and return
+    end
+    cost = Rails.application.config.x.blackticket.filter_unlock_cost
+    if Current.user.ticket_credits < cost
+      redirect_to matching_path,
+        alert: "필터 해제에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    Current.user.credit_transactions.create!(
+      amount: -cost, kind: :spend, memo: "filter_unlock"
+    )
+    redirect_to matching_path,
+      notice: "이번 기수 동안 거주지/직무 필터를 해제했습니다 (-#{cost} 크레딧)."
+  end
+
   # 추천 코멘트 강조 — 15 크레딧, 본 기수 동안 매칭 카드 상위 노출 + 강조 배지.
   def highlight_recommendation
     invitation = Current.user.accepted_invitation
