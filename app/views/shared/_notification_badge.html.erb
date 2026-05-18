@@ -1,9 +1,13 @@
 <% if user %>
   <% unread_count = user.notifications.unread.size %>
-  <%= link_to notifications_path, class: "relative text-lg leading-none", title: "알림" do %>
-    🔔
+  <%= link_to notifications_path,
+        class: "relative inline-flex items-center justify-center hover:opacity-80",
+        style: "color: var(--color-text);",
+        title: "알림" do %>
+    <%= icon :bell, class: "h-5 w-5" %>
     <% if unread_count.positive? %>
-      <span class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-[10px] font-medium px-1.5 py-0.5 leading-none">
+      <span class="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center text-[10px] font-semibold rounded-full px-1.5 min-w-[18px] h-[18px]"
+            style="background-color: var(--color-accent); color: var(--color-accent-on);">
         <%= unread_count > 99 ? "99+" : unread_count %>
       </span>
     <% end %>
