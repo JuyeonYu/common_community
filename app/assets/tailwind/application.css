@@ -1,18 +1,211 @@
+/* Pretendard — 한글 표준 sans 폰트 (CDN). @import는 모든 룰 앞에 와야 한다. */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css");
 @import "tailwindcss";
 
+/* ───────────────────────────────────────────────────────────
+   디자인 토큰 — '리멤버' 톤 오마주 + 블랙티켓 도메인 색 매핑
+   - 라이트가 기본, 다크는 prefers-color-scheme:dark 자동
+   - 메인 액센트는 레드티켓의 'red' (사용자 결정 2026-05-18)
+   ─────────────────────────────────────────────────────────── */
+
+@theme {
+  /* 폰트 */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-serif: "Times New Roman", "Noto Serif KR", Georgia, serif;
+
+  /* 표면/배경 (라이트) */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f5f7;
+  --color-border: #e5e7eb;
+  --color-border-muted: #f0f1f4;
+
+  /* 텍스트 (라이트) */
+  --color-text: #111111;
+  --color-text-muted: #6b7280;
+  --color-text-subtle: #9ca3af;
+
+  /* 액센트 — 메인 = 레드티켓 레드 */
+  --color-accent: #dc2626;
+  --color-accent-hover: #b91c1c;
+  --color-accent-soft: #fef2f2;
+  --color-accent-on: #ffffff;
+
+  /* 도메인 색 — 골든티켓 (후속) */
+  --color-gold: #eab308;
+  --color-gold-hover: #ca8a04;
+  --color-gold-soft: #fefce8;
+
+  /* 보조 의미색 */
+  --color-link: #2563eb;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+
+  /* 라운드 — 리멤버는 카드 큰 라운드 */
+  --radius-card: 1rem;       /* 16px */
+  --radius-input: 0.5rem;    /* 8px */
+  --radius-button: 0.5rem;   /* 8px */
+}
+
+/* 다크 — prefers-color-scheme:dark 자동 적용. 리멤버 마케팅 톤 차용. */
+@variant dark (&:where(.dark, .dark *));
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0a0a0a;
+    --color-surface: #141416;
+    --color-surface-muted: #1a1a1c;
+    --color-border: #27272a;
+    --color-border-muted: #1f1f22;
+
+    --color-text: #ffffff;
+    --color-text-muted: #9ca3af;
+    --color-text-subtle: #6b7280;
+
+    --color-accent: #ef4444;
+    --color-accent-hover: #dc2626;
+    --color-accent-soft: #1f1212;
+
+    --color-link: #3b82f6;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────
+   기본 스타일
+   ─────────────────────────────────────────────────────────── */
+
 @layer base {
-  /* iOS Safari가 가로 회전 시 텍스트를 임의로 키우는 동작 차단 */
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
-  /* iOS Safari는 폼 입력 폰트가 16px 미만이면 포커스 시 자동 확대(zoom)한다.
-     모든 입력 요소에 최소 16px을 보장해 의도치 않은 확대를 막는다. */
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss02", "ss03";
+  }
+
+  /* iOS Safari 폼 입력 자동 확대 방지 — 16px 보장 */
   input,
   textarea,
   select,
   trix-editor {
     font-size: 16px;
+  }
+
+  /* 영문 워드마크용 (BlackTicket 로고 등) */
+  .font-wordmark {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────
+   컴포넌트 alias — @apply로 토큰 묶음
+   ─────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* 버튼 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-on);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+  }
+  .btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-surface-muted);
+  }
+  .btn-dark {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+  .btn-ghost {
+    color: var(--color-text-muted);
+  }
+  .btn-ghost:hover {
+    color: var(--color-text);
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .btn-lg {
+    @apply px-5 py-3 text-base;
+  }
+
+  /* 카드 */
+  .card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 1.25rem;
+  }
+  .card-muted {
+    background-color: var(--color-surface-muted);
+    border: 1px solid var(--color-border-muted);
+    border-radius: var(--radius-card);
+    padding: 1.25rem;
+  }
+
+  /* 칩/뱃지 */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs;
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+  }
+  .chip-accent {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .chip-gold {
+    background-color: var(--color-gold-soft);
+    color: var(--color-gold-hover);
+    border-color: var(--color-gold);
+  }
+
+  /* 인풋 */
+  .input {
+    @apply block w-full rounded-lg px-3 py-2 text-sm;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+  .input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -1px;
+  }
+
+  /* 폼 라벨 */
+  .label {
+    @apply block text-sm font-semibold mb-1.5;
+    color: var(--color-text);
+  }
+  .field-hint {
+    @apply mt-1 text-xs;
+    color: var(--color-text-muted);
+  }
+  .field-error {
+    @apply mt-1 text-xs;
+    color: var(--color-danger);
+  }
+
+  /* Empty state */
+  .empty {
+    @apply rounded-xl text-center py-10 px-6;
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
   }
 }
