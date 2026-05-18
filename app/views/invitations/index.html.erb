@@ -3,9 +3,9 @@
 <div class="mx-auto max-w-3xl">
   <h1 class="text-2xl font-bold mb-6">초대장</h1>
 
-  <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+  <section class="card mb-6">
     <h2 class="font-semibold mb-3">초대 트리</h2>
-    <p class="text-xs text-gray-500 mb-3">
+    <p class="text-xs mb-3" style="color: var(--color-text-muted);">
       나로부터 시작된 초대 사슬. 깊이 <%= @tree_stats[:max_depth] %>단계 ·
       누적 <%= @tree_stats[:descendants] %>명. <% if @inviter %>(나를 초대: <%= @inviter.nickname %>)<% end %>
     </p>
@@ -14,34 +14,39 @@
     </div>
   </section>
 
-  <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+  <section class="card mb-6">
     <h2 class="font-semibold mb-2">새 초대 발급</h2>
     <% if @next_free_at&.future? %>
-      <p class="text-sm text-gray-500 mb-3">
+      <p class="text-sm mb-3" style="color: var(--color-text-muted);">
         무료 발급은 <%= l @next_free_at, format: :short %> 이후 가능합니다.
       </p>
     <% else %>
-      <p class="text-sm text-gray-500 mb-3">7일에 1회 무료로 발급할 수 있습니다.</p>
+      <p class="text-sm mb-3" style="color: var(--color-text-muted);">7일에 1회 무료로 발급할 수 있습니다.</p>
     <% end %>
 
-    <%= form_with model: @invitation, url: invitations_path, class: "space-y-3" do |form| %>
+    <%= form_with model: @invitation, url: invitations_path, class: "space-y-4" do |form| %>
       <div>
-        <%= form.label :invitee_local_part, "초대받을 Gmail 아이디 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <div class="flex rounded-md border border-gray-300 focus-within:border-blue-600 overflow-hidden">
+        <%= form.label :invitee_local_part, "초대받을 Gmail 아이디 (필수)", class: "label" %>
+        <div class="flex rounded-lg overflow-hidden focus-within:outline focus-within:outline-2"
+             style="border: 1px solid var(--color-border); --tw-outline-color: var(--color-accent);">
           <%= form.text_field :invitee_local_part, required: true,
                 placeholder: "friend",
                 pattern: "[^@\\s]+",
                 title: "이메일 아이디만 입력하세요 (@gmail.com 제외)",
                 autocomplete: "off",
-                class: "flex-1 min-w-0 px-3 py-2 focus:outline-none" %>
-          <span class="px-3 py-2 bg-gray-100 text-gray-600 text-sm border-l border-gray-300">@gmail.com</span>
+                class: "flex-1 min-w-0 px-3 py-2 bg-transparent focus:outline-none",
+                style: "color: var(--color-text);" %>
+          <span class="px-3 py-2 text-sm border-l"
+                style="background-color: var(--color-surface-muted); color: var(--color-text-muted); border-color: var(--color-border);">
+            @gmail.com
+          </span>
         </div>
-        <p class="mt-1 text-xs text-gray-500">
+        <p class="field-hint">
           Gmail 계정으로만 가입 가능합니다. <strong>이 메일로 받은 사람의 Google 계정으로만</strong> 가입할 수 있습니다.
         </p>
       </div>
 
-      <p class="text-xs text-gray-500">
+      <p class="text-xs" style="color: var(--color-text-muted);">
         추천서와 강력 추천은 가입 후 별도로 작성합니다.
       </p>
 
@@ -49,14 +54,10 @@
       <% if @next_free_at&.future? %>
         <label class="flex items-center gap-2 text-sm">
           <%= form.check_box :pay_extra %>
-          <span>지금 추가 발급 (-<%= extra_cost %> 크레딧 · 잔액 <%= Current.user.ticket_credits %>) — 미가입 만료 시 50% 환급</span>
+          <span>지금 추가 발급 (−<%= extra_cost %> 크레딧 · 잔액 <%= Current.user.ticket_credits %>) — 미가입 만료 시 50% 환급</span>
         </label>
-        <%= form.submit "초대 메일 발송",
-              class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
-      <% else %>
-        <%= form.submit "초대 메일 발송",
-              class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
       <% end %>
+      <%= form.submit "초대 메일 발송", class: "btn btn-primary" %>
     <% end %>
   </section>
 
@@ -65,25 +66,24 @@
     <% if @invitations.any? %>
       <div class="space-y-2">
         <% @invitations.each do |inv| %>
-          <article class="rounded-md bg-white border border-gray-200 p-3 flex items-center gap-3">
+          <article class="card p-4 flex items-center gap-3">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-mono font-bold text-sm tracking-widest"><%= inv.code %></span>
-                <span class="text-xs px-2 py-0.5 rounded
-                  <%= case inv.status
-                      when 'pending'   then 'bg-yellow-100 text-yellow-800'
-                      when 'accepted'  then 'bg-green-100 text-green-800'
-                      when 'expired'   then 'bg-gray-200 text-gray-600'
-                      when 'cancelled' then 'bg-gray-200 text-gray-600'
-                      end %>">
+                <% status_classes = case inv.status
+                   when "pending"   then "background-color: #FEF3C7; color: #92400E;"
+                   when "accepted"  then "background-color: #DCFCE7; color: #166534;"
+                   else "background-color: var(--color-surface-muted); color: var(--color-text-muted);"
+                   end %>
+                <span class="chip" style="<%= status_classes %>; border: 0;">
                   <%= I18n.t("invitations.status.#{inv.status}", default: inv.status) %>
                 </span>
                 <% if inv.boosted? %>
-                  <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력</span>
+                  <span class="chip chip-accent">강력</span>
                 <% end %>
               </div>
-              <p class="text-xs text-gray-700 mt-1 font-mono"><%= inv.invitee_email %></p>
-              <p class="text-xs text-gray-500 mt-1">
+              <p class="text-xs mt-1 font-mono" style="color: var(--color-text);"><%= inv.invitee_email %></p>
+              <p class="text-xs mt-1" style="color: var(--color-text-muted);">
                 만료 <%= l inv.expires_at, format: :short %>
                 <% if inv.recommendation_written? %>
                   · 추천서 작성됨: "<%= truncate(inv.recommendation_comment, length: 40) %>"
@@ -94,20 +94,23 @@
             </div>
             <% if inv.accepted? && !inv.recommendation_written? %>
               <%= link_to "추천서 작성", edit_invitation_path(inv),
-                    class: "text-xs text-blue-600 hover:text-blue-800 underline" %>
+                    class: "text-xs hover:underline",
+                    style: "color: var(--color-accent);" %>
             <% end %>
             <% if inv.usable? %>
               <%= button_to "재발송", resend_invitation_path(inv), method: :post,
-                    class: "text-xs text-blue-600 hover:text-blue-800 underline" %>
+                    class: "text-xs hover:underline cursor-pointer bg-transparent border-0 p-0",
+                    style: "color: var(--color-accent);" %>
               <%= button_to "취소", invitation_path(inv), method: :delete,
                     data: { turbo_confirm: "취소하시겠습니까?" },
-                    class: "text-xs text-red-600 hover:text-red-800 underline" %>
+                    class: "text-xs hover:underline cursor-pointer bg-transparent border-0 p-0",
+                    style: "color: var(--color-danger);" %>
             <% end %>
           </article>
         <% end %>
       </div>
     <% else %>
-      <p class="text-sm text-gray-500">아직 발급한 초대장이 없습니다.</p>
+      <p class="empty">아직 발급한 초대장이 없습니다.</p>
     <% end %>
   </section>
 </div>

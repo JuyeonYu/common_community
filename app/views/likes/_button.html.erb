@@ -1,14 +1,17 @@
-<div id="<%= dom_id(likeable, :like_button) %>" class="inline-flex items-center gap-1">
+<div id="<%= dom_id(likeable, :like_button) %>" class="inline-flex items-center gap-1.5">
   <% liked = likeable.liked_by?(Current.user) %>
   <% if Current.user %>
     <%= button_to like_url_for(likeable),
           method: liked ? :delete : :post,
-          class: "text-base leading-none cursor-pointer #{liked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}",
+          class: "inline-flex items-center cursor-pointer bg-transparent border-0 p-0 hover:opacity-80",
+          style: (liked ? "color: var(--color-accent);" : "color: var(--color-text-subtle);"),
           form: { class: "inline" } do %>
-      <%= liked ? "♥" : "♡" %>
+      <%= icon :heart, class: "h-4 w-4" %>
     <% end %>
   <% else %>
-    <span class="text-base leading-none text-gray-400">♡</span>
+    <span class="inline-flex items-center" style="color: var(--color-text-subtle);">
+      <%= icon :heart, class: "h-4 w-4" %>
+    </span>
   <% end %>
-  <span class="text-xs text-gray-500"><%= likeable.likes_count %></span>
+  <span class="text-xs" style="color: var(--color-text-muted);"><%= likeable.likes_count %></span>
 </div>

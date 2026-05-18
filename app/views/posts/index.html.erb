@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">
       <% if @query.present? %>
-        "<%= @query %>" 검색 결과 <span class="text-gray-500 text-base">(<%= @pagy.count %>건)</span>
+        "<%= @query %>" 검색 결과 <span class="text-base" style="color: var(--color-text-muted);">(<%= @pagy.count %>건)</span>
       <% elsif params[:tag].present? %>
         #<%= params[:tag] %>
       <% else %>
@@ -11,20 +11,27 @@
     </h1>
 
     <% if Current.user %>
-      <%= link_to "글쓰기", new_post_path,
-            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500" %>
+      <%= link_to new_post_path, class: "btn btn-primary" do %>
+        <%= icon :plus, class: "h-4 w-4" %> 글쓰기
+      <% end %>
     <% end %>
   </div>
 
   <% if flash[:notice] %>
-    <p class="py-2 px-3 bg-green-50 mb-4 text-green-700 rounded-md text-sm"><%= flash[:notice] %></p>
+    <p class="rounded-lg py-2 px-3 mb-4 text-sm"
+       style="background-color: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0;">
+      <%= flash[:notice] %>
+    </p>
   <% end %>
   <% if flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-4 text-red-700 rounded-md text-sm"><%= flash[:alert] %></p>
+    <p class="rounded-lg py-2 px-3 mb-4 text-sm"
+       style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
+      <%= flash[:alert] %>
+    </p>
   <% end %>
 
   <% if @posts.any? %>
-    <div class="space-y-4">
+    <div class="space-y-3">
       <%= render @posts %>
     </div>
 
@@ -32,14 +39,14 @@
       <%== pagy_nav(@pagy) %>
     </div>
   <% else %>
-    <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+    <div class="empty">
       <% if @query.present? %>
-        검색 결과가 없습니다.
-        <%= link_to "전체 피드 보기", posts_path, class: "text-blue-600 underline" %>
+        검색 결과가 없습니다.<br>
+        <%= link_to "전체 피드 보기", posts_path, class: "inline-block mt-2 hover:underline", style: "color: var(--color-accent);" %>
       <% else %>
-        아직 글이 없습니다.
+        아직 글이 없습니다.<br>
         <% if Current.user %>
-          <%= link_to "첫 글 작성하기", new_post_path, class: "text-blue-600 underline" %>
+          <%= link_to "첫 글 작성하기", new_post_path, class: "inline-block mt-2 hover:underline", style: "color: var(--color-accent);" %>
         <% end %>
       <% end %>
     </div>
