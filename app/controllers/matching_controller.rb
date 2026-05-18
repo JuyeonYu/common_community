@@ -35,6 +35,29 @@ class MatchingController < ApplicationController
     redirect_to matching_path, notice: "이성 매칭을 일시 중지했습니다. 미수락 요청은 취소되었습니다."
   end
 
+  # 프로필 우선 노출 — 30 크레딧, 24h 동안 다른 사용자의 매칭 풀에서 본인 우선 정렬.
+  def boost_profile
+    if Current.user.profile_boosted?
+      redirect_to matching_path,
+        notice: "프로필 우선 노출이 #{l Current.user.boosted_until, format: :short}까지 적용 중입니다." and return
+    end
+    cost = Rails.application.config.x.blackticket.profile_boost_cost
+    ttl  = Rails.application.config.x.blackticket.profile_boost_ttl
+    if Current.user.ticket_credits < cost
+      redirect_to matching_path,
+        alert: "우선 노출에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    User.transaction do
+      Current.user.credit_transactions.create!(
+        amount: -cost, kind: :spend, memo: "profile_boost"
+      )
+      Current.user.update!(boosted_until: Time.current + ttl)
+    end
+    redirect_to matching_path,
+      notice: "프로필을 24시간 동안 우선 노출합니다 (-#{cost} 크레딧)."
+  end
+
   # 거주지/직무 필터 해제 — 20 크레딧, 본 기수 동안 동일 지역 우선 정렬 무시.
   def unlock_filter
     unless Current.user.matching_active?
@@ -137,18 +160,21 @@ class MatchingController < ApplicationController
     end
 
     # 우선순위 정렬:
-    # ① 본 기수 추천서 강조 구매자
-    # ② 노출 없음
-    # ③ 동일 시·도 (단, viewer가 본 기수 필터 해제를 구매했으면 무시)
-    # ④ 무작위
+    # ① 프로필 우선 노출 (boosted_until > now) — 결제 즉시성·최우선
+    # ② 본 기수 추천서 강조 구매자
+    # ③ 노출 없음
+    # ④ 동일 시·도 (단, viewer가 본 기수 필터 해제를 구매했으면 무시)
+    # ⑤ 무작위
     def build_candidates(viewer, gen_week, pool_size, highlighted_ids = Set.new)
       scope = User.matching_pool_for(viewer, gen_week: gen_week).with_attached_avatar
       exposed_ids = MatchExposure.where(viewer_id: viewer.id).pluck(:target_id).to_set
       filter_unlocked = viewer.filter_unlocked_this_week?(gen_week)
+      now = Time.current
 
       scope.to_a
         .sort_by { |u|
           [
+            (u.boosted_until.present? && u.boosted_until > now) ? 0 : 1,
             highlighted_ids.include?(u.id) ? 0 : 1,
             exposed_ids.include?(u.id) ? 1 : 0,
             filter_unlocked ? 0 : ((u.residence_area == viewer.residence_area) ? 0 : 1),

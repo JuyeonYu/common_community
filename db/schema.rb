@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_062646) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_064016) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -293,6 +293,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_062646) do
     t.string "avatar_url"
     t.text "bio"
     t.date "birth_date"
+    t.datetime "boosted_until"
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.integer "gender"
@@ -313,6 +314,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_062646) do
     t.integer "ticket_credits", default: 0, null: false
     t.integer "ticket_score", default: 10, null: false
     t.datetime "updated_at", null: false
+    t.index ["boosted_until"], name: "index_users_on_boosted_until"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"

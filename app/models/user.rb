@@ -80,6 +80,11 @@ class User < ApplicationRecord
     credit_transactions.where(kind: :spend, memo: "filter_unlock", created_at: range).exists?
   end
 
+  # 프로필 우선 노출 활성 여부 (24h 단위).
+  def profile_boosted?
+    boosted_until.present? && boosted_until > Time.current
+  end
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }

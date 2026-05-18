@@ -181,6 +181,35 @@ class MatchingControllerTest < ActionDispatch::IntegrationTest
     assert_match(/활성화되지 않/, flash[:alert])
   end
 
+  # --- 프로필 우선 노출 (Phase F-2-c) ---
+
+  test "boost_profile: 잔액 충분 → boosted_until 24h 후 + 크레딧 차감" do
+    cost = Rails.application.config.x.blackticket.profile_boost_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post boost_profile_matching_path
+    assert_equal before - cost, @user.reload.ticket_credits
+    assert @user.profile_boosted?
+    assert_in_delta 24.hours.from_now.to_i, @user.boosted_until.to_i, 10
+  end
+
+  test "boost_profile: 활성 중이면 안내" do
+    @user.update!(boosted_until: 12.hours.from_now)
+    sign_in_as(@user)
+    assert_no_difference -> { @user.reload.ticket_credits } do
+      post boost_profile_matching_path
+    end
+    assert_match(/우선 노출이/, flash[:notice])
+  end
+
+  test "boost_profile: 잔액 부족 거절" do
+    sign_in_as(@user)
+    post boost_profile_matching_path
+    assert_match(/크레딧이 부족/, flash[:alert])
+  end
+
   private
     def fill_required_profile(user)
       user.update!(
