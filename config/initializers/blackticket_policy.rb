@@ -20,4 +20,9 @@ Rails.application.config.x.blackticket = ActiveSupport::OrderedOptions.new.tap d
   c.extra_matching_cost       = 12     # 추가 매칭권(+5명) — v1.2 7-4
   c.red_connect_extension_cost = 60    # 커넥트 연장권(+1개월) — v1.2 7-4
   c.refresh_matching_cost     = 10     # 매칭 리스트 새로고침 — v1.2 7-5
+  c.highlight_recommendation_cost = 15 # 추천 코멘트 강조 (1기수) — v1.2 7-5
+  c.filter_unlock_cost        = 20     # 거주지/직무 필터 해제 (1기수) — v1.2 7-5
+  c.profile_boost_cost        = 30     # 프로필 우선 노출 (24h) — v1.2 7-5
+  c.profile_boost_ttl         = 24.hours
+  c.chat_read_receipt_cost    = 5      # 채팅 읽음 확인 (1건) — v1.2 7-5
 end

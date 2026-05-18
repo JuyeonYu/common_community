@@ -17,6 +17,18 @@
       <%= button_to "잠시 쉬기", matching_path, method: :delete,
             data: { turbo_confirm: "매칭을 일시 중지할까요? 보낸/받은 미수락 요청은 자동 취소됩니다." },
             class: "rounded-md border border-green-300 bg-white px-3 py-1.5 text-sm hover:bg-green-100 cursor-pointer" %>
+
+      <% if Current.user.accepted_invitation&.recommendation_written? %>
+        <% hcost = Rails.application.config.x.blackticket.highlight_recommendation_cost %>
+        <% already = Current.user.highlight_purchased_this_week?(@gen_week) %>
+        <% if already %>
+          <p class="mt-2 text-xs text-amber-700">★ 이번 기수 추천서 강조 표시 적용 중</p>
+        <% else %>
+          <%= button_to "★ 추천서 강조 (-#{hcost})", highlight_recommendation_matching_path, method: :post,
+                data: { turbo_confirm: "이번 기수 동안 본인의 추천서를 강조 표시합니다. #{hcost} 크레딧이 차감됩니다." },
+                class: "ml-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-100 cursor-pointer" %>
+        <% end %>
+      <% end %>
     </section>
 
     <% active_connects = Current.user.active_red_connects.includes(:user_a, :user_b) %>
@@ -90,13 +102,17 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <% @candidates.each do |cand| %>
-          <article class="rounded-md bg-white border border-gray-200 p-4">
+          <% highlighted = @highlighted_user_ids.include?(cand.id) %>
+          <article class="rounded-md bg-white p-4 <%= highlighted ? 'border-2 border-amber-400 ring-1 ring-amber-200' : 'border border-gray-200' %>">
             <%= link_to matching_candidate_path(cand), class: "flex items-start gap-3 hover:opacity-90" do %>
               <%= avatar_image(cand, class: "h-14 w-14 rounded-full") %>
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <p class="font-medium"><%= cand.nickname %></p>
                   <% inv = cand.invited_by&.sent_invitations&.find_by(accepted_by_id: cand.id) %>
+                  <% if highlighted %>
+                    <span class="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">★ 추천 강조</span>
+                  <% end %>
                   <% if inv&.boosted? %>
                     <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력 추천</span>
                   <% end %>

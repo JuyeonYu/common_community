@@ -68,6 +68,18 @@ class User < ApplicationRecord
     credit_transactions.where(kind: :spend, memo: "extra_matching", created_at: range).count
   end
 
+  # 본 기수에 추천 코멘트 강조 구매 여부 (memo: "highlight_recommendation").
+  def highlight_purchased_this_week?(gen_week)
+    range = ConnectRequest.gen_week_range(gen_week)
+    credit_transactions.where(kind: :spend, memo: "highlight_recommendation", created_at: range).exists?
+  end
+
+  # 본 기수에 거주지/직무 필터 해제 구매 여부 (memo: "filter_unlock").
+  def filter_unlocked_this_week?(gen_week)
+    range = ConnectRequest.gen_week_range(gen_week)
+    credit_transactions.where(kind: :spend, memo: "filter_unlock", created_at: range).exists?
+  end
+
   enum :residence_area, RESIDENCE_AREAS
   enum :smoking,        { smokes: 0, non_smoker: 1, sometimes: 2 }
   enum :gender,         { male: 0, female: 1 }

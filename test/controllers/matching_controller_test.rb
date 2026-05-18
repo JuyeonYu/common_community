@@ -105,6 +105,47 @@ class MatchingControllerTest < ActionDispatch::IntegrationTest
     assert_match(/활성화되지 않/, flash[:alert])
   end
 
+  # --- 추천 코멘트 강조 (Phase F-2-c) ---
+
+  def fresh_invitation_with_rec(user)
+    inv = users(:two).sent_invitations.create!(invitee_email: "rec-#{user.id}@gmail.com")
+    inv.update!(status: :accepted, accepted_by: user,
+                recommendation_comment: "잘 아는 동료입니다 (테스트용).")
+    user.update!(invited_by: users(:two), invitation_accepted_at: Time.current, seed: false)
+    inv
+  end
+
+  test "highlight_recommendation: 추천서 보유 + 잔액 충분 → 크레딧 차감 + 본 기수 1회 표시" do
+    fresh_invitation_with_rec(@user)
+    cost = Rails.application.config.x.blackticket.highlight_recommendation_cost
+    @user.credit_transactions.create!(amount: cost * 2, kind: :admin_grant, memo: "seed")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post highlight_recommendation_matching_path
+    assert_equal before - cost, @user.reload.ticket_credits
+    assert @user.highlight_purchased_this_week?(ConnectRequest.current_gen_week)
+  end
+
+  test "highlight_recommendation: 본 기수 중복 구매 거절" do
+    fresh_invitation_with_rec(@user)
+    cost = Rails.application.config.x.blackticket.highlight_recommendation_cost
+    @user.credit_transactions.create!(amount: cost * 3, kind: :admin_grant, memo: "seed")
+    @user.credit_transactions.create!(amount: -cost, kind: :spend, memo: "highlight_recommendation")
+    sign_in_as(@user)
+    before = @user.reload.ticket_credits
+
+    post highlight_recommendation_matching_path
+    assert_equal before, @user.reload.ticket_credits
+    assert_match(/이미 강조 표시/, flash[:notice])
+  end
+
+  test "highlight_recommendation: 추천서 미작성이면 거절" do
+    sign_in_as(@user)
+    post highlight_recommendation_matching_path
+    assert_match(/강조할 추천서/, flash[:alert])
+  end
+
   private
     def fill_required_profile(user)
       user.update!(

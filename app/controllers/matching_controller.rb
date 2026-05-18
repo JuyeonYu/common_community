@@ -12,7 +12,8 @@ class MatchingController < ApplicationController
 
     @gen_week = ConnectRequest.current_gen_week
     @pool_size = pool_size_for(Current.user, @gen_week)
-    @candidates = build_candidates(Current.user, @gen_week, @pool_size)
+    @highlighted_user_ids = highlighted_user_ids(@gen_week)
+    @candidates = build_candidates(Current.user, @gen_week, @pool_size, @highlighted_user_ids)
     record_exposures(@candidates)
     @my_pending_request = Current.user.sent_connect_requests
                                 .where(gen_week: @gen_week, status: :pending).first
@@ -32,6 +33,30 @@ class MatchingController < ApplicationController
   def destroy
     Current.user.disable_matching!
     redirect_to matching_path, notice: "이성 매칭을 일시 중지했습니다. 미수락 요청은 취소되었습니다."
+  end
+
+  # 추천 코멘트 강조 — 15 크레딧, 본 기수 동안 매칭 카드 상위 노출 + 강조 배지.
+  def highlight_recommendation
+    invitation = Current.user.accepted_invitation
+    unless invitation&.recommendation_written?
+      redirect_to matching_path,
+        alert: "강조할 추천서가 아직 없습니다." and return
+    end
+    gen_week = ConnectRequest.current_gen_week
+    if Current.user.highlight_purchased_this_week?(gen_week)
+      redirect_to matching_path, notice: "이번 기수에 이미 강조 표시가 적용되어 있습니다." and return
+    end
+    cost = Rails.application.config.x.blackticket.highlight_recommendation_cost
+    if Current.user.ticket_credits < cost
+      redirect_to matching_path,
+        alert: "강조 표시에 필요한 크레딧이 부족합니다 (#{cost} 필요)." and return
+    end
+
+    Current.user.credit_transactions.create!(
+      amount: -cost, kind: :spend, related: invitation, memo: "highlight_recommendation"
+    )
+    redirect_to matching_path,
+      notice: "추천서를 이번 기수 동안 강조 표시합니다 (-#{cost} 크레딧)."
   end
 
   # 새로고침 — 10 크레딧 차감, 본인의 모든 MatchExposure 삭제 후 풀 재추출.
@@ -82,17 +107,29 @@ class MatchingController < ApplicationController
       BASE_POOL_SIZE + user.extra_matchings_this_week_count(gen_week) * EXTRA_PER_PURCHASE
     end
 
-    # 우선순위 정렬: ① 노출 없음 ② 동일 시·도. 그 외 무작위.
-    # 작은 풀이라 Ruby 정렬로 충분.
-    def build_candidates(viewer, gen_week, pool_size)
+    # 본 기수에 추천서 강조를 산 사용자 id 셋 — 매칭 정렬 최우선.
+    def highlighted_user_ids(gen_week)
+      range = ConnectRequest.gen_week_range(gen_week)
+      CreditTransaction.where(kind: :spend, memo: "highlight_recommendation", created_at: range)
+                       .pluck(:user_id).to_set
+    end
+
+    # 우선순위 정렬:
+    # ① 본 기수 추천서 강조 구매자
+    # ② 노출 없음
+    # ③ 동일 시·도 (단, viewer가 본 기수 필터 해제를 구매했으면 무시)
+    # ④ 무작위
+    def build_candidates(viewer, gen_week, pool_size, highlighted_ids = Set.new)
       scope = User.matching_pool_for(viewer, gen_week: gen_week).with_attached_avatar
       exposed_ids = MatchExposure.where(viewer_id: viewer.id).pluck(:target_id).to_set
+      filter_unlocked = viewer.filter_unlocked_this_week?(gen_week)
 
       scope.to_a
         .sort_by { |u|
           [
+            highlighted_ids.include?(u.id) ? 0 : 1,
             exposed_ids.include?(u.id) ? 1 : 0,
-            (u.residence_area == viewer.residence_area) ? 0 : 1,
+            filter_unlocked ? 0 : ((u.residence_area == viewer.residence_area) ? 0 : 1),
             SecureRandom.random_number
           ]
         }

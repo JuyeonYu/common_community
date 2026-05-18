@@ -42,6 +42,7 @@ Rails.application.routes.draw do
     post :enable
     post :extend_pool
     post :refresh
+    post :highlight_recommendation
   end
   # 매칭 후보 풀 프로필 (제한된 노출).
   get "/matching/candidates/:id", to: "matching/candidates#show",
