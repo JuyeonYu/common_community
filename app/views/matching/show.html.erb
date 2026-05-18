@@ -2,70 +2,90 @@
 
 <div class="mx-auto max-w-2xl">
   <h1 class="text-2xl font-bold mb-2">이성 매칭</h1>
-  <p class="text-sm text-gray-500 mb-6">
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
     같이 일해본 사람의 추천 + 검증된 프로필 기반의 매칭. 활성화하면 매주 매칭 풀에 노출됩니다.
   </p>
 
   <% if Current.user.matching_active? %>
-    <section class="rounded-md bg-green-50 border border-green-200 p-5 mb-6">
-      <h2 class="font-semibold text-green-900 mb-1">매칭 활성</h2>
-      <p class="text-sm text-green-800 mb-3">
-        <% if Current.user.matching_activated_at %>
-          <%= l Current.user.matching_activated_at, format: :short %>부터 매칭 풀에 노출 중.
-        <% end %>
-      </p>
-      <%= button_to "잠시 쉬기", matching_path, method: :delete,
-            data: { turbo_confirm: "매칭을 일시 중지할까요? 보낸/받은 미수락 요청은 자동 취소됩니다." },
-            class: "rounded-md border border-green-300 bg-white px-3 py-1.5 text-sm hover:bg-green-100 cursor-pointer" %>
+    <section class="card mb-6">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="font-semibold mb-1 flex items-center gap-2">
+            <span class="inline-block h-2 w-2 rounded-full" style="background-color: var(--color-success);"></span>
+            매칭 활성
+          </h2>
+          <p class="text-sm" style="color: var(--color-text-muted);">
+            <% if Current.user.matching_activated_at %>
+              <%= l Current.user.matching_activated_at, format: :short %>부터 매칭 풀에 노출 중
+            <% end %>
+          </p>
+        </div>
+        <%= button_to "잠시 쉬기", matching_path, method: :delete,
+              data: { turbo_confirm: "매칭을 일시 중지할까요? 보낸/받은 미수락 요청은 자동 취소됩니다." },
+              class: "btn btn-secondary btn-sm" %>
+      </div>
 
       <% if Current.user.accepted_invitation&.recommendation_written? %>
         <% hcost = Rails.application.config.x.blackticket.highlight_recommendation_cost %>
         <% already = Current.user.highlight_purchased_this_week?(@gen_week) %>
-        <% if already %>
-          <p class="mt-2 text-xs text-amber-700">★ 이번 기수 추천서 강조 표시 적용 중</p>
-        <% else %>
-          <%= button_to "★ 추천서 강조 (-#{hcost})", highlight_recommendation_matching_path, method: :post,
-                data: { turbo_confirm: "이번 기수 동안 본인의 추천서를 강조 표시합니다. #{hcost} 크레딧이 차감됩니다." },
-                class: "ml-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-100 cursor-pointer" %>
-        <% end %>
-      <% end %>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <% if already %>
+            <span class="chip" style="background-color: var(--color-gold-soft); color: var(--color-gold-hover); border-color: var(--color-gold);">
+              <%= icon :star, class: "h-3 w-3" %> 추천서 강조 중
+            </span>
+          <% else %>
+            <%= button_to highlight_recommendation_matching_path, method: :post,
+                  data: { turbo_confirm: "이번 기수 동안 본인의 추천서를 강조 표시합니다. #{hcost} 크레딧이 차감됩니다." },
+                  class: "btn btn-secondary btn-sm" do %>
+              <%= icon :star, class: "h-3 w-3" %> 추천서 강조 <span class="opacity-60">−<%= hcost %></span>
+            <% end %>
+          <% end %>
 
-      <% fcost = Rails.application.config.x.blackticket.filter_unlock_cost %>
-      <% filter_on = Current.user.filter_unlocked_this_week?(@gen_week) %>
-      <% if filter_on %>
-        <p class="mt-2 text-xs text-purple-700">✦ 이번 기수 거주지/직무 필터 해제 중</p>
-      <% else %>
-        <%= button_to "✦ 필터 해제 (-#{fcost})", unlock_filter_matching_path, method: :post,
-              data: { turbo_confirm: "이번 기수 동안 거주지/직무 우선 정렬을 해제합니다. #{fcost} 크레딧이 차감됩니다." },
-              class: "ml-2 rounded-md border border-purple-300 bg-purple-50 px-3 py-1.5 text-sm text-purple-800 hover:bg-purple-100 cursor-pointer" %>
-      <% end %>
+          <% fcost = Rails.application.config.x.blackticket.filter_unlock_cost %>
+          <% if Current.user.filter_unlocked_this_week?(@gen_week) %>
+            <span class="chip">
+              <%= icon :funnel, class: "h-3 w-3" %> 필터 해제 중
+            </span>
+          <% else %>
+            <%= button_to unlock_filter_matching_path, method: :post,
+                  data: { turbo_confirm: "이번 기수 동안 거주지/직무 우선 정렬을 해제합니다. #{fcost} 크레딧이 차감됩니다." },
+                  class: "btn btn-secondary btn-sm" do %>
+              <%= icon :funnel, class: "h-3 w-3" %> 필터 해제 <span class="opacity-60">−<%= fcost %></span>
+            <% end %>
+          <% end %>
 
-      <% bcost = Rails.application.config.x.blackticket.profile_boost_cost %>
-      <% if Current.user.profile_boosted? %>
-        <p class="mt-2 text-xs text-pink-700">⚡ 프로필 우선 노출 <%= l Current.user.boosted_until, format: :short %>까지</p>
-      <% else %>
-        <%= button_to "⚡ 우선 노출 24h (-#{bcost})", boost_profile_matching_path, method: :post,
-              data: { turbo_confirm: "24시간 동안 다른 사용자 풀에서 본인을 우선 노출합니다. #{bcost} 크레딧이 차감됩니다." },
-              class: "ml-2 rounded-md border border-pink-300 bg-pink-50 px-3 py-1.5 text-sm text-pink-800 hover:bg-pink-100 cursor-pointer" %>
+          <% bcost = Rails.application.config.x.blackticket.profile_boost_cost %>
+          <% if Current.user.profile_boosted? %>
+            <span class="chip chip-accent">
+              <%= icon :bolt, class: "h-3 w-3" %> 우선 노출 <%= l Current.user.boosted_until, format: :short %>까지
+            </span>
+          <% else %>
+            <%= button_to boost_profile_matching_path, method: :post,
+                  data: { turbo_confirm: "24시간 동안 다른 사용자 풀에서 본인을 우선 노출합니다. #{bcost} 크레딧이 차감됩니다." },
+                  class: "btn btn-secondary btn-sm" do %>
+              <%= icon :bolt, class: "h-3 w-3" %> 우선 노출 24h <span class="opacity-60">−<%= bcost %></span>
+            <% end %>
+          <% end %>
+        </div>
       <% end %>
     </section>
 
     <% active_connects = Current.user.active_red_connects.includes(:user_a, :user_b) %>
     <% if active_connects.any? %>
-      <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+      <section class="card mb-6">
         <h2 class="font-semibold mb-3">진행 중 커넥트 (<%= active_connects.size %>)</h2>
         <ul class="space-y-2">
           <% active_connects.each do |rc| %>
             <% other = rc.other_user(Current.user) %>
             <li>
               <%= link_to red_connect_path(rc),
-                    class: "flex items-center gap-3 rounded-md border border-gray-200 p-2 hover:bg-gray-50" do %>
+                    class: "flex items-center gap-3 rounded-lg p-2 hover:bg-[var(--color-surface-muted)] transition-colors" do %>
                 <%= avatar_image(other, class: "h-9 w-9 rounded-full") %>
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium"><%= other.nickname %></p>
-                  <p class="text-xs text-gray-500">만료 <%= l rc.expires_at, format: :short %></p>
+                  <p class="text-xs" style="color: var(--color-text-muted);">만료 <%= l rc.expires_at, format: :short %></p>
                 </div>
-                <span class="text-xs text-blue-600">채팅 →</span>
+                <span class="text-xs" style="color: var(--color-accent);">채팅 →</span>
               <% end %>
             </li>
           <% end %>
@@ -74,22 +94,20 @@
     <% end %>
 
     <% if @received_requests.any? %>
-      <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+      <section class="card mb-6">
         <h2 class="font-semibold mb-3">받은 커넥트 요청</h2>
         <ul class="space-y-3">
           <% @received_requests.each do |req| %>
-            <li class="flex items-center gap-3 border-b last:border-b-0 pb-3 last:pb-0">
+            <li class="flex items-center gap-3 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--color-border-muted);">
               <%= avatar_image(req.requester, class: "h-10 w-10 rounded-full") %>
-              <div class="flex-1 text-sm">
+              <div class="flex-1 text-sm min-w-0">
                 <p class="font-medium"><%= req.requester.nickname %></p>
                 <% if (inv = req.requester.invited_by&.sent_invitations&.find_by(accepted_by_id: req.requester.id)) %>
-                  <p class="text-xs text-gray-500 italic">"<%= truncate(inv.recommendation_comment, length: 60) %>"</p>
+                  <p class="text-xs italic truncate" style="color: var(--color-text-muted);">"<%= truncate(inv.recommendation_comment, length: 60) %>"</p>
                 <% end %>
               </div>
-              <%= button_to "수락", accept_connect_request_path(req), method: :post,
-                    class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-xs cursor-pointer" %>
-              <%= button_to "거절", reject_connect_request_path(req), method: :post,
-                    class: "rounded-md border border-gray-300 px-3 py-1.5 text-xs cursor-pointer" %>
+              <%= button_to "수락", accept_connect_request_path(req), method: :post, class: "btn btn-primary btn-sm" %>
+              <%= button_to "거절", reject_connect_request_path(req), method: :post, class: "btn btn-secondary btn-sm" %>
             </li>
           <% end %>
         </ul>
@@ -97,125 +115,132 @@
     <% end %>
 
     <% if @my_pending_request %>
-      <section class="rounded-md bg-yellow-50 border border-yellow-200 p-5 mb-6">
+      <section class="card mb-6" style="background-color: var(--color-surface-muted);">
         <p class="text-sm">
           이번 기수 요청 송신 완료 — 상대 응답 대기 중
-          (<%= @my_pending_request.target.nickname %>)
+          <span class="font-medium">(<%= @my_pending_request.target.nickname %>)</span>
         </p>
         <%= button_to "요청 취소", connect_request_path(@my_pending_request), method: :delete,
               data: { turbo_confirm: "요청을 취소할까요?" },
-              class: "mt-3 rounded-md border border-yellow-400 bg-white px-3 py-1.5 text-xs cursor-pointer" %>
+              class: "btn btn-secondary btn-sm mt-3" %>
       </section>
     <% end %>
 
     <section>
       <div class="flex items-center justify-between mb-3">
-        <h2 class="font-semibold">이번 기수 매칭 후보 (<%= @gen_week %>)</h2>
+        <h2 class="font-semibold">이번 기수 매칭 후보 <span class="text-xs font-normal" style="color: var(--color-text-muted);">(<%= @gen_week %>)</span></h2>
         <div class="flex items-center gap-3">
-          <span class="text-xs text-gray-500"><%= @candidates.size %>명</span>
+          <span class="text-xs" style="color: var(--color-text-muted);"><%= @candidates.size %>명</span>
           <% refresh_cost = Rails.application.config.x.blackticket.refresh_matching_cost %>
-          <%= button_to "↻ 새로고침 (-#{refresh_cost})", refresh_matching_path, method: :post,
+          <%= button_to refresh_matching_path, method: :post,
                 data: { turbo_confirm: "매칭 리스트를 새로 추출합니다. #{refresh_cost} 크레딧이 차감됩니다." },
-                class: "text-xs text-blue-600 hover:underline cursor-pointer bg-transparent border-0 p-0" %>
+                class: "inline-flex items-center gap-1 text-xs hover:opacity-80 cursor-pointer bg-transparent border-0 p-0",
+                style: "color: var(--color-accent);" do %>
+            <%= icon :refresh, class: "h-3.5 w-3.5" %> 새로고침 −<%= refresh_cost %>
+          <% end %>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <% @candidates.each do |cand| %>
           <% highlighted = @highlighted_user_ids.include?(cand.id) %>
-          <article class="rounded-md bg-white p-4 <%= highlighted ? 'border-2 border-amber-400 ring-1 ring-amber-200' : 'border border-gray-200' %>">
+          <article class="card p-4 <%= 'ring-2' if highlighted %>"
+                   style="<%= 'border-color: var(--color-gold); --tw-ring-color: var(--color-gold-soft);' if highlighted %>">
             <%= link_to matching_candidate_path(cand), class: "flex items-start gap-3 hover:opacity-90" do %>
               <%= avatar_image(cand, class: "h-14 w-14 rounded-full") %>
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <p class="font-medium"><%= cand.nickname %></p>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <p class="font-semibold"><%= cand.nickname %></p>
                   <% inv = cand.invited_by&.sent_invitations&.find_by(accepted_by_id: cand.id) %>
                   <% if highlighted %>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">★ 추천 강조</span>
+                    <span class="chip chip-gold">
+                      <%= icon :star, class: "h-3 w-3" %> 강조
+                    </span>
                   <% end %>
                   <% if inv&.boosted? %>
-                    <span class="text-xs px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">강력 추천</span>
+                    <span class="chip chip-accent">강력 추천</span>
                   <% end %>
                 </div>
                 <% if inv && inv.recommendation_comment.present? %>
-                  <p class="text-xs text-gray-600 italic mt-1 line-clamp-3">"<%= inv.recommendation_comment %>"</p>
+                  <p class="text-xs italic mt-1 line-clamp-3" style="color: var(--color-text-muted);">"<%= inv.recommendation_comment %>"</p>
                 <% end %>
-                <p class="text-[11px] text-blue-600 mt-1">프로필 보기 →</p>
+                <p class="text-[11px] mt-1" style="color: var(--color-accent);">프로필 보기 →</p>
               </div>
             <% end %>
             <% unless @my_pending_request %>
               <%= button_to "커넥트 요청", connect_requests_path(target_id: cand.id), method: :post,
                     data: { turbo_confirm: "이 사람에게 커넥트를 요청할까요? 1기수에 1명만 가능합니다." },
-                    class: "mt-3 w-full rounded-md bg-blue-600 px-3 py-1.5 text-white text-xs cursor-pointer" %>
+                    class: "btn btn-primary btn-sm mt-3 w-full" %>
             <% end %>
           </article>
         <% end %>
         <% (@pool_size - @candidates.size).times do %>
-          <article class="rounded-md bg-gray-50 border border-dashed border-gray-300 p-4 flex items-center justify-center min-h-[112px]">
+          <article class="card-muted p-4 flex items-center justify-center min-h-[112px] border-dashed">
             <div class="text-center">
-              <div class="h-14 w-14 rounded-full bg-gray-200 mx-auto mb-2"></div>
-              <p class="text-xs text-gray-400">매칭 대상 탐색 중…</p>
+              <div class="h-14 w-14 rounded-full mx-auto mb-2" style="background-color: var(--color-border);"></div>
+              <p class="text-xs" style="color: var(--color-text-subtle);">매칭 대상 탐색 중…</p>
             </div>
           </article>
         <% end %>
       </div>
       <% extra_cost = Rails.application.config.x.blackticket.extra_matching_cost %>
-      <div class="mt-3 text-center">
-        <%= button_to "추가 5명 더 보기 (-#{extra_cost} 크레딧)", extend_pool_matching_path, method: :post,
+      <div class="mt-4 text-center">
+        <%= button_to extend_pool_matching_path, method: :post,
               data: { turbo_confirm: "추가 매칭권을 사용합니다. #{extra_cost} 크레딧이 차감됩니다." },
-              class: "rounded-md border border-blue-300 bg-white px-4 py-1.5 text-xs text-blue-600 hover:bg-blue-50 cursor-pointer" %>
+              class: "btn btn-secondary btn-sm" do %>
+          <%= icon :plus, class: "h-3.5 w-3.5" %> 추가 5명 −<%= extra_cost %>
+        <% end %>
       </div>
     </section>
   <% else %>
-    <section class="rounded-md bg-white border border-gray-200 p-5 mb-6">
+    <section class="card mb-6">
       <h2 class="font-semibold mb-3">활성화 조건</h2>
       <ul class="space-y-2 text-sm">
         <% User::MATCHING_REQUIRED_FIELDS.each do |field| %>
           <% present = Current.user.public_send(field).present? %>
           <li class="flex items-center gap-2">
-            <span class="<%= present ? 'text-green-600' : 'text-gray-300' %>">
+            <span style="color: <%= present ? 'var(--color-success)' : 'var(--color-text-subtle)' %>;">
               <%= present ? "✓" : "○" %>
             </span>
-            <span class="<%= 'text-gray-400 line-through' if present %>">
+            <span style="<%= 'text-decoration: line-through; color: var(--color-text-subtle);' if present %>">
               <%= I18n.t("activerecord.attributes.user.#{field}", default: field.to_s) %>
             </span>
           </li>
         <% end %>
         <% avatar_present = Current.user.avatar.attached? %>
         <li class="flex items-center gap-2">
-          <span class="<%= avatar_present ? 'text-green-600' : 'text-gray-300' %>">
+          <span style="color: <%= avatar_present ? 'var(--color-success)' : 'var(--color-text-subtle)' %>;">
             <%= avatar_present ? "✓" : "○" %>
           </span>
-          <span class="<%= 'text-gray-400 line-through' if avatar_present %>">프로필 사진</span>
+          <span style="<%= 'text-decoration: line-through; color: var(--color-text-subtle);' if avatar_present %>">프로필 사진</span>
         </li>
         <% unless Current.user.seed? %>
           <li class="flex items-center gap-2">
-            <span class="<%= @has_recommendation ? 'text-green-600' : 'text-gray-300' %>">
+            <span style="color: <%= @has_recommendation ? 'var(--color-success)' : 'var(--color-text-subtle)' %>;">
               <%= @has_recommendation ? "✓" : "○" %>
             </span>
-            <span class="<%= 'text-gray-400 line-through' if @has_recommendation %>">초대자의 추천서</span>
+            <span style="<%= 'text-decoration: line-through; color: var(--color-text-subtle);' if @has_recommendation %>">초대자의 추천서</span>
           </li>
         <% end %>
       </ul>
 
       <% unless @has_recommendation %>
-        <div class="mt-4 rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm">
-          <p class="text-yellow-900">
+        <div class="mt-4 rounded-xl p-3 text-sm"
+             style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
+          <p>
             <strong><%= @accepted_invitation&.inviter&.nickname || "초대자" %></strong>님의 추천서가 아직 없습니다.
           </p>
           <%= button_to "초대자에게 추천서 요청", request_recommendation_invitations_path, method: :post,
-                class: "mt-2 rounded-md bg-yellow-600 px-3 py-1.5 text-white text-xs font-medium hover:bg-yellow-500 cursor-pointer" %>
+                class: "btn btn-primary btn-sm mt-2" %>
         </div>
       <% end %>
 
       <div class="mt-5 flex items-center gap-3">
         <% if @can_activate %>
-          <%= button_to "이성 매칭 시작", enable_matching_path, method: :post,
-                class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
-          <span class="text-xs text-gray-500">활성화 후 언제든 잠시 쉬기 가능</span>
+          <%= button_to "이성 매칭 시작", enable_matching_path, method: :post, class: "btn btn-primary" %>
+          <span class="text-xs" style="color: var(--color-text-muted);">활성화 후 언제든 잠시 쉬기 가능</span>
         <% elsif !@profile_complete %>
-          <%= link_to "프로필 채우러 가기", edit_profile_path(Current.user),
-                class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500" %>
-          <span class="text-xs text-gray-500">필수 항목 <%= @missing_fields.size %>개 누락</span>
+          <%= link_to "프로필 채우러 가기", edit_profile_path(Current.user), class: "btn btn-primary" %>
+          <span class="text-xs" style="color: var(--color-text-muted);">필수 항목 <%= @missing_fields.size %>개 누락</span>
         <% end %>
       </div>
     </section>
