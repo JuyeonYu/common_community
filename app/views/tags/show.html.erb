@@ -10,12 +10,12 @@
       <%== pagy_nav(@pagy) %>
     </div>
   <% else %>
-    <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+    <div class="empty">
       이 태그에 글이 없습니다.
     </div>
   <% end %>
 
   <div class="mt-6">
-    <%= link_to "← 피드로", posts_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+    <%= link_to "← 피드로", posts_path, class: "btn btn-ghost btn-sm" %>
   </div>
 </div>

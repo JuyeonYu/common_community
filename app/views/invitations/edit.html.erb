@@ -2,40 +2,40 @@
 
 <div class="mx-auto max-w-xl">
   <h1 class="text-2xl font-bold mb-2">추천서 작성</h1>
-  <p class="text-sm text-gray-600 mb-6">
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
     <strong><%= @invitation.accepted_by&.nickname || @invitation.invitee_email %></strong>님을 위한 추천서입니다.
   </p>
 
   <%= form_with model: @invitation, url: invitation_path(@invitation), method: :patch, class: "space-y-4" do |form| %>
     <% if @invitation.errors.any? %>
-      <div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
+      <div class="rounded-xl p-3 text-sm"
+           style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
         <%= @invitation.errors.full_messages.join(", ") %>
       </div>
     <% end %>
 
     <div>
-      <%= form.label :recommendation_comment, "추천서 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.label :recommendation_comment, "추천서 (필수)", class: "label" %>
       <%= form.text_area :recommendation_comment, rows: 5, minlength: 5, maxlength: 1000, required: true,
-            placeholder: "어떤 사람인지, 왜 추천하는지 적어주세요",
-            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
-      <p class="mt-1 text-xs text-orange-700">
+            placeholder: "어떤 사람인지, 왜 추천하는지 적어주세요", class: "input" %>
+      <p class="mt-1 text-xs" style="color: var(--color-warning);">
         ⚠ 추천서는 한 번 작성한 후 수정할 수 없으며, 블랙티켓 내에서 평생 따라다닙니다. 신중하게 작성해주세요.
       </p>
     </div>
 
     <label class="flex items-center gap-2">
       <%= form.check_box :boosted %>
-      <span class="text-sm text-gray-700">
+      <span class="text-sm" style="color: var(--color-text);">
         강력 추천 (<%= @boost_cost %> 크레딧 소비 · 잔액 <%= Current.user.ticket_credits %>)
       </span>
     </label>
-    <p class="text-xs text-gray-500 -mt-1">
+    <p class="text-xs -mt-1" style="color: var(--color-text-muted);">
       강력 추천 받은 사람은 매칭/구직 화면에서 별도 배지로 표시됩니다.
     </p>
 
     <div class="flex items-center gap-2">
-      <%= form.submit "추천서 작성", class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
-      <%= link_to "취소", invitations_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+      <%= form.submit "추천서 작성", class: "btn btn-primary" %>
+      <%= link_to "취소", invitations_path, class: "btn btn-ghost btn-sm" %>
     </div>
   <% end %>
 </div>
