@@ -1,7 +1,7 @@
 <% content_for :title, @user.nickname %>
 
 <div class="mx-auto max-w-3xl">
-  <header class="rounded-md bg-white border border-gray-200 p-6">
+  <header class="card">
     <div class="flex items-start gap-4">
       <%= avatar_image(@user, class: "h-20 w-20 rounded-full") %>
 
@@ -11,37 +11,37 @@
             <%= @user.nickname %>
           </h1>
           <% if @user.admin? %>
-            <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">관리자</span>
+            <span class="chip chip-accent">관리자</span>
           <% end %>
           <% if @user.age %>
-            <span class="text-sm text-gray-500"><%= @user.age %>세</span>
+            <span class="text-sm" style="color: var(--color-text-muted);"><%= @user.age %>세</span>
           <% end %>
           <% if @user.gender.present? %>
-            <span class="text-sm text-gray-500"><%= t("users.gender.#{@user.gender}") %></span>
+            <span class="text-sm" style="color: var(--color-text-muted);"><%= t("users.gender.#{@user.gender}") %></span>
           <% end %>
         </div>
 
         <% if @user.job_title.present? %>
-          <p class="mt-1 text-sm text-gray-700"><%= @user.job_title %></p>
+          <p class="mt-1 text-sm" style="color: var(--color-text);"><%= @user.job_title %></p>
         <% end %>
 
         <% if @user.residence_area.present? %>
-          <p class="text-sm text-gray-500 mt-1"><%= t("users.residence_area.#{@user.residence_area}") %></p>
+          <p class="text-sm mt-1" style="color: var(--color-text-muted);"><%= t("users.residence_area.#{@user.residence_area}") %></p>
         <% end %>
 
         <% if @user.bio.present? %>
-          <p class="mt-3 text-sm text-gray-700 whitespace-pre-wrap"><%= @user.bio %></p>
+          <p class="mt-3 text-sm whitespace-pre-wrap" style="color: var(--color-text);"><%= @user.bio %></p>
         <% end %>
 
         <% if @user.hobby.present? %>
-          <p class="mt-2 text-sm text-blue-600"><%= @user.hobby %></p>
+          <p class="mt-2 text-sm" style="color: var(--color-accent);"><%= @user.hobby %></p>
         <% end %>
 
         <% if Current.user&.id == @user.id %>
-          <p class="mt-3 text-xs text-gray-500">
-            실명 <span class="font-medium text-gray-700"><%= @user.name %></span>
+          <p class="mt-3 text-xs" style="color: var(--color-text-muted);">
+            실명 <span class="font-medium" style="color: var(--color-text);"><%= @user.name %></span>
           </p>
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1 text-xs" style="color: var(--color-text-muted);">
             로그인 이메일 <span class="font-mono"><%= @user.email_address %></span>
           </p>
         <% end %>
@@ -49,44 +49,43 @@
 
       <% if Current.user&.id == @user.id %>
         <%= link_to "프로필 수정", edit_profile_path(@user),
-              class: "rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50" %>
+              class: "btn btn-secondary btn-sm" %>
       <% end %>
     </div>
 
     <% if Current.user&.id == @user.id || Current.user&.admin? %>
-      <dl class="mt-6 grid grid-cols-2 gap-4 text-sm border-t pt-4">
+      <dl class="mt-6 grid grid-cols-2 gap-4 text-sm pt-4"
+          style="border-top: 1px solid var(--color-border);">
         <div>
-          <dt class="text-gray-500">티켓 스코어</dt>
+          <dt style="color: var(--color-text-muted);">티켓 스코어</dt>
           <dd class="font-semibold mt-1">
             <%= @user.ticket_score %>
             <% if @user.suspended? %>
-              <span class="ml-2 px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">정지 중</span>
+              <span class="chip chip-accent ml-2">정지 중</span>
             <% end %>
           </dd>
         </div>
         <div>
-          <dt class="text-gray-500">티켓 크레딧</dt>
+          <dt style="color: var(--color-text-muted);">티켓 크레딧</dt>
           <dd class="font-semibold mt-1"><%= @user.ticket_credits %></dd>
         </div>
       </dl>
       <% if Current.user&.id == @user.id %>
         <div class="mt-3 text-right">
           <%= link_to "이력 보기 →", history_profile_path(@user),
-                class: "text-sm text-blue-600 hover:underline" %>
+                class: "text-sm hover:underline", style: "color: var(--color-link);" %>
         </div>
       <% end %>
     <% end %>
   </header>
 
   <section class="mt-6 grid grid-cols-2 gap-3 text-sm">
-    <%= link_to posts_profile_path(@user),
-          class: "rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
-      <span class="block text-gray-500 text-xs">작성한 글</span>
+    <%= link_to posts_profile_path(@user), class: "card hover:opacity-90 transition-opacity" do %>
+      <span class="block text-xs" style="color: var(--color-text-muted);">작성한 글</span>
       <span class="block font-semibold mt-1"><%= @post_count %></span>
     <% end %>
-    <%= link_to comments_profile_path(@user),
-          class: "rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
-      <span class="block text-gray-500 text-xs">작성한 댓글</span>
+    <%= link_to comments_profile_path(@user), class: "card hover:opacity-90 transition-opacity" do %>
+      <span class="block text-xs" style="color: var(--color-text-muted);">작성한 댓글</span>
       <span class="block font-semibold mt-1"><%= @comment_count %></span>
     <% end %>
   </section>
@@ -94,33 +93,35 @@
   <section class="mt-6">
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-semibold">최근 글</h2>
-      <%= link_to "더보기 →", posts_profile_path(@user), class: "text-sm text-blue-600 hover:underline" %>
+      <%= link_to "더보기 →", posts_profile_path(@user),
+            class: "text-sm hover:underline", style: "color: var(--color-link);" %>
     </div>
     <% if @recent_posts.any? %>
       <div class="space-y-2">
         <% @recent_posts.each do |post| %>
-          <article class="rounded-md bg-white border border-gray-200 p-3">
+          <article class="card" style="padding: 0.75rem;">
             <%= link_to post.title, post, class: "font-medium hover:underline" %>
-            <p class="text-xs text-gray-500 mt-1"><%= l post.created_at, format: :short %></p>
+            <p class="text-xs mt-1" style="color: var(--color-text-muted);"><%= l post.created_at, format: :short %></p>
           </article>
         <% end %>
       </div>
     <% else %>
-      <p class="text-sm text-gray-500">아직 작성한 글이 없습니다.</p>
+      <p class="text-sm" style="color: var(--color-text-muted);">아직 작성한 글이 없습니다.</p>
     <% end %>
   </section>
 
   <section class="mt-6">
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-semibold">최근 댓글</h2>
-      <%= link_to "더보기 →", comments_profile_path(@user), class: "text-sm text-blue-600 hover:underline" %>
+      <%= link_to "더보기 →", comments_profile_path(@user),
+            class: "text-sm hover:underline", style: "color: var(--color-link);" %>
     </div>
     <% if @recent_comments.any? %>
       <div class="space-y-2">
         <% @recent_comments.each do |comment| %>
-          <article class="rounded-md bg-white border border-gray-200 p-3 text-sm">
-            <p class="line-clamp-2 text-gray-800"><%= comment.body %></p>
-            <p class="text-xs text-gray-500 mt-1">
+          <article class="card text-sm" style="padding: 0.75rem;">
+            <p class="line-clamp-2" style="color: var(--color-text);"><%= comment.body %></p>
+            <p class="text-xs mt-1" style="color: var(--color-text-muted);">
               <%= link_to comment.post.title, comment.post, class: "hover:underline" %>
               · <%= l comment.created_at, format: :short %>
             </p>
@@ -128,7 +129,7 @@
         <% end %>
       </div>
     <% else %>
-      <p class="text-sm text-gray-500">아직 작성한 댓글이 없습니다.</p>
+      <p class="text-sm" style="color: var(--color-text-muted);">아직 작성한 댓글이 없습니다.</p>
     <% end %>
   </section>
 </div>

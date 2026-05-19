@@ -1,15 +1,15 @@
 <div class="mx-auto max-w-3xl">
   <header class="mb-6">
-    <%= link_to "← #{@user.nickname}님 프로필", profile_path(@user), class: "text-sm text-gray-500 hover:text-gray-700" %>
+    <%= link_to "← #{@user.nickname}님 프로필", profile_path(@user), class: "btn btn-ghost btn-sm" %>
     <h1 class="text-2xl font-bold mt-2"><%= @user.nickname %>님의 댓글</h1>
   </header>
 
   <% if @comments.any? %>
     <div class="space-y-3">
       <% @comments.each do |comment| %>
-        <article class="rounded-md bg-white border border-gray-200 p-4 text-sm">
-          <p class="text-gray-800 whitespace-pre-wrap"><%= comment.body %></p>
-          <p class="text-xs text-gray-500 mt-2">
+        <article class="card text-sm">
+          <p class="whitespace-pre-wrap" style="color: var(--color-text);"><%= comment.body %></p>
+          <p class="text-xs mt-2" style="color: var(--color-text-muted);">
             <%= link_to comment.post.title, comment.post, class: "hover:underline" %>
             · <%= l comment.created_at, format: :short %>
           </p>
@@ -20,7 +20,7 @@
       <%== pagy_nav(@pagy) %>
     </div>
   <% else %>
-    <div class="rounded-md bg-white border border-gray-200 p-8 text-center text-gray-500">
+    <div class="empty">
       작성한 댓글이 없습니다.
     </div>
   <% end %>

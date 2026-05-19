@@ -4,7 +4,8 @@
   <h1 class="text-2xl font-bold mb-6">프로필 수정</h1>
 
   <% if @user.errors.any? %>
-    <div class="rounded-md bg-red-50 p-4 mb-4 text-sm text-red-700">
+    <div class="rounded-xl p-4 mb-4 text-sm"
+         style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
       <ul class="list-disc list-inside">
         <% @user.errors.full_messages.each do |msg| %>
           <li><%= msg %></li>
@@ -22,9 +23,11 @@
         <img data-avatar-picker-target="preview"
              src="<%= preview_src %>"
              alt="<%= @user.name %>"
-             class="h-24 w-24 rounded-full object-cover border border-gray-200 bg-gray-100 <%= 'hidden' unless has_avatar %>">
+             class="h-24 w-24 rounded-full object-cover <%= 'hidden' unless has_avatar %>"
+             style="border: 1px solid var(--color-border); background-color: var(--color-surface-muted);">
         <div data-avatar-picker-target="placeholder"
-             class="<%= 'hidden' if has_avatar %> h-24 w-24 rounded-full border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-xs text-gray-400">
+             class="<%= 'hidden' if has_avatar %> h-24 w-24 rounded-full flex items-center justify-center text-xs"
+             style="border: 1px dashed var(--color-border); background-color: var(--color-surface-muted); color: var(--color-text-subtle);">
           사진 없음
         </div>
       </div>
@@ -37,110 +40,102 @@
               class: "hidden" %>
         <button type="button"
                 data-action="click->avatar-picker#open"
-                class="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 cursor-pointer">
+                class="btn btn-secondary btn-sm">
           사진 변경
         </button>
-        <p class="text-xs text-gray-500 mt-2">JPG/PNG. 저장 버튼을 눌러야 반영됩니다.</p>
+        <p class="field-hint">JPG/PNG. 저장 버튼을 눌러야 반영됩니다.</p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= form.label :name, "이름", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= form.text_field :name, required: true,
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+        <%= form.label :name, "이름", class: "label" %>
+        <%= form.text_field :name, required: true, class: "input" %>
       </div>
       <div>
-        <%= form.label :nickname, "닉네임 (유일)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= form.text_field :nickname,
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+        <%= form.label :nickname, "닉네임 (유일)", class: "label" %>
+        <%= form.text_field :nickname, class: "input" %>
       </div>
     </div>
 
     <div>
-      <%= form.label :bio, "자기소개", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.text_area :bio, rows: 3, maxlength: 500,
-            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      <%= form.label :bio, "자기소개", class: "label" %>
+      <%= form.text_area :bio, rows: 3, maxlength: 500, class: "input" %>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= form.label :birth_date, "생년월일", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= form.date_field :birth_date,
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+        <%= form.label :birth_date, "생년월일", class: "label" %>
+        <%= form.date_field :birth_date, class: "input" %>
       </div>
       <div>
-        <%= form.label :gender, "성별", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.label :gender, "성별", class: "label" %>
         <%= form.select :gender,
               [["남성","male"],["여성","female"],["기타","other"]], { include_blank: "선택" },
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+              class: "input" %>
       </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= form.label :residence_area, "거주지", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.label :residence_area, "거주지", class: "label" %>
         <%= form.select :residence_area,
               User::RESIDENCE_AREAS.keys.map { |k| [t("users.residence_area.#{k}"), k] },
-              { include_blank: "선택" },
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+              { include_blank: "선택" }, class: "input" %>
       </div>
       <div>
-        <%= form.label :smoking, "흡연", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.label :smoking, "흡연", class: "label" %>
         <%= form.select :smoking,
               [["핌","smokes"],["비흡연","non_smoker"],["가끔","sometimes"]],
-              { include_blank: "선택" },
-              class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+              { include_blank: "선택" }, class: "input" %>
       </div>
     </div>
 
     <div>
-      <%= form.label :job_title, "직무 (필수)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= form.text_field :job_title,
-            placeholder: "예: 백엔드 개발자",
-            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+      <%= form.label :job_title, "직무 (필수)", class: "label" %>
+      <%= form.text_field :job_title, placeholder: "예: 백엔드 개발자", class: "input" %>
     </div>
 
     <div>
-      <%= form.label :hobby, "취미 (해시태그)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= form.label :hobby, "취미 (해시태그)", class: "label" %>
       <%= form.text_field :hobby,
-            placeholder: "러닝, 사진, 컬처 (콤마/공백으로 구분)",
-            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+            placeholder: "러닝, 사진, 컬처 (콤마/공백으로 구분)", class: "input" %>
     </div>
 
-    <fieldset class="rounded-md border border-gray-200 p-4">
-      <legend class="text-sm font-medium text-gray-700 px-1">알림 설정</legend>
+    <fieldset class="rounded-xl p-4"
+              style="border: 1px solid var(--color-border);">
+      <legend class="text-sm font-semibold px-1" style="color: var(--color-text);">알림 설정</legend>
       <div class="flex items-center gap-2 mt-2">
         <%= form.check_box "notification_preferences[web_push]",
               { checked: @user.notification_preferences["web_push"] != false },
               "true", "false" %>
-        <span class="text-sm text-gray-700">브라우저 푸시 알림 받기</span>
+        <span class="text-sm" style="color: var(--color-text);">브라우저 푸시 알림 받기</span>
       </div>
     </fieldset>
 
     <div class="flex items-center gap-2">
-      <%= form.submit "저장",
-            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
-      <%= link_to "취소", profile_path(@user), class: "text-sm text-gray-500 hover:text-gray-700" %>
+      <%= form.submit "저장", class: "btn btn-primary" %>
+      <%= link_to "취소", profile_path(@user), class: "btn btn-ghost btn-sm" %>
     </div>
   <% end %>
 
   <% if (vapid_pk = Rails.application.credentials.dig(:vapid, :public_key)).present? %>
-    <section class="mt-10 border-t pt-6"
+    <section class="mt-10 pt-6"
+             style="border-top: 1px solid var(--color-border);"
              data-controller="push-subscription"
              data-push-subscription-vapid-public-key-value="<%= vapid_pk %>">
-      <h2 class="text-lg font-semibold text-gray-900 mb-2">브라우저 알림 구독</h2>
-      <p class="text-sm text-gray-600 mb-3">
+      <h2 class="text-lg font-semibold mb-2">브라우저 알림 구독</h2>
+      <p class="text-sm mb-3" style="color: var(--color-text-muted);">
         이 브라우저에서 백그라운드 알림을 받으려면 구독을 켜세요. 디바이스마다 별도로 켜야 합니다.
       </p>
       <button type="button"
               data-push-subscription-target="button"
               data-action="push-subscription#toggle"
-              class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer">
+              class="btn btn-secondary btn-sm">
         브라우저 알림 받기
       </button>
       <p data-push-subscription-target="unsupportedMsg" hidden
-         class="text-sm text-gray-500 mt-2">
+         class="text-sm mt-2" style="color: var(--color-text-muted);">
         이 브라우저는 Web Push를 지원하지 않습니다.
       </p>
     </section>
