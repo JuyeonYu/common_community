@@ -2,13 +2,13 @@
   <% if @posts.any? %>
     <div class="space-y-3">
       <% @posts.each do |post| %>
-        <%= link_to post_path(post), class: "block rounded-md bg-white border border-gray-200 p-4" do %>
-          <div class="text-xs text-gray-500 mb-1">
+        <%= link_to post_path(post), class: "block card" do %>
+          <div class="text-xs mb-1" style="color: var(--color-text-muted);">
             <%= post.user.nickname %> · <%= l post.created_at, format: :short %>
           </div>
           <div class="font-semibold"><%= post.title %></div>
           <% if post.tags.any? %>
-            <div class="mt-1 text-xs text-blue-600">
+            <div class="mt-1 text-xs" style="color: var(--color-link);">
               <%= post.tags.map { |t| "##{t.name}" }.join(" ") %>
             </div>
           <% end %>
@@ -20,6 +20,6 @@
       <%== pagy_nav(@pagy) %>
     </div>
   <% else %>
-    <p class="text-center text-gray-500 py-8">아직 글이 없습니다.</p>
+    <p class="text-center py-8" style="color: var(--color-text-muted);">아직 글이 없습니다.</p>
   <% end %>
 </div>
