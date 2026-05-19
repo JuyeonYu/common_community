@@ -4,14 +4,13 @@
   <h1 class="text-2xl font-bold mb-6">사용자</h1>
 
   <%= form_with url: admin_users_path, method: :get, class: "mb-4" do |form| %>
-    <%= form.text_field :q, value: params[:q],
-          placeholder: "이메일 / 이름 / 닉네임 검색",
-          class: "w-full max-w-md rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    <%= form.text_field :q, value: params[:q], placeholder: "이메일 / 이름 / 닉네임 검색",
+          class: "input max-w-md" %>
   <% end %>
 
-  <div class="overflow-x-auto bg-white border border-gray-200 rounded-md">
+  <div class="card overflow-x-auto" style="padding: 0;">
     <table class="w-full text-sm">
-      <thead class="bg-gray-50 text-gray-600">
+      <thead style="background-color: var(--color-surface-muted); color: var(--color-text-muted);">
         <tr>
           <th class="text-left px-3 py-2">사용자</th>
           <th class="text-left px-3 py-2">스코어</th>
@@ -21,29 +20,29 @@
           <th></th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
+      <tbody>
         <% @users.each do |u| %>
-          <tr>
+          <tr class="not-first:border-t" style="border-color: var(--color-border-muted);">
             <td class="px-3 py-2">
               <div class="font-medium"><%= u.nickname %></div>
-              <div class="text-xs text-gray-500"><%= u.email_address %></div>
+              <div class="text-xs" style="color: var(--color-text-muted);"><%= u.email_address %></div>
             </td>
             <td class="px-3 py-2"><%= u.ticket_score %></td>
             <td class="px-3 py-2"><%= u.ticket_credits %></td>
             <td class="px-3 py-2">
               <% if u.suspended? %>
-                <span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">정지</span>
+                <span class="chip chip-accent">정지</span>
               <% elsif u.active? %>
-                <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">활성</span>
+                <span class="chip" style="background-color: rgba(22,163,74,0.12); color: var(--color-success); border-color: var(--color-success);">활성</span>
               <% else %>
-                <span class="px-2 py-0.5 rounded text-xs bg-gray-200 text-gray-700">잠금</span>
+                <span class="chip">잠금</span>
               <% end %>
-              <% if u.seed? %><span class="ml-1 text-xs text-blue-600">seed</span><% end %>
-              <% if u.admin? %><span class="ml-1 text-xs text-red-600">admin</span><% end %>
+              <% if u.seed? %><span class="ml-1 text-xs" style="color: var(--color-link);">seed</span><% end %>
+              <% if u.admin? %><span class="ml-1 text-xs" style="color: var(--color-danger);">admin</span><% end %>
             </td>
-            <td class="px-3 py-2 text-xs text-gray-500"><%= l u.created_at, format: :short %></td>
+            <td class="px-3 py-2 text-xs" style="color: var(--color-text-muted);"><%= l u.created_at, format: :short %></td>
             <td class="px-3 py-2 text-right">
-              <%= link_to "관리", admin_user_path(u), class: "text-blue-600 hover:underline text-xs" %>
+              <%= link_to "관리", admin_user_path(u), class: "hover:underline text-xs", style: "color: var(--color-link);" %>
             </td>
           </tr>
         <% end %>

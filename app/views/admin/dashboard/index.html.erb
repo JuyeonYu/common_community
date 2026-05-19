@@ -12,23 +12,23 @@
     [ "활성 커넥트",     @active_red_connect_count, nil ]
   ].each do |label, count, path| %>
     <% content = capture do %>
-      <div class="text-xs text-gray-500"><%= label %></div>
+      <div class="text-xs" style="color: var(--color-text-muted);"><%= label %></div>
       <div class="font-semibold text-2xl mt-1"><%= count %></div>
     <% end %>
     <% if path %>
-      <%= link_to path, class: "block bg-white border border-gray-200 rounded-md p-4 hover:bg-gray-50" do %><%= content %><% end %>
+      <%= link_to path, class: "block card hover:opacity-90 transition-opacity" do %><%= content %><% end %>
     <% else %>
-      <div class="bg-white border border-gray-200 rounded-md p-4"><%= content %></div>
+      <div class="card"><%= content %></div>
     <% end %>
   <% end %>
 </div>
 
-<section class="bg-white border border-gray-200 rounded-md p-4">
+<section class="card">
   <h2 class="font-semibold mb-3">바로가기</h2>
   <ul class="text-sm space-y-2">
-    <li><%= link_to "사용자 관리 →", admin_users_path, class: "text-blue-600 hover:underline" %></li>
-    <li><%= link_to "게시물 관리 →", admin_posts_path, class: "text-blue-600 hover:underline" %></li>
-    <li><%= link_to "시드 이메일 →", admin_seed_emails_path, class: "text-blue-600 hover:underline" %></li>
-    <li><%= link_to "신고 처리 →", admin_reports_path, class: "text-blue-600 hover:underline" %></li>
+    <li><%= link_to "사용자 관리 →", admin_users_path, class: "hover:underline", style: "color: var(--color-link);" %></li>
+    <li><%= link_to "게시물 관리 →", admin_posts_path, class: "hover:underline", style: "color: var(--color-link);" %></li>
+    <li><%= link_to "시드 이메일 →", admin_seed_emails_path, class: "hover:underline", style: "color: var(--color-link);" %></li>
+    <li><%= link_to "신고 처리 →", admin_reports_path, class: "hover:underline", style: "color: var(--color-link);" %></li>
   </ul>
 </section>

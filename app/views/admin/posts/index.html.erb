@@ -3,14 +3,13 @@
 <h1 class="text-2xl font-bold mb-4">게시물</h1>
 
 <%= form_with url: admin_posts_path, method: :get, class: "mb-4" do |form| %>
-  <%= form.text_field :q, value: params[:q],
-        placeholder: "제목 또는 작성자 이메일",
-        class: "w-full max-w-md rounded-md border border-gray-300 px-3 py-2" %>
+  <%= form.text_field :q, value: params[:q], placeholder: "제목 또는 작성자 이메일",
+        class: "input max-w-md" %>
 <% end %>
 
-<div class="bg-white border border-gray-200 rounded-md overflow-x-auto">
+<div class="card overflow-x-auto" style="padding: 0;">
   <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-600">
+    <thead style="background-color: var(--color-surface-muted); color: var(--color-text-muted);">
       <tr>
         <th class="text-left px-3 py-2">제목</th>
         <th class="text-left px-3 py-2">작성자</th>
@@ -19,32 +18,35 @@
         <th></th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-200">
+    <tbody>
       <% @posts.each do |post| %>
-        <tr>
+        <tr class="not-first:border-t" style="border-color: var(--color-border-muted);">
           <td class="px-3 py-2">
             <%= link_to post.title, post, class: "hover:underline" %>
           </td>
-          <td class="px-3 py-2 text-xs text-gray-500"><%= post.user.email_address %></td>
+          <td class="px-3 py-2 text-xs" style="color: var(--color-text-muted);"><%= post.user.email_address %></td>
           <td class="px-3 py-2">
             <% if post.hidden? %>
-              <span class="px-2 py-0.5 rounded text-xs bg-gray-200 text-gray-700">숨김</span>
+              <span class="chip">숨김</span>
             <% else %>
-              <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">공개</span>
+              <span class="chip" style="background-color: rgba(22,163,74,0.12); color: var(--color-success); border-color: var(--color-success);">공개</span>
             <% end %>
           </td>
-          <td class="px-3 py-2 text-xs text-gray-500"><%= l post.created_at, format: :short %></td>
+          <td class="px-3 py-2 text-xs" style="color: var(--color-text-muted);"><%= l post.created_at, format: :short %></td>
           <td class="px-3 py-2 text-right space-x-1">
             <% if post.hidden? %>
               <%= button_to "공개", unhide_admin_post_path(post), method: :post,
-                    class: "text-xs text-blue-600 hover:underline inline" %>
+                    class: "text-xs hover:underline inline bg-transparent border-0 cursor-pointer",
+                    style: "color: var(--color-link);" %>
             <% else %>
               <%= button_to "숨김", hide_admin_post_path(post), method: :post,
-                    class: "text-xs text-yellow-700 hover:underline inline" %>
+                    class: "text-xs hover:underline inline bg-transparent border-0 cursor-pointer",
+                    style: "color: var(--color-warning);" %>
             <% end %>
             <%= button_to "삭제", admin_post_path(post), method: :delete,
                   data: { turbo_confirm: "삭제하시겠습니까?" },
-                  class: "text-xs text-red-600 hover:underline inline" %>
+                  class: "text-xs hover:underline inline bg-transparent border-0 cursor-pointer",
+                  style: "color: var(--color-danger);" %>
           </td>
         </tr>
       <% end %>

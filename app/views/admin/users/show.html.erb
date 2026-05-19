@@ -2,101 +2,107 @@
 
 <div class="mx-auto max-w-3xl">
   <h1 class="text-2xl font-bold mb-2">
-    <%= @user.nickname %> <span class="text-sm font-normal text-gray-500">(<%= @user.name %>)</span>
+    <%= @user.nickname %> <span class="text-sm font-normal" style="color: var(--color-text-muted);">(<%= @user.name %>)</span>
   </h1>
-  <p class="text-sm text-gray-500 mb-6"><%= @user.email_address %></p>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);"><%= @user.email_address %></p>
 
   <section class="grid grid-cols-2 gap-4 mb-6 text-sm">
-    <div class="bg-white border border-gray-200 rounded-md p-3">
-      <div class="text-gray-500">티켓 스코어</div>
+    <div class="card" style="padding: 0.75rem;">
+      <div style="color: var(--color-text-muted);">티켓 스코어</div>
       <div class="font-semibold text-xl mt-1"><%= @user.ticket_score %></div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-md p-3">
-      <div class="text-gray-500">티켓 크레딧</div>
+    <div class="card" style="padding: 0.75rem;">
+      <div style="color: var(--color-text-muted);">티켓 크레딧</div>
       <div class="font-semibold text-xl mt-1"><%= @user.ticket_credits %></div>
     </div>
   </section>
 
-  <section class="bg-white border border-gray-200 rounded-md p-4 mb-4">
+  <section class="card mb-4">
     <h2 class="font-semibold mb-3">스코어 조정</h2>
     <%= form_with url: adjust_score_admin_user_path(@user), method: :post, class: "flex items-end gap-2" do |form| %>
       <div class="w-24">
-        <%= form.label :delta, "delta", class: "block text-xs text-gray-500 mb-1" %>
-        <%= form.number_field :delta, required: true, class: "w-full rounded-md border border-gray-300 px-2 py-1" %>
+        <%= form.label :delta, "delta", class: "label" %>
+        <%= form.number_field :delta, required: true, class: "input" %>
       </div>
       <div class="flex-1">
-        <%= form.label :memo, "사유", class: "block text-xs text-gray-500 mb-1" %>
-        <%= form.text_field :memo, required: true, class: "w-full rounded-md border border-gray-300 px-2 py-1" %>
+        <%= form.label :memo, "사유", class: "label" %>
+        <%= form.text_field :memo, required: true, class: "input" %>
       </div>
-      <%= form.submit "적용", class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm cursor-pointer" %>
+      <%= form.submit "적용", class: "btn btn-primary btn-sm" %>
     <% end %>
   </section>
 
-  <section class="bg-white border border-gray-200 rounded-md p-4 mb-4">
+  <section class="card mb-4">
     <h2 class="font-semibold mb-3">크레딧 부여/차감</h2>
     <%= form_with url: grant_credits_admin_user_path(@user), method: :post, class: "flex items-end gap-2" do |form| %>
       <div class="w-24">
-        <%= form.label :amount, "amount", class: "block text-xs text-gray-500 mb-1" %>
-        <%= form.number_field :amount, required: true, class: "w-full rounded-md border border-gray-300 px-2 py-1" %>
+        <%= form.label :amount, "amount", class: "label" %>
+        <%= form.number_field :amount, required: true, class: "input" %>
       </div>
       <div class="flex-1">
-        <%= form.label :memo, "사유", class: "block text-xs text-gray-500 mb-1" %>
-        <%= form.text_field :memo, required: true, class: "w-full rounded-md border border-gray-300 px-2 py-1" %>
+        <%= form.label :memo, "사유", class: "label" %>
+        <%= form.text_field :memo, required: true, class: "input" %>
       </div>
-      <%= form.submit "적용", class: "rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm cursor-pointer" %>
+      <%= form.submit "적용", class: "btn btn-primary btn-sm" %>
     <% end %>
   </section>
 
-  <section class="bg-white border border-gray-200 rounded-md p-4 mb-6">
+  <section class="card mb-6">
     <h2 class="font-semibold mb-3">정지</h2>
     <% if @user.suspended? %>
       <p class="text-sm mb-2">정지 중 — 해제 시점 <%= l @user.suspended_until, format: :short %></p>
       <%= button_to "정지 해제", unsuspend_admin_user_path(@user), method: :post,
-            class: "rounded-md bg-gray-700 px-3 py-1.5 text-white text-sm cursor-pointer" %>
+            class: "btn btn-dark btn-sm" %>
     <% else %>
       <%= button_to "1개월 정지", suspend_admin_user_path(@user), method: :post,
             data: { turbo_confirm: "정지하시겠습니까?" },
-            class: "rounded-md bg-red-600 px-3 py-1.5 text-white text-sm cursor-pointer" %>
+            class: "btn btn-primary btn-sm" %>
     <% end %>
   </section>
 
   <section class="mb-6">
     <h2 class="font-semibold mb-3">스코어 이력</h2>
     <% if @score_events.any? %>
-      <ul class="divide-y divide-gray-200 bg-white border border-gray-200 rounded-md">
+      <ul class="card" style="padding: 0;">
         <% @score_events.each do |e| %>
-          <li class="p-3 text-sm flex items-center justify-between">
+          <li class="p-3 text-sm flex items-center justify-between not-first:border-t"
+              style="border-color: var(--color-border-muted);">
             <div>
-              <span class="font-mono"><%= e.delta > 0 ? "+#{e.delta}" : e.delta %></span>
-              <span class="ml-2 text-xs text-gray-500"><%= e.reason %></span>
-              <% if e.memo.present? %><span class="ml-2 text-gray-700">"<%= e.memo %>"</span><% end %>
+              <span class="font-mono" style="color: <%= e.delta > 0 ? 'var(--color-success)' : 'var(--color-danger)' %>;">
+                <%= e.delta > 0 ? "+#{e.delta}" : e.delta %>
+              </span>
+              <span class="ml-2 text-xs" style="color: var(--color-text-muted);"><%= e.reason %></span>
+              <% if e.memo.present? %><span class="ml-2" style="color: var(--color-text);">"<%= e.memo %>"</span><% end %>
             </div>
-            <span class="text-xs text-gray-500"><%= l e.created_at, format: :short %></span>
+            <span class="text-xs" style="color: var(--color-text-muted);"><%= l e.created_at, format: :short %></span>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="text-sm text-gray-500">이력 없음.</p>
+      <p class="text-sm" style="color: var(--color-text-muted);">이력 없음.</p>
     <% end %>
   </section>
 
   <section>
     <h2 class="font-semibold mb-3">크레딧 이력</h2>
     <% if @credit_txns.any? %>
-      <ul class="divide-y divide-gray-200 bg-white border border-gray-200 rounded-md">
+      <ul class="card" style="padding: 0;">
         <% @credit_txns.each do |t| %>
-          <li class="p-3 text-sm flex items-center justify-between">
+          <li class="p-3 text-sm flex items-center justify-between not-first:border-t"
+              style="border-color: var(--color-border-muted);">
             <div>
-              <span class="font-mono"><%= t.amount > 0 ? "+#{t.amount}" : t.amount %></span>
-              <span class="ml-2 text-xs text-gray-500"><%= t.kind %></span>
-              <% if t.memo.present? %><span class="ml-2 text-gray-700">"<%= t.memo %>"</span><% end %>
+              <span class="font-mono" style="color: <%= t.amount > 0 ? 'var(--color-success)' : 'var(--color-danger)' %>;">
+                <%= t.amount > 0 ? "+#{t.amount}" : t.amount %>
+              </span>
+              <span class="ml-2 text-xs" style="color: var(--color-text-muted);"><%= t.kind %></span>
+              <% if t.memo.present? %><span class="ml-2" style="color: var(--color-text);">"<%= t.memo %>"</span><% end %>
             </div>
-            <span class="text-xs text-gray-500"><%= l t.created_at, format: :short %></span>
+            <span class="text-xs" style="color: var(--color-text-muted);"><%= l t.created_at, format: :short %></span>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <p class="text-sm text-gray-500">이력 없음.</p>
+      <p class="text-sm" style="color: var(--color-text-muted);">이력 없음.</p>
     <% end %>
   </section>
 </div>
