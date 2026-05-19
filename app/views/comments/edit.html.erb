@@ -2,7 +2,8 @@
   <h1 class="text-2xl font-bold mb-6">댓글 수정</h1>
 
   <% if @comment.errors.any? %>
-    <div class="rounded-md bg-red-50 p-4 mb-4 text-sm text-red-700">
+    <div class="rounded-xl p-4 mb-4 text-sm"
+         style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
       <ul class="list-disc list-inside">
         <% @comment.errors.full_messages.each do |msg| %>
           <li><%= msg %></li>
@@ -12,13 +13,11 @@
   <% end %>
 
   <%= form_with model: @comment, url: comment_path(@comment), method: :patch, class: "space-y-3" do |form| %>
-    <%= form.text_area :body, required: true, rows: 4,
-          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-blue-600" %>
+    <%= form.text_area :body, required: true, rows: 4, class: "input" %>
 
     <div class="flex items-center gap-2">
-      <%= form.submit "수정",
-            class: "rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-500 cursor-pointer" %>
-      <%= link_to "취소", @comment.post, class: "text-sm text-gray-500 hover:text-gray-700" %>
+      <%= form.submit "수정", class: "btn btn-primary" %>
+      <%= link_to "취소", @comment.post, class: "btn btn-ghost btn-sm" %>
     </div>
   <% end %>
 </div>
