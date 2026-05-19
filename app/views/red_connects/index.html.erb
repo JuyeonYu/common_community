@@ -10,28 +10,31 @@
         <% last  = rc.chat_messages.order(created_at: :desc).first %>
         <li>
           <%= link_to red_connect_path(rc),
-                class: "flex items-center gap-3 rounded-md bg-white border border-gray-200 p-3 hover:bg-gray-50" do %>
+                class: "flex items-center gap-3 card hover:opacity-90 transition-opacity",
+                style: "padding: 0.75rem;" do %>
             <%= avatar_image(other, class: "h-12 w-12 rounded-full") %>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2">
                 <p class="font-medium truncate"><%= other.nickname %></p>
                 <% if last %>
-                  <span class="text-[10px] text-gray-400 shrink-0"><%= l last.created_at, format: :short %></span>
+                  <span class="text-[10px] shrink-0" style="color: var(--color-text-subtle);"><%= l last.created_at, format: :short %></span>
                 <% end %>
               </div>
               <% if last %>
-                <p class="text-xs text-gray-500 truncate"><%= last.body %></p>
+                <p class="text-xs truncate" style="color: var(--color-text-muted);"><%= last.body %></p>
               <% else %>
-                <p class="text-xs text-gray-400">아직 메시지가 없습니다.</p>
+                <p class="text-xs" style="color: var(--color-text-subtle);">아직 메시지가 없습니다.</p>
               <% end %>
-              <p class="text-[10px] text-gray-400 mt-1">만료 <%= l rc.expires_at, format: :short %></p>
+              <p class="text-[10px] mt-1" style="color: var(--color-text-subtle);">만료 <%= l rc.expires_at, format: :short %></p>
             </div>
           <% end %>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="text-sm text-gray-500">진행 중인 커넥트가 없습니다.</p>
-    <%= link_to "이성 매칭 가기 →", matching_path, class: "mt-3 inline-block text-sm text-blue-600 hover:underline" %>
+    <p class="text-sm" style="color: var(--color-text-muted);">진행 중인 커넥트가 없습니다.</p>
+    <%= link_to "이성 매칭 가기 →", matching_path,
+          class: "mt-3 inline-block text-sm hover:underline",
+          style: "color: var(--color-link);" %>
   <% end %>
 </div>
