@@ -1,0 +1,9 @@
+[블랙티켓] 입금 알리기 접수
+
+사용자       <%= @user.nickname %> (<%= @user.email_address %>)
+패키지       <%= @purchase.package[:name] %> · <%= @purchase.total_credits %> 크레딧 · ₩<%= number_with_delimiter(@purchase.expected_price_won) %>
+신고 금액     ₩<%= number_with_delimiter(@purchase.declared_amount) %>
+신고 입금주명 <%= @purchase.declared_name %>
+접수 시각     <%= l @purchase.created_at, format: :default %>
+
+어드민에서 확인: <%= @admin_url %>

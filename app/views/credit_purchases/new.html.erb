@@ -1,0 +1,100 @@
+<% content_for :title, "크레딧 충전" %>
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="text-2xl font-bold mb-2">크레딧 충전</h1>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
+    원하는 패키지를 선택하고, 안내된 계좌로 입금한 뒤 알리기를 보내주세요.
+    입금 확인 후 크레딧이 충전됩니다(영업일 기준 빠르면 수 시간 ~ 1일).
+  </p>
+
+  <%= form_with model: @purchase, url: credit_purchases_path, class: "space-y-6" do |form| %>
+    <% if @purchase.errors.any? %>
+      <div class="rounded-xl p-4 text-sm"
+           style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
+        <ul class="list-disc list-inside">
+          <% @purchase.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%# 1) 패키지 선택 %>
+    <section>
+      <h2 class="font-semibold mb-3">1. 패키지 선택</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <% @packages.each do |pkg| %>
+          <% selected = @purchase.package_key == pkg[:key] %>
+          <% total = pkg[:credits] + pkg[:bonus] %>
+          <% per_credit = (pkg[:price_won].to_f / total).round %>
+          <label class="card cursor-pointer transition-colors <%= 'ring-2' if selected %>"
+                 style="<%= 'border-color: var(--color-accent); --tw-ring-color: var(--color-accent-soft);' if selected %>">
+            <%= form.radio_button :package_key, pkg[:key], class: "sr-only" %>
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="font-semibold"><%= pkg[:name] %></p>
+                <p class="text-xs mt-0.5" style="color: var(--color-text-muted);">
+                  <%= pkg[:credits] %> 크레딧
+                  <% if pkg[:bonus].positive? %>
+                    <span style="color: var(--color-accent);">+ <%= pkg[:bonus] %> 보너스</span>
+                  <% end %>
+                </p>
+              </div>
+              <% if selected %>
+                <span style="color: var(--color-accent);"><%= icon :check, class: "h-5 w-5" %></span>
+              <% end %>
+            </div>
+            <div class="mt-3 flex items-end justify-between">
+              <p class="text-lg font-bold">₩<%= number_with_delimiter(pkg[:price_won]) %></p>
+              <p class="text-[11px]" style="color: var(--color-text-subtle);">₩<%= number_with_delimiter(per_credit) %>/크레딧</p>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </section>
+
+    <%# 2) 운영 계좌 안내 %>
+    <section>
+      <h2 class="font-semibold mb-3">2. 입금 계좌 안내</h2>
+      <% if @bank_name.blank? || @bank_account_number.blank? %>
+        <div class="card text-sm" style="color: var(--color-text-muted);">
+          운영 계좌가 아직 등록되지 않았습니다. 운영자에게 문의해주세요.
+        </div>
+      <% else %>
+        <div class="card font-mono text-sm space-y-1">
+          <p><span class="opacity-60">은행</span> <%= @bank_name %></p>
+          <p><span class="opacity-60">계좌</span> <%= @bank_account_number %></p>
+          <p><span class="opacity-60">예금주</span> <%= @bank_account_holder %></p>
+        </div>
+        <p class="field-hint">위 계좌로 선택한 패키지 금액을 정확히 입금한 뒤, 아래 폼에 입금주명/금액을 적어주세요.</p>
+      <% end %>
+    </section>
+
+    <%# 3) 입금 알리기 %>
+    <section class="space-y-4">
+      <h2 class="font-semibold">3. 입금 알리기</h2>
+
+      <div>
+        <%= form.label :declared_name, "입금주명 (필수)", class: "label" %>
+        <%= form.text_field :declared_name, required: true, maxlength: 50,
+              placeholder: "실제 입금 시 표기될 이름",
+              class: "input" %>
+        <p class="field-hint">입금 내역과 매칭하기 위해 정확하게 입력해주세요.</p>
+      </div>
+
+      <div>
+        <%= form.label :declared_amount, "입금 금액 (필수, 원)", class: "label" %>
+        <%= form.number_field :declared_amount, required: true, min: 1,
+              value: @purchase.declared_amount || CreditPackages.price_for(@purchase.package_key),
+              class: "input" %>
+        <p class="field-hint">선택한 패키지 금액과 일치해야 처리가 빠릅니다.</p>
+      </div>
+
+      <div class="pt-2 flex items-center gap-3">
+        <%= form.submit "입금 알리기 보내기", class: "btn btn-primary",
+              disabled: @bank_name.blank? || @bank_account_number.blank? %>
+        <%= link_to "취소", profile_path(Current.user), class: "btn btn-ghost btn-sm" %>
+      </div>
+    </section>
+  <% end %>
+</div>

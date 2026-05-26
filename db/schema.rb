@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_26_025405) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_025708) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -93,6 +93,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_025405) do
     t.index ["status", "created_at"], name: "index_connect_requests_on_status_and_created_at"
     t.index ["target_id", "gen_week"], name: "index_connect_requests_on_target_id_and_gen_week"
     t.index ["target_id"], name: "index_connect_requests_on_target_id"
+  end
+
+  create_table "credit_purchases", force: :cascade do |t|
+    t.text "admin_memo"
+    t.datetime "created_at", null: false
+    t.integer "declared_amount", null: false
+    t.string "declared_name", null: false
+    t.string "package_key", null: false
+    t.datetime "processed_at"
+    t.bigint "processed_by_id"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["processed_by_id"], name: "index_credit_purchases_on_processed_by_id"
+    t.index ["status", "created_at"], name: "index_credit_purchases_on_status_and_created_at"
+    t.index ["user_id"], name: "index_credit_purchases_on_user_id"
   end
 
   create_table "credit_transactions", force: :cascade do |t|
@@ -340,6 +356,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_025405) do
   add_foreign_key "comments", "users"
   add_foreign_key "connect_requests", "users", column: "requester_id"
   add_foreign_key "connect_requests", "users", column: "target_id"
+  add_foreign_key "credit_purchases", "users"
+  add_foreign_key "credit_purchases", "users", column: "processed_by_id"
   add_foreign_key "credit_transactions", "users"
   add_foreign_key "downvotes", "red_connects"
   add_foreign_key "downvotes", "users", column: "from_user_id"

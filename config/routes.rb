@@ -29,6 +29,9 @@ Rails.application.routes.draw do
     collection { patch :read_all }
   end
 
+  # 크레딧 충전 (무통장입금 알리기) — Phase H.
+  resources :credit_purchases, only: %i[ new create ]
+
   # @멘션 자동완성용 닉네임 검색.
   get "/users/search", to: "users#search", as: :search_users
 
@@ -102,6 +105,7 @@ Rails.application.routes.draw do
       end
     end
     resource :settings, only: %i[ show update ]
+    resources :credit_purchases, only: %i[ index update ]
   end
 
   # 헬스체크.

@@ -1,0 +1,22 @@
+<div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 540px; margin: 0 auto; color: #111;">
+  <h1 style="font-size: 18px; margin-bottom: 8px;">입금 알리기 접수</h1>
+  <p style="color: #555; margin-bottom: 24px;">새 무통장입금 알리기가 도착했습니다. 입금 내역과 대조 후 어드민에서 승인해주세요.</p>
+
+  <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+    <tr><td style="padding: 6px 0; color: #888; width: 120px;">사용자</td><td><%= @user.nickname %> (<%= @user.email_address %>)</td></tr>
+    <tr><td style="padding: 6px 0; color: #888;">패키지</td><td><%= @purchase.package[:name] %> · <%= @purchase.total_credits %> 크레딧 · ₩<%= number_with_delimiter(@purchase.expected_price_won) %></td></tr>
+    <tr><td style="padding: 6px 0; color: #888;">신고 금액</td><td>₩<%= number_with_delimiter(@purchase.declared_amount) %></td></tr>
+    <tr><td style="padding: 6px 0; color: #888;">신고 입금주명</td><td><%= @purchase.declared_name %></td></tr>
+    <tr><td style="padding: 6px 0; color: #888;">접수 시각</td><td><%= l @purchase.created_at, format: :default %></td></tr>
+  </table>
+
+  <p style="margin-top: 24px;">
+    <a href="<%= @admin_url %>"
+       style="display: inline-block; background: #DC2626; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+      어드민에서 확인
+    </a>
+  </p>
+
+  <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;">
+  <p style="font-size: 11px; color: #aaa;">— 블랙티켓</p>
+</div>

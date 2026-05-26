@@ -33,6 +33,7 @@ class User < ApplicationRecord
   has_one  :accepted_invitation, class_name: "Invitation", foreign_key: :accepted_by_id
   has_many :score_events, dependent: :destroy
   has_many :credit_transactions, dependent: :destroy
+  has_many :credit_purchases, dependent: :destroy
   belongs_to :invited_by, class_name: "User", optional: true
   has_many :invitees, class_name: "User", foreign_key: :invited_by_id, dependent: :nullify
 
