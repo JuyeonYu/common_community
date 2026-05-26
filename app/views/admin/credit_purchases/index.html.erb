@@ -1,0 +1,86 @@
+<% content_for :title, "충전 요청" %>
+
+<div>
+  <h1 class="text-2xl font-bold mb-2">충전 요청</h1>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
+    사용자의 무통장입금 알리기 목록. 실제 입금 내역과 대조한 뒤 승인하면 크레딧이 자동 충전됩니다.
+  </p>
+
+  <nav class="flex items-center gap-2 mb-6 text-sm">
+    <% %w[ pending fulfilled rejected cancelled ].each do |key| %>
+      <% active = @status == key %>
+      <%= link_to admin_credit_purchases_path(status: key),
+            class: "px-3 py-1.5 rounded-full hover:opacity-90",
+            style: active ? "background-color: var(--color-accent); color: var(--color-accent-on);" : "background-color: var(--color-surface-muted); color: var(--color-text-muted);" do %>
+        <%= I18n.t("activerecord.attributes.credit_purchase.status.#{key}", default: key) %>
+        <span class="text-xs opacity-70"><%= @counts[key] || 0 %></span>
+      <% end %>
+    <% end %>
+  </nav>
+
+  <% if @purchases.any? %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="color: var(--color-text-muted); border-bottom: 1px solid var(--color-border);">
+            <th class="text-left py-2 px-2">접수</th>
+            <th class="text-left py-2 px-2">사용자</th>
+            <th class="text-left py-2 px-2">패키지</th>
+            <th class="text-left py-2 px-2">신고 입금주</th>
+            <th class="text-right py-2 px-2">신고 금액</th>
+            <th class="text-right py-2 px-2">상태/액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @purchases.each do |p| %>
+            <tr style="border-bottom: 1px solid var(--color-border-muted);">
+              <td class="py-2 px-2 align-top"><%= l p.created_at, format: :short %></td>
+              <td class="py-2 px-2 align-top">
+                <p class="font-medium"><%= p.user.nickname %></p>
+                <p class="text-xs" style="color: var(--color-text-muted);"><%= p.user.name %> · <%= p.user.email_address %></p>
+              </td>
+              <td class="py-2 px-2 align-top">
+                <p><%= p.package[:name] %></p>
+                <p class="text-xs" style="color: var(--color-text-muted);">+<%= p.total_credits %> 크레딧 · 정가 ₩<%= number_with_delimiter(p.expected_price_won) %></p>
+              </td>
+              <td class="py-2 px-2 align-top font-medium"><%= p.declared_name %></td>
+              <td class="py-2 px-2 align-top text-right">
+                <span class="font-mono <%= 'font-bold' if p.declared_amount != p.expected_price_won %>"
+                      style="<%= 'color: var(--color-warning);' if p.declared_amount != p.expected_price_won %>">
+                  ₩<%= number_with_delimiter(p.declared_amount) %>
+                </span>
+                <% if p.declared_amount != p.expected_price_won %>
+                  <p class="text-[10px]" style="color: var(--color-warning);">정가와 다름</p>
+                <% end %>
+              </td>
+              <td class="py-2 px-2 align-top text-right">
+                <% if p.pending? %>
+                  <%= button_to admin_credit_purchase_path(p, resolution: "fulfill"), method: :patch,
+                        data: { turbo_confirm: "실제 입금 확인했나요? 사용자에게 #{p.total_credits} 크레딧이 충전됩니다." },
+                        class: "btn btn-primary btn-sm" do %>
+                    충전 +<%= p.total_credits %>
+                  <% end %>
+                  <%= button_to admin_credit_purchase_path(p, resolution: "reject"), method: :patch,
+                        data: { turbo_confirm: "이 요청을 반려할까요?" },
+                        class: "btn btn-secondary btn-sm mt-1" do %>
+                    반려
+                  <% end %>
+                <% else %>
+                  <p class="text-xs" style="color: var(--color-text-muted);">
+                    <%= I18n.t("activerecord.attributes.credit_purchase.status.#{p.status}", default: p.status) %>
+                    <% if p.processed_at %>
+                      · <%= l p.processed_at, format: :short %>
+                      <% if p.processed_by %> · <%= p.processed_by.nickname %><% end %>
+                    <% end %>
+                  </p>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty">해당 상태의 요청이 없습니다.</div>
+  <% end %>
+</div>

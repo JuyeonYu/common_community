@@ -61,6 +61,12 @@ ko:
         smoking: "흡연"
         hobby: "취미"
         bio: "자기소개"
+      credit_purchase:
+        status:
+          pending: "대기"
+          fulfilled: "충전 완료"
+          rejected: "반려"
+          cancelled: "취소"
   users:
     residence_area:
       seoul:    "서울"

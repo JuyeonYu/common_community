@@ -2,20 +2,28 @@
        style="border-right: 1px solid var(--color-border); background-color: var(--color-surface);">
   <nav class="p-3 text-sm">
     <h2 class="font-semibold text-xs uppercase tracking-wide mb-2" style="color: var(--color-text-muted);">관리</h2>
+    <% pending_purchases = CreditPurchase.pending.count %>
     <% items = [
-      [ "대시보드",   admin_root_path,         controller.controller_name == "dashboard" && controller.class.module_parent == Admin ],
-      [ "사용자",     admin_users_path,        controller.is_a?(Admin::UsersController) ],
-      [ "게시물",     admin_posts_path,        controller.is_a?(Admin::PostsController) ],
-      [ "시드 이메일", admin_seed_emails_path, controller.is_a?(Admin::SeedEmailsController) ],
-      [ "신고",       admin_reports_path,      controller.is_a?(Admin::ReportsController) ],
-      [ "운영 설정",  admin_settings_path,     controller.is_a?(Admin::SettingsController) ]
+      [ "대시보드",    admin_root_path,             controller.controller_name == "dashboard" && controller.class.module_parent == Admin, nil ],
+      [ "사용자",      admin_users_path,            controller.is_a?(Admin::UsersController), nil ],
+      [ "게시물",      admin_posts_path,            controller.is_a?(Admin::PostsController), nil ],
+      [ "시드 이메일", admin_seed_emails_path,      controller.is_a?(Admin::SeedEmailsController), nil ],
+      [ "신고",        admin_reports_path,          controller.is_a?(Admin::ReportsController), nil ],
+      [ "충전 요청",   admin_credit_purchases_path, controller.is_a?(Admin::CreditPurchasesController), (pending_purchases if pending_purchases.positive?) ],
+      [ "운영 설정",   admin_settings_path,         controller.is_a?(Admin::SettingsController), nil ]
     ] %>
     <ul class="space-y-1">
-      <% items.each do |label, path, current| %>
+      <% items.each do |label, path, current, badge| %>
         <li>
-          <%= link_to label, path,
-                class: "block rounded px-2 py-1.5 hover:opacity-90",
-                style: current ? "background-color: var(--color-accent-soft); color: var(--color-accent); font-weight: 500;" : "color: var(--color-text);" %>
+          <%= link_to path,
+                class: "flex items-center justify-between rounded px-2 py-1.5 hover:opacity-90",
+                style: current ? "background-color: var(--color-accent-soft); color: var(--color-accent); font-weight: 500;" : "color: var(--color-text);" do %>
+            <span><%= label %></span>
+            <% if badge %>
+              <span class="inline-flex items-center justify-center text-[10px] font-semibold rounded-full px-1.5 min-w-[18px] h-[18px]"
+                    style="background-color: var(--color-accent); color: var(--color-accent-on);"><%= badge %></span>
+            <% end %>
+          <% end %>
         </li>
       <% end %>
     </ul>
