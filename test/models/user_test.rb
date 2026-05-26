@@ -115,4 +115,25 @@ class UserTest < ActiveSupport::TestCase
       assert_equal first.id, again.id
     end
   end
+
+  # --- 본인인증 (Phase I-2) ---
+
+  test "identity_verified?: seed 사용자는 면제" do
+    u = User.new(seed: true)
+    assert u.identity_verified?
+  end
+
+  test "identity_verified?: identity_verified_at 있어야 true" do
+    u = User.new(seed: false)
+    assert_not u.identity_verified?
+    u.identity_verified_at = Time.current
+    assert u.identity_verified?
+  end
+
+  test "CI unique 강제" do
+    User.create!(email_address: "ci1@example.com", name: "본인1", ci: "CI_ABC123")
+    dup = User.new(email_address: "ci2@example.com", name: "본인2", ci: "CI_ABC123")
+    assert_not dup.valid?
+    assert_includes dup.errors.attribute_names, :ci
+  end
 end

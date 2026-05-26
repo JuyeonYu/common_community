@@ -108,6 +108,7 @@ class User < ApplicationRecord
             format: { with: /\A[\p{L}\p{N}_]+\z/, message: "는 한글/영문/숫자/_만 사용할 수 있습니다" },
             if: -> { nickname.present? }
   validates :google_uid, uniqueness: true, allow_nil: true
+  validates :ci,         uniqueness: true, allow_nil: true
   validates :ticket_score, numericality: { only_integer: true }
   validates :ticket_credits, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
@@ -161,8 +162,14 @@ class User < ApplicationRecord
     accepted_invitation&.recommendation_written?
   end
 
+  # 본인인증 완료 여부. 시드 사용자는 면제(개발/관리자용).
+  def identity_verified?
+    return true if seed?
+    identity_verified_at.present?
+  end
+
   def matching_ready?
-    matching_profile_complete? && has_recommendation?
+    matching_profile_complete? && has_recommendation? && identity_verified?
   end
 
   def matching_active?

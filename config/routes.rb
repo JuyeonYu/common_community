@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   # 크레딧 충전 (무통장입금 알리기) — Phase H.
   resources :credit_purchases, only: %i[ new create ]
 
+  # PortOne 본인인증 — Phase I.
+  resources :identity_verifications, only: %i[ new create ]
+
   # @멘션 자동완성용 닉네임 검색.
   get "/users/search", to: "users#search", as: :search_users
 

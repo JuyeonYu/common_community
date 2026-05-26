@@ -6,7 +6,8 @@ class MatchingController < ApplicationController
     @missing_fields    = Current.user.matching_missing_fields
     @profile_complete  = @missing_fields.empty?
     @has_recommendation = Current.user.has_recommendation?
-    @can_activate      = @profile_complete && @has_recommendation
+    @identity_verified  = Current.user.identity_verified?
+    @can_activate       = @profile_complete && @has_recommendation && @identity_verified
     @accepted_invitation = Current.user.accepted_invitation
     return unless Current.user.matching_active?
 

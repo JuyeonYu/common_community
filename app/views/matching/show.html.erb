@@ -220,6 +220,13 @@
             </span>
             <span style="<%= 'text-decoration: line-through; color: var(--color-text-subtle);' if @has_recommendation %>">초대자의 추천서</span>
           </li>
+          <li class="flex items-center gap-2">
+            <% verified = Current.user.identity_verified? %>
+            <span style="color: <%= verified ? 'var(--color-success)' : 'var(--color-text-subtle)' %>;">
+              <%= verified ? "✓" : "○" %>
+            </span>
+            <span style="<%= 'text-decoration: line-through; color: var(--color-text-subtle);' if verified %>">본인인증 (휴대폰)</span>
+          </li>
         <% end %>
       </ul>
 
@@ -231,6 +238,14 @@
           </p>
           <%= button_to "초대자에게 추천서 요청", request_recommendation_invitations_path, method: :post,
                 class: "btn btn-primary btn-sm mt-2" %>
+        </div>
+      <% end %>
+
+      <% unless Current.user.identity_verified? %>
+        <div class="mt-4 rounded-xl p-3 text-sm"
+             style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);">
+          <p>본인인증이 아직 완료되지 않았습니다.</p>
+          <%= link_to "본인인증 시작 →", new_identity_verification_path, class: "btn btn-primary btn-sm mt-2" %>
         </div>
       <% end %>
 

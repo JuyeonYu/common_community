@@ -1,0 +1,47 @@
+<% content_for :title, "본인인증" %>
+
+<div class="mx-auto max-w-md">
+  <h1 class="text-2xl font-bold mb-2">본인인증</h1>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
+    이성 매칭 활성화를 위해 본인인증이 필요합니다. 휴대폰 본인확인 1회로 완료됩니다.
+    이름·생년월일·성별 정보가 자동으로 입력됩니다.
+  </p>
+
+  <% if Current.user.identity_verified? %>
+    <div class="card text-sm" style="color: var(--color-text-muted);">
+      이미 본인인증이 완료되었습니다 (<%= l Current.user.identity_verified_at, format: :short %>).
+    </div>
+    <div class="mt-4">
+      <%= link_to "매칭으로 돌아가기", matching_path, class: "btn btn-secondary btn-sm" %>
+    </div>
+  <% elsif !PortOne.identity_enabled? %>
+    <div class="card text-sm" style="background-color: var(--color-accent-soft); color: var(--color-accent); border-color: var(--color-accent);">
+      본인인증 채널이 아직 운영자에 의해 활성화되지 않았습니다. 잠시 후 다시 시도해주세요.
+    </div>
+  <% else %>
+    <div data-controller="identity-verification"
+         data-identity-verification-store-id-value="<%= PortOne.store_id %>"
+         data-identity-verification-channel-key-value="<%= PortOne.channel_key_identity %>"
+         data-identity-verification-identity-verification-id-value="<%= @identity_verification_id %>">
+
+      <%# 성공 시 제출될 hidden form. JS가 requestSubmit()로 트리거. %>
+      <%= form_with url: identity_verifications_path, method: :post,
+            data: { identity_verification_target: "form" } do |form| %>
+        <%= form.hidden_field :identity_verification_id, value: @identity_verification_id %>
+      <% end %>
+
+      <p data-identity-verification-target="error"
+         class="rounded-xl p-3 text-sm mb-3" hidden
+         style="background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);"></p>
+
+      <button type="button"
+              data-identity-verification-target="button"
+              data-action="click->identity-verification#start"
+              class="btn btn-primary w-full">
+        본인인증 시작
+      </button>
+
+      <p class="field-hint mt-3">통신사 본인확인 절차가 새 창으로 열립니다.</p>
+    </div>
+  <% end %>
+</div>
