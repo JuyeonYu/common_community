@@ -1,0 +1,61 @@
+<%# 모바일 drawer — sidebar_controller가 열림/닫힘 토글. %>
+<% items = [
+  [ "홈",       root_path,       :home ],
+  [ "게시판",   posts_path,      :ticket ],
+  [ "이성 매칭", matching_path,  :users ],
+  [ "초대장",   invitations_path, :envelope ]
+] %>
+
+<%# 백드롭 %>
+<div data-sidebar-target="backdrop" hidden
+     data-action="click->sidebar#close"
+     class="lg:hidden fixed inset-0 z-40"
+     style="background-color: rgba(0,0,0,0.5);"></div>
+
+<%# Drawer %>
+<aside data-sidebar-target="drawer"
+       class="lg:hidden fixed inset-y-0 left-0 z-50 w-64 -translate-x-full transform transition-transform"
+       style="background-color: var(--color-surface); border-right: 1px solid var(--color-border);">
+  <div class="flex flex-col h-full p-4">
+    <div class="flex items-center justify-between mb-6">
+      <%= link_to "BlackTicket", root_path,
+            class: "font-wordmark text-xl",
+            style: "color: var(--color-text);" %>
+      <button type="button" data-action="click->sidebar#close"
+              style="color: var(--color-text-muted);">
+        <%= icon :x, class: "h-5 w-5" %>
+      </button>
+    </div>
+
+    <nav class="flex-1 space-y-1">
+      <% items.each do |label, path, ic| %>
+        <%= link_to path,
+              class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:opacity-90",
+              style: "color: var(--color-text);" do %>
+          <%= icon ic, class: "h-5 w-5" %>
+          <span><%= label %></span>
+        <% end %>
+      <% end %>
+
+      <% if Current.user&.active_red_connects&.exists? %>
+        <%= link_to red_connects_path,
+              class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:opacity-90",
+              style: "color: var(--color-text);" do %>
+          <%= icon :chat, class: "h-5 w-5" %>
+          <span class="flex-1">메시지</span>
+          <% unread = Current.user.unread_message_room_count %>
+          <% if unread.positive? %>
+            <span class="inline-flex items-center justify-center text-[10px] font-semibold rounded-full px-1.5 min-w-[18px] h-[18px]"
+                  style="background-color: var(--color-accent); color: var(--color-accent-on);"><%= unread %></span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </nav>
+
+    <% if Current.user&.admin? %>
+      <%= link_to "관리 →", admin_root_path,
+            class: "mt-4 px-3 py-2 text-xs hover:underline",
+            style: "color: var(--color-text-muted);" %>
+    <% end %>
+  </div>
+</aside>

@@ -2,43 +2,40 @@
 
 <header class="sticky top-0 z-30 backdrop-blur"
         style="background-color: color-mix(in srgb, var(--color-bg) 92%, transparent); border-bottom: 1px solid var(--color-border);">
-  <div class="container mx-auto px-5 py-3 flex items-center gap-4">
-    <%= link_to "BlackTicket", root_path,
-          class: "font-wordmark text-xl shrink-0",
-          style: "color: var(--color-text);" %>
-
+  <div class="px-4 sm:px-5 py-2.5 flex items-center gap-3">
+    <%# 모바일 햄버거 — 사이드바 열기 (활성 사용자만 사이드바 노출) %>
     <% if Current.user&.active? %>
-      <%= form_with url: posts_path, method: :get, class: "flex-1 max-w-md", data: { turbo_frame: "_top" } do |form| %>
-        <%= form.search_field :q, value: params[:q], placeholder: "글 검색", class: "input py-1.5" %>
-      <% end %>
-    <% else %>
-      <div class="flex-1"></div>
+      <button type="button" class="lg:hidden p-1 -ml-1"
+              data-action="click->sidebar#open"
+              style="color: var(--color-text);"
+              aria-label="메뉴 열기">
+        <%= icon :menu, class: "h-6 w-6" %>
+      </button>
     <% end %>
 
-    <nav class="flex items-center gap-4 text-sm shrink-0" style="color: var(--color-text-muted);">
+    <%# 모바일 워드마크 (데스크탑은 사이드바에 있음) %>
+    <%= link_to "BlackTicket", root_path,
+          class: "lg:hidden font-wordmark text-lg",
+          style: "color: var(--color-text);" %>
+
+    <%# 데스크탑 검색 — 사이드바 자리 확보 위해 좌측 패딩 %>
+    <% if Current.user&.active? %>
+      <%= form_with url: posts_path, method: :get,
+            class: "hidden md:block flex-1 max-w-md lg:ml-2",
+            data: { turbo_frame: "_top" } do |form| %>
+        <%= form.search_field :q, value: params[:q], placeholder: "글 검색", class: "input py-1.5" %>
+      <% end %>
+    <% end %>
+
+    <div class="flex-1"></div>
+
+    <nav class="flex items-center gap-3 text-sm" style="color: var(--color-text-muted);">
       <% if Current.user&.active? %>
         <%= turbo_stream_from Current.user, :notifications %>
         <div id="notification_badge">
           <%= render "shared/notification_badge", user: Current.user %>
         </div>
-        <%= link_to "게시판", posts_path, class: "hidden sm:inline hover:opacity-80" %>
-        <%= link_to "이성 매칭", matching_path,
-              class: "hidden sm:inline hover:opacity-80 #{'font-semibold' if Current.user.matching_active?}",
-              style: ("color: var(--color-accent);" if Current.user.matching_active?) %>
-        <% if Current.user.active_red_connects.exists? %>
-          <%= link_to red_connects_path, class: "hidden sm:inline hover:opacity-80" do %>
-            메시지<%
-            unread_rooms = Current.user.unread_message_room_count
-            if unread_rooms.positive? %><span class="ml-1 inline-flex items-center justify-center text-[10px] font-semibold rounded-full px-1.5 min-w-[18px] h-[18px]" style="background-color: var(--color-accent); color: var(--color-accent-on);"><%= unread_rooms %></span><% end %>
-          <% end %>
-        <% end %>
-        <%= link_to "초대장", invitations_path, class: "hidden sm:inline hover:opacity-80" %>
-        <% if Current.user.admin? %>
-          <%= link_to "관리", admin_root_path, class: "hidden sm:inline hover:opacity-80",
-                style: "color: var(--color-accent);" %>
-        <% end %>
 
-        <%# 크레딧 잔액 chip — 클릭 시 변동 이력으로 이동 %>
         <%= link_to history_profile_path(Current.user),
               class: "inline-flex items-center gap-1 rounded-full px-2.5 py-1 hover:opacity-80",
               style: "background-color: var(--color-accent-soft); color: var(--color-accent); border: 1px solid var(--color-accent);",
@@ -49,9 +46,7 @@
 
         <%= link_to profile_path(Current.user), class: "flex items-center gap-2 hover:opacity-80" do %>
           <%= avatar_image(Current.user, class: "h-8 w-8 rounded-full") %>
-          <span class="hidden sm:inline" style="color: var(--color-text);"><%= Current.user.nickname %></span>
         <% end %>
-        <%= button_to "로그아웃", session_path, method: :delete, class: "text-xs hover:underline" %>
       <% elsif Current.user %>
         <span class="text-xs">활성화 대기</span>
         <%= button_to "로그아웃", session_path, method: :delete, class: "text-xs hover:underline" %>

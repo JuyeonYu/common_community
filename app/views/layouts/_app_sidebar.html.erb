@@ -1,0 +1,53 @@
+<%# 일반 사용자용 좌측 사이드바. admin 영역은 _admin_sidebar로 별도. %>
+<% items = [
+  [ "홈",       root_path,       :home,     controller.controller_name == "landing" || (controller.is_a?(ProfilesController) && controller.action_name == "show" && Current.user&.id.to_s == params[:id]) ],
+  [ "게시판",   posts_path,      :ticket,   controller.is_a?(PostsController) || controller.is_a?(CommentsController) ],
+  [ "이성 매칭", matching_path,  :users,    controller.is_a?(MatchingController) || controller.is_a?(ConnectRequestsController) || controller.is_a?(RedConnectsController) || controller.is_a?(ChatMessagesController) ],
+  [ "초대장",   invitations_path, :envelope, controller.is_a?(InvitationsController) ]
+] %>
+
+<% messages_path_active = controller.is_a?(RedConnectsController) %>
+
+<aside data-sidebar-target="aside"
+       class="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-56 lg:flex-col"
+       style="background-color: var(--color-surface); border-right: 1px solid var(--color-border);">
+  <div class="flex flex-col h-full p-4">
+    <%= link_to "BlackTicket", root_path,
+          class: "font-wordmark text-xl mb-6 px-2",
+          style: "color: var(--color-text);" %>
+
+    <nav class="flex-1 space-y-1">
+      <% items.each do |label, path, ic, active| %>
+        <%= link_to path,
+              class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:opacity-90 transition-colors",
+              style: active ? "background-color: var(--color-accent-soft); color: var(--color-accent); font-weight: 500;" : "color: var(--color-text);" do %>
+          <%= icon ic, class: "h-5 w-5" %>
+          <span><%= label %></span>
+        <% end %>
+      <% end %>
+
+      <%# 활성 RedConnect 있으면 메시지 메뉴 — 미확인 카운트 뱃지 %>
+      <% if Current.user&.active_red_connects&.exists? %>
+        <%= link_to red_connects_path,
+              class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:opacity-90 transition-colors",
+              style: messages_path_active ? "background-color: var(--color-accent-soft); color: var(--color-accent); font-weight: 500;" : "color: var(--color-text);" do %>
+          <%= icon :chat, class: "h-5 w-5" %>
+          <span class="flex-1">메시지</span>
+          <% unread = Current.user.unread_message_room_count %>
+          <% if unread.positive? %>
+            <span class="inline-flex items-center justify-center text-[10px] font-semibold rounded-full px-1.5 min-w-[18px] h-[18px]"
+                  style="background-color: var(--color-accent); color: var(--color-accent-on);"><%= unread %></span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </nav>
+
+    <% if Current.user&.admin? %>
+      <%= link_to admin_root_path,
+            class: "mt-4 px-3 py-2 text-xs hover:underline",
+            style: "color: var(--color-text-muted);" do %>
+        관리 →
+      <% end %>
+    <% end %>
+  </div>
+</aside>

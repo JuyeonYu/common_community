@@ -7,10 +7,15 @@ class Webhooks::PortoneControllerTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = users(:one)
-    ENV["PORTONE_WEBHOOK_SECRET"] = SECRET
+    # PortOne.webhook_secret을 SECRET으로 강제 — credentials/ENV 모두 무시.
+    PortOne.define_singleton_method(:webhook_secret) { SECRET }
   end
 
-  teardown { ENV.delete("PORTONE_WEBHOOK_SECRET") }
+  teardown do
+    if PortOne.singleton_class.method_defined?(:webhook_secret)
+      PortOne.singleton_class.send(:remove_method, :webhook_secret)
+    end
+  end
 
   def sign(body, id:, timestamp:)
     signed = "#{id}.#{timestamp}.#{body}"
