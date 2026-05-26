@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   # PortOne 본인인증 — Phase I.
   resources :identity_verifications, only: %i[ new create ]
 
+  # PortOne 웹훅 — Phase I-4. Standard Webhooks 서명 검증.
+  post "/webhooks/portone", to: "webhooks/portone#create"
+
   # @멘션 자동완성용 닉네임 검색.
   get "/users/search", to: "users#search", as: :search_users
 
