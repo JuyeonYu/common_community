@@ -7,7 +7,8 @@
       [ "사용자",     admin_users_path,        controller.is_a?(Admin::UsersController) ],
       [ "게시물",     admin_posts_path,        controller.is_a?(Admin::PostsController) ],
       [ "시드 이메일", admin_seed_emails_path, controller.is_a?(Admin::SeedEmailsController) ],
-      [ "신고",       admin_reports_path,      controller.is_a?(Admin::ReportsController) ]
+      [ "신고",       admin_reports_path,      controller.is_a?(Admin::ReportsController) ],
+      [ "운영 설정",  admin_settings_path,     controller.is_a?(Admin::SettingsController) ]
     ] %>
     <ul class="space-y-1">
       <% items.each do |label, path, current| %>

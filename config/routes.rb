@@ -101,6 +101,7 @@ Rails.application.routes.draw do
         post   :unsuspend
       end
     end
+    resource :settings, only: %i[ show update ]
   end
 
   # 헬스체크.

@@ -1,0 +1,38 @@
+<% content_for :title, "운영 설정" %>
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="text-2xl font-bold mb-2">운영 설정</h1>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted);">
+    사용자에게 노출되는 운영 정보. 입금 안내 페이지에 표시됩니다.
+  </p>
+
+  <%= form_with url: admin_settings_path, method: :patch, class: "space-y-5" do %>
+    <div>
+      <label for="settings_bank_name" class="label">은행명</label>
+      <input type="text" name="settings[bank_name]" id="settings_bank_name"
+             value="<%= @settings["bank_name"] %>"
+             placeholder="예: 신한은행"
+             class="input">
+    </div>
+
+    <div>
+      <label for="settings_bank_account_number" class="label">계좌번호</label>
+      <input type="text" name="settings[bank_account_number]" id="settings_bank_account_number"
+             value="<%= @settings["bank_account_number"] %>"
+             placeholder="예: 110-123-456789"
+             class="input">
+    </div>
+
+    <div>
+      <label for="settings_bank_account_holder" class="label">예금주</label>
+      <input type="text" name="settings[bank_account_holder]" id="settings_bank_account_holder"
+             value="<%= @settings["bank_account_holder"] %>"
+             placeholder="예: 유주연(블랙티켓)"
+             class="input">
+    </div>
+
+    <div class="pt-2">
+      <button type="submit" class="btn btn-primary">저장</button>
+    </div>
+  <% end %>
+</div>
