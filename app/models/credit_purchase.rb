@@ -6,10 +6,13 @@ class CreditPurchase < ApplicationRecord
   belongs_to :processed_by, class_name: "User", optional: true
 
   enum :status, { pending: 0, fulfilled: 1, rejected: 2, cancelled: 3 }
+  # 결제 채널 — bank_transfer는 무통장(수동), portone_card는 PortOne PG(자동).
+  enum :paid_via, { bank_transfer: 0, portone_card: 1 }
 
   validates :package_key, presence: true, inclusion: { in: CreditPackages::KEYS }
   validates :declared_amount, presence: true, numericality: { only_integer: true, greater_than: 0 }
-  validates :declared_name, presence: true, length: { in: 2..50 }
+  # 무통장은 입금주명 필수, PortOne은 결제자 정보를 PG가 보유하니 옵션.
+  validates :declared_name, presence: true, length: { in: 2..50 }, if: :bank_transfer?
 
   scope :recent, -> { order(created_at: :desc) }
 

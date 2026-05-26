@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_26_025708) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_053616) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -100,12 +100,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_025708) do
     t.datetime "created_at", null: false
     t.integer "declared_amount", null: false
     t.string "declared_name", null: false
+    t.string "external_payment_id"
     t.string "package_key", null: false
+    t.datetime "paid_at"
+    t.integer "paid_via", default: 0, null: false
     t.datetime "processed_at"
     t.bigint "processed_by_id"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["external_payment_id"], name: "index_credit_purchases_on_external_payment_id", unique: true
     t.index ["processed_by_id"], name: "index_credit_purchases_on_processed_by_id"
     t.index ["status", "created_at"], name: "index_credit_purchases_on_status_and_created_at"
     t.index ["user_id"], name: "index_credit_purchases_on_user_id"
@@ -320,11 +324,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_025708) do
     t.text "bio"
     t.date "birth_date"
     t.datetime "boosted_until"
+    t.string "ci"
     t.datetime "created_at", null: false
+    t.string "di"
     t.string "email_address", null: false
     t.integer "gender"
     t.string "google_uid"
     t.text "hobby"
+    t.datetime "identity_verified_at"
     t.datetime "invitation_accepted_at"
     t.bigint "invited_by_id"
     t.string "job_title"
@@ -341,6 +348,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_025708) do
     t.integer "ticket_score", default: 10, null: false
     t.datetime "updated_at", null: false
     t.index ["boosted_until"], name: "index_users_on_boosted_until"
+    t.index ["ci"], name: "index_users_on_ci", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["google_uid"], name: "index_users_on_google_uid", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"

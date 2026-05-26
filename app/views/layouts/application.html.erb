@@ -20,6 +20,18 @@
       <meta name="vapid-public-key" content="<%= vapid_pk %>">
     <% end %>
 
+    <%# PortOne V2 통합 정보 — Store ID/Channel Key는 클라 노출 안전. %>
+    <% if PortOne.store_id.present? %>
+      <meta name="portone-store-id" content="<%= PortOne.store_id %>">
+      <% if PortOne.channel_key_identity.present? %>
+        <meta name="portone-channel-key-identity" content="<%= PortOne.channel_key_identity %>">
+      <% end %>
+      <% if PortOne.channel_key_payment.present? %>
+        <meta name="portone-channel-key-payment" content="<%= PortOne.channel_key_payment %>">
+      <% end %>
+      <script src="https://cdn.portone.io/v2/browser-sdk.js" defer></script>
+    <% end %>
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
