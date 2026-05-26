@@ -67,7 +67,12 @@
         </div>
         <div>
           <dt style="color: var(--color-text-muted);">티켓 크레딧</dt>
-          <dd class="font-semibold mt-1"><%= @user.ticket_credits %></dd>
+          <dd class="font-semibold mt-1 flex items-center gap-2">
+            <span><%= number_with_delimiter(@user.ticket_credits) %></span>
+            <% if Current.user&.id == @user.id %>
+              <%= link_to "충전", new_credit_purchase_path, class: "btn btn-primary btn-sm" %>
+            <% end %>
+          </dd>
         </div>
       </dl>
       <% if Current.user&.id == @user.id %>

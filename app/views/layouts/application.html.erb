@@ -36,6 +36,7 @@
 
   <body class="min-h-screen antialiased" style="background-color: var(--color-bg); color: var(--color-text);">
     <%= render "layouts/header" %>
+    <%= render "shared/flash" %>
 
     <% if admin_section? %>
       <div class="container mx-auto mt-4 px-5 flex gap-6">
