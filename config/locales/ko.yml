@@ -14,8 +14,16 @@ ko:
       default: "%Y년 %-m월 %-d일 %H:%M"
       short: "%-m월 %-d일 %H:%M"
       long: "%Y년 %-m월 %-d일 %H:%M:%S"
+      ymd: "%Y.%m.%d"
+      ymd_hm: "%Y.%m.%d %H:%M"
     am: "오전"
     pm: "오후"
+    relative:
+      just_now: "방금"
+      minutes: "%{n}분 전"
+      hours: "%{n}시간 전"
+      days: "%{n}일 전"
+      months: "%{n}개월 전"
   invitations:
     status:
       pending: "대기"

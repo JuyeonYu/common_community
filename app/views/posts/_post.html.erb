@@ -5,7 +5,7 @@
       <span class="font-medium" style="color: var(--color-text);"><%= post.user.nickname %></span>
     <% end %>
     <span>·</span>
-    <time datetime="<%= post.created_at.iso8601 %>"><%= l post.created_at, format: :short %></time>
+    <%= relative_time(post.created_at) %>
   </header>
 
   <h2 class="text-lg font-semibold mb-1">

@@ -14,7 +14,7 @@
           <span class="font-medium" style="color: var(--color-text);"><%= @post.user.nickname %></span>
         <% end %>
         <span>·</span>
-        <time datetime="<%= @post.created_at.iso8601 %>"><%= l @post.created_at, format: :default %></time>
+        <time datetime="<%= @post.created_at.iso8601 %>"><%= l @post.created_at, format: :ymd_hm %></time>
         <span>·</span>
         <span>조회 <%= @post.views_count %></span>
       </div>

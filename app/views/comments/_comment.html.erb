@@ -7,7 +7,7 @@
       <span class="font-medium" style="color: var(--color-text);"><%= comment.user.nickname %></span>
     <% end %>
     <span>·</span>
-    <time datetime="<%= comment.created_at.iso8601 %>"><%= l comment.created_at, format: :short %></time>
+    <%= relative_time(comment.created_at, with_time: true) %>
   </header>
 
   <div class="text-sm whitespace-pre-wrap" style="color: var(--color-text);"><%= comment.body %></div>

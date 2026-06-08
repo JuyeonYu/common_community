@@ -4,7 +4,7 @@
       <% @posts.each do |post| %>
         <%= link_to post_path(post), class: "block card" do %>
           <div class="text-xs mb-1" style="color: var(--color-text-muted);">
-            <%= post.user.nickname %> · <%= l post.created_at, format: :short %>
+            <%= post.user.nickname %> · <%= relative_time(post.created_at) %>
           </div>
           <div class="font-semibold"><%= post.title %></div>
           <% if post.tags.any? %>
