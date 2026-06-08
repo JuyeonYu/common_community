@@ -35,9 +35,9 @@ module Authentication
       alert = if Current.user.suspended?
                 until_at = I18n.l(Current.user.suspended_until, format: :short)
                 "정지된 계정입니다. 해제 시점: #{until_at}"
-              else
+      else
                 "계정 활성화 상태가 아닙니다. 다시 초대 메일의 링크로 가입을 진행해주세요."
-              end
+      end
       terminate_session
       redirect_to new_session_path, alert: alert
     end

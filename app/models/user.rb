@@ -244,5 +244,4 @@ class User < ApplicationRecord
       locals: { user: self }
     )
   end
-
 end

@@ -75,7 +75,7 @@ Rails.application.routes.draw do
     resources :chat_messages, only: %i[ create ] do
       member { post :mark_read }
     end
-    resource  :downvote,     only: %i[ create ]
+    resource :downvote,     only: %i[ create ]
   end
 
   # 초대장.
