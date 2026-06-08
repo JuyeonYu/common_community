@@ -3,7 +3,7 @@ class LandingController < ApplicationController
   allow_unauthenticated_access only: :index
 
   def index
-    return redirect_to profile_path(Current.user) if Current.user
+    redirect_to profile_path(Current.user) if Current.user
     # 비로그인은 뷰 렌더(잠금 화면)
   end
 end

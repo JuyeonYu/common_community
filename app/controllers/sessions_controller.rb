@@ -28,9 +28,9 @@ class SessionsController < ApplicationController
     unless seed_allowed || invite_match
       reason = if invitation.present?
                  "초대받은 이메일(#{invitation.invitee_email})과 Google 계정 이메일이 일치하지 않습니다."
-               else
+      else
                  "초대를 받은 이메일로만 가입할 수 있습니다."
-               end
+      end
       redirect_to new_session_path, alert: reason and return
     end
 
